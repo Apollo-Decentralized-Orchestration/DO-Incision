@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+// for compliance with higher Java versions
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+group 'Apollo-Decentralized-Orchestration-DO-Incision'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name "jitpack"
+        url 'https://jitpack.io' }
+}
+
+dependencies {
+
+    if (project.hasProperty("local")) {
+        implementation project (':EE-Model')
+    }else {
+        // dependencies to other parts of the Apollo Core EE
+        implementation 'com.github.Apollo-Core:EE-Model:main-SNAPSHOT'
+    }
+
+    // dependency to opendse
+    implementation 'com.github.FedorSmirnov89:opendse:-SNAPSHOT'
+
+    // JUnit 5
+    testImplementation(platform('org.junit:junit-bom:5.7.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+    afterEvaluate {
+        classDirectories.from = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: '**/modules/**')
+        })
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

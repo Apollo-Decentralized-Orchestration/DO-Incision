@@ -1,0 +1,14 @@
+.idea
+.gradle
+/.metadata/
+/build/
+/bin/
+.classpath
+/.gradle/
+.project
+/.settings/
+*.tsv
+/?/
+*.pdf
+*.jpg
+out/

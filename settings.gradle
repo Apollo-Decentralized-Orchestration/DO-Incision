@@ -1,0 +1,5 @@
+if(startParameter.projectProperties.containsKey("local")) {
+    include 'EE-Model'
+
+    project (':EE-Model').projectDir = new File(settingsDir, "../EE-Model")
+}
