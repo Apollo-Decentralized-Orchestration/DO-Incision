@@ -33,15 +33,17 @@ public class Incision {
    * @param bottomCut communication nodes representing the bottom cut of the
    *        {@link EnactmentGraph}.
    *
+   * @throws IllegalArgumentException if the cut is invalid.
+   *
    * @return the resulting cut out {@link EnactmentGraph}.
    */
-  public EnactmentGraph cut(final EnactmentGraph eGraph, Set<Task> topCut,
-      Set<Task> bottomCut) throws IllegalArgumentException {
+  public EnactmentGraph cut(final EnactmentGraph eGraph, final Set<Task> topCut,
+      final Set<Task> bottomCut) throws IllegalArgumentException {
 
     validateInput(eGraph, topCut, bottomCut);
 
     // Create the cut out graph
-    EnactmentGraph cutOutGraph = cutGraph(eGraph, topCut, bottomCut);
+    final EnactmentGraph cutOutGraph = cutGraph(eGraph, topCut, bottomCut);
 
     insertFunctionNode(eGraph, topCut, bottomCut);
 
@@ -71,19 +73,19 @@ public class Incision {
    * @param bottomCut communication nodes representing the bottom cut of the
    *        {@link EnactmentGraph}.
    */
-  private void insertFunctionNode(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut) {
+  private void insertFunctionNode(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut) {
     // Create and insert the function node for the distributed engine
     final Task functionNode = new Task(topCut.toString() + bottomCut.toString());
     eGraph.addVertex(functionNode);
 
     // Substitute the edges before the bottom cut
-    for (Task bTask : bottomCut) {
+    for (final Task bTask : bottomCut) {
       eGraph.getInEdges(bTask).forEach(
           (dependency -> remapDependency(eGraph, dependency, functionNode, bTask)));
     }
 
     // Substitute the edges after the top cut
-    for (Task tTask : topCut) {
+    for (final Task tTask : topCut) {
       eGraph.getOutEdges(tTask).forEach(
           (dependency -> remapDependency(eGraph, dependency, tTask, functionNode)));
     }
@@ -101,9 +103,8 @@ public class Incision {
    *        {@link EnactmentGraph}.
    */
   void validateInput(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut){
-
     // Check if top and bottom cut is specified
-    if (topCut == null || topCut.size() == 0 || bottomCut == null || bottomCut.size() == 0) {
+    if (topCut == null || topCut.isEmpty() || bottomCut == null || bottomCut.isEmpty()) {
       throw new IllegalArgumentException("Both, top and bottom cut must be specified!");
     }
 
@@ -122,12 +123,12 @@ public class Incision {
    *
    * @param eGraph the {@link EnactmentGraph} to check for a valid cut.
    * @param topCut the top cut communication nodes of the {@link EnactmentGraph}.
-   * @param bottomCut the bottom cut communication nodes of the {@link EnactmentGraph}.
+   * @param bottomCut the bottom cut communication nodes of the
+   *                  {@link EnactmentGraph}.
    *
    * @return true if the cut is valid.
    */
   boolean isCutValid(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut) {
-
     // Check both directions for validity
     return checkDirection(eGraph, topCut, bottomCut, true)
         && checkDirection(eGraph, bottomCut, topCut, false);
@@ -139,11 +140,12 @@ public class Incision {
    * @param eGraph {@link EnactmentGraph} to check for a valid cut.
    * @param startTasks represents the starting tasks to check for validity.
    * @param endTasks represents the end tasks to stop checking for validity.
-   * @param topBottom specifies the direction to check: from top to bottom or bottom to top.
+   * @param topBottom specifies the direction to check: from top to bottom
+   *                  or bottom to top.
    *
    * @return true if cut is valid for the specified direction.
    */
-  private boolean checkDirection(EnactmentGraph eGraph, Set<Task> startTasks, Set<Task> endTasks,
+  private boolean checkDirection(final EnactmentGraph eGraph, final Set<Task> startTasks, final Set<Task> endTasks,
       boolean topBottom) {
     Set<Task> currentTasks = new HashSet<>(startTasks);
     while (!currentTasks.isEmpty()) {
@@ -159,8 +161,8 @@ public class Incision {
 
       // Check for node without next step
       if (nextTasks.stream()
-          .anyMatch(nextTask -> (topBottom ? eGraph.getSuccessorCount(nextTask) == 0
-              : eGraph.getPredecessorCount(nextTask) == 0))) {
+          .anyMatch(nextTask -> topBottom ? eGraph.getSuccessorCount(nextTask) == 0
+              : eGraph.getPredecessorCount(nextTask) == 0)) {
         return false;
       }
       currentTasks = nextTasks;
@@ -176,7 +178,7 @@ public class Incision {
    * @param from new source of the edge.
    * @param to new destination of the edge.
    */
-  private void remapDependency(EnactmentGraph eGraph, final Dependency dependency, Task from, Task to) {
+  private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency, Task from, Task to) {
     Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
     eGraph.removeEdge(dependency);
     PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmp), eGraph);
@@ -190,11 +192,12 @@ public class Incision {
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
-  private void copyBelow(EnactmentGraph eGraph, final EnactmentGraph cutOutGraph,
-      final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,  AbstractMap.SimpleEntry<Task, Dependency> task){
+  private void copyBelow(final EnactmentGraph eGraph, final EnactmentGraph cutOutGraph,
+      final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,
+      final AbstractMap.SimpleEntry<Task, Dependency> task){
 
     for (final Dependency edge : eGraph.getOutEdges(task.getKey())) {
-      if (!task.getValue().equals(edge)) {
+      if (task.getValue() == null || !task.getValue().equals(edge)) {
         copyEdge(cutOutGraph, edge, currentTasks, task.getKey(), eGraph.getDest(edge));
       }
     }
@@ -208,11 +211,12 @@ public class Incision {
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
-  private void copyAbove(EnactmentGraph eGraph, EnactmentGraph cutOutGraph,
-      Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,  AbstractMap.SimpleEntry<Task, Dependency> task){
+  private void copyAbove(final EnactmentGraph eGraph, final EnactmentGraph cutOutGraph,
+      final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,
+      final AbstractMap.SimpleEntry<Task, Dependency> task){
 
     for (final Dependency edge : eGraph.getInEdges(task.getKey())) {
-      if (!task.getValue().equals(edge)) {
+      if (task.getValue() == null || !task.getValue().equals(edge)) {
         copyEdge(cutOutGraph, edge, currentTasks, task.getKey(), eGraph.getSource(edge));
       }
     }
@@ -253,23 +257,22 @@ public class Incision {
    * @param startCut the start nodes representing the cut.
    * @param endCut the end node representing the cut.
    */
-  private EnactmentGraph cutGraph(EnactmentGraph eGraph, Set<Task> startCut, Set<Task> endCut) {
-
+  private EnactmentGraph cutGraph(final EnactmentGraph eGraph, final Set<Task> startCut, final Set<Task> endCut) {
     // Begin with the start tasks
-    Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks = new Stack<>();
-    startCut.forEach((node -> currentTasks.push(new AbstractMap.SimpleEntry<>(node, new Dependency("")))));
+    final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks = new Stack<>();
+    startCut.forEach(node -> currentTasks.push(new AbstractMap.SimpleEntry<>(node, null)));
 
-    EnactmentGraph cutOutGraph = new EnactmentGraph();
+    final EnactmentGraph cutOutGraph = new EnactmentGraph();
 
     // Continue if there are more tasks to proceed
     while(!currentTasks.isEmpty()) {
 
       // Get one task of the stack
-      AbstractMap.SimpleEntry<Task, Dependency> currentTask = currentTasks.pop();
+      final AbstractMap.SimpleEntry<Task, Dependency> currentTask = currentTasks.pop();
 
       // Check if task is in end or start tasks
-      boolean isEndTask = endCut.contains(currentTask.getKey());
-      boolean isStartTask = startCut.contains(currentTask.getKey());
+      final boolean isEndTask = endCut.contains(currentTask.getKey());
+      final boolean isStartTask = startCut.contains(currentTask.getKey());
 
       if(isEndTask || !isStartTask) {
 
