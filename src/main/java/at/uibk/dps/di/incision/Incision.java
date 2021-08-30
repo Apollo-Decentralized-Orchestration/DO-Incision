@@ -26,16 +26,16 @@ public class Incision {
    * Cut the {@link EnactmentGraph} at a specific position (two given cuts).
    *
    * @param eGraph the reference to the original input {@link EnactmentGraph}. This
-   *        {@link EnactmentGraph} will be adapted and contains the distributed engine
-   *        node after this method call.
+   *        {@link EnactmentGraph} will be adapted and contains the distributed
+   *        engine node after this method call.
    * @param topCut communication nodes representing the top cut of the
    *        {@link EnactmentGraph}.
    * @param bottomCut communication nodes representing the bottom cut of the
    *        {@link EnactmentGraph}.
    *
-   * @throws IllegalArgumentException if the cut is invalid.
-   *
    * @return the resulting cut out {@link EnactmentGraph}.
+   *
+   * @throws IllegalArgumentException if the cut is invalid.
    */
   public EnactmentGraph cut(final EnactmentGraph eGraph, final Set<Task> topCut,
       final Set<Task> bottomCut) throws IllegalArgumentException {
@@ -81,13 +81,13 @@ public class Incision {
     // Substitute the edges before the bottom cut
     for (final Task bTask : bottomCut) {
       eGraph.getInEdges(bTask).forEach(
-          (dependency -> remapDependency(eGraph, dependency, functionNode, bTask)));
+          dependency -> remapDependency(eGraph, dependency, functionNode, bTask));
     }
 
     // Substitute the edges after the top cut
     for (final Task tTask : topCut) {
       eGraph.getOutEdges(tTask).forEach(
-          (dependency -> remapDependency(eGraph, dependency, tTask, functionNode)));
+          dependency -> remapDependency(eGraph, dependency, tTask, functionNode));
     }
   }
 
@@ -102,7 +102,7 @@ public class Incision {
    * @param bottomCut communication nodes representing the bottom cut of the
    *        {@link EnactmentGraph}.
    */
-  void validateInput(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut){
+  private void validateInput(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut){
     // Check if top and bottom cut is specified
     if (topCut == null || topCut.isEmpty() || bottomCut == null || bottomCut.isEmpty()) {
       throw new IllegalArgumentException("Both, top and bottom cut must be specified!");
@@ -128,7 +128,7 @@ public class Incision {
    *
    * @return true if the cut is valid.
    */
-  boolean isCutValid(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut) {
+  boolean isCutValid(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut) {
     // Check both directions for validity
     return checkDirection(eGraph, topCut, bottomCut, true)
         && checkDirection(eGraph, bottomCut, topCut, false);
@@ -146,12 +146,12 @@ public class Incision {
    * @return true if cut is valid for the specified direction.
    */
   private boolean checkDirection(final EnactmentGraph eGraph, final Set<Task> startTasks, final Set<Task> endTasks,
-      boolean topBottom) {
+      final boolean topBottom) {
     Set<Task> currentTasks = new HashSet<>(startTasks);
     while (!currentTasks.isEmpty()) {
 
       // Get the next tasks
-      Set<Task> nextTasks = currentTasks.stream()
+      final Set<Task> nextTasks = currentTasks.stream()
           .flatMap(curTask -> (topBottom ? eGraph.getSuccessors(curTask)
               : eGraph.getPredecessors(curTask)).stream())
           .filter(newTask -> !endTasks.contains(newTask))
@@ -178,8 +178,8 @@ public class Incision {
    * @param from new source of the edge.
    * @param to new destination of the edge.
    */
-  private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency, Task from, Task to) {
-    Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
+  private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency, final Task from, final Task to) {
+    final Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
     eGraph.removeEdge(dependency);
     PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmp), eGraph);
   }
@@ -188,7 +188,8 @@ public class Incision {
    * Copy the tasks and edges below the current task.
    *
    * @param eGraph the full {@link EnactmentGraph}.
-   * @param cutOutGraph the cut out {@link EnactmentGraph} to add tasks and edges to.
+   * @param cutOutGraph the cut out {@link EnactmentGraph} to add tasks
+   *                    and edges to.
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
@@ -231,8 +232,9 @@ public class Incision {
    * @param currentTask the current task to copy.
    * @param nextTask the next task to copy
    */
-  private void copyEdge(EnactmentGraph cutOutGraph, Dependency edge, Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,
-      Task currentTask, Task nextTask) {
+  private void copyEdge(final EnactmentGraph cutOutGraph, final Dependency edge,
+      final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,
+      final Task currentTask, final Task nextTask) {
 
     // Copy the current and next task
     final Task from = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
@@ -241,7 +243,7 @@ public class Incision {
         : UtilsDeepCopy.deepCopyTask(nextTask);
 
     // Make a copy of the edge
-    Dependency tmpEdge = UtilsDeepCopy.deepCopyDependency(edge);
+    final Dependency tmpEdge = UtilsDeepCopy.deepCopyDependency(edge);
 
     // Add edge with the given tasks to the cut out graph
     PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmpEdge), cutOutGraph);
