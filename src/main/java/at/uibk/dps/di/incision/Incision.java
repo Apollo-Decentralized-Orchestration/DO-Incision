@@ -38,7 +38,7 @@ public class Incision {
    * @throws IllegalArgumentException if the cut is invalid.
    */
   public EnactmentGraph cut(final EnactmentGraph eGraph, final Set<Task> topCut,
-      final Set<Task> bottomCut) throws IllegalArgumentException {
+      final Set<Task> bottomCut) {
 
     validateInput(eGraph, topCut, bottomCut);
 
@@ -65,13 +65,13 @@ public class Incision {
   /**
    * Insert a function node and remap dependencies.
    *
-   * @param eGraph the reference to the original input {@link EnactmentGraph}. This
-   *         {@link EnactmentGraph} will be adapted and contains the distributed engine
-   *         node after this method call.
+   * @param eGraph the reference to the original input {@link EnactmentGraph}.
+   *         This {@link EnactmentGraph} will be adapted and contains
+   *         the distributed engine node after this method call.
    * @param topCut communication nodes representing the top cut of the
    *        {@link EnactmentGraph}.
-   * @param bottomCut communication nodes representing the bottom cut of the
-   *        {@link EnactmentGraph}.
+   * @param bottomCut communication nodes representing the bottom cut
+   *        of the {@link EnactmentGraph}.
    */
   private void insertFunctionNode(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut) {
     // Create and insert the function node for the distributed engine
@@ -175,13 +175,14 @@ public class Incision {
    *
    * @param eGraph the full {@link EnactmentGraph}.
    * @param dependency the dependency edge to remap.
-   * @param from new source of the edge.
-   * @param to new destination of the edge.
+   * @param taskFrom new source of the edge.
+   * @param taskTo new destination of the edge.
    */
-  private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency, final Task from, final Task to) {
+  private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency,
+      final Task taskFrom, final Task taskTo) {
     final Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
     eGraph.removeEdge(dependency);
-    PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmp), eGraph);
+    PropertyServiceDependency.addDataDependency(taskFrom, taskTo, PropertyServiceDependency.getJsonKey(tmp), eGraph);
   }
 
   /**
@@ -208,7 +209,8 @@ public class Incision {
    * Copy the tasks and edges above the current task.
    *
    * @param eGraph the full {@link EnactmentGraph}.
-   * @param cutOutGraph the cut out {@link EnactmentGraph} to add tasks and edges to.
+   * @param cutOutGraph the cut out {@link EnactmentGraph} to add
+   *                    tasks and edges to.
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
@@ -237,16 +239,16 @@ public class Incision {
       final Task currentTask, final Task nextTask) {
 
     // Copy the current and next task
-    final Task from = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
+    final Task taskFrom = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
         : UtilsDeepCopy.deepCopyTask(currentTask);
-    final Task to = nextTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(nextTask)
+    final Task taskTo = nextTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(nextTask)
         : UtilsDeepCopy.deepCopyTask(nextTask);
 
     // Make a copy of the edge
     final Dependency tmpEdge = UtilsDeepCopy.deepCopyDependency(edge);
 
     // Add edge with the given tasks to the cut out graph
-    PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmpEdge), cutOutGraph);
+    PropertyServiceDependency.addDataDependency(taskFrom, taskTo, PropertyServiceDependency.getJsonKey(tmpEdge), cutOutGraph);
 
     // Add next task to check
     currentTasks.push(new AbstractMap.SimpleEntry<>(nextTask, tmpEdge));
