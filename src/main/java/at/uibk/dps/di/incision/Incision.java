@@ -25,9 +25,9 @@ public class Incision {
   /**
    * Cut the {@link EnactmentGraph} at a specific position (two given cuts).
    *
-   * @param eGraph the reference to the original input {@link EnactmentGraph}. This
-   *        {@link EnactmentGraph} will be adapted and contains the distributed
-   *        engine node after this method call.
+   * @param eGraph the reference to the original input {@link EnactmentGraph}.
+   *        This {@link EnactmentGraph} will be adapted and contains the
+   *        distributed engine node after this method call.
    * @param topCut communication nodes representing the top cut of the
    *        {@link EnactmentGraph}.
    * @param bottomCut communication nodes representing the bottom cut of the
@@ -94,13 +94,13 @@ public class Incision {
   /**
    * Validate the input to the cutting method.
    *
-   * @param eGraph the reference to the original input {@link EnactmentGraph}. This
-   *         {@link EnactmentGraph} will be adapted and contains the distributed engine
-   *         node after this method call.
+   * @param eGraph the reference to the original input {@link EnactmentGraph}.
+   *         This {@link EnactmentGraph} will be adapted and contains the
+   *         distributed engine node after this method call.
    * @param topCut communication nodes representing the top cut of the
    *        {@link EnactmentGraph}.
-   * @param bottomCut communication nodes representing the bottom cut of the
-   *        {@link EnactmentGraph}.
+   * @param bottomCut communication nodes representing the bottom cut of
+   *        the {@link EnactmentGraph}.
    */
   private void validateInput(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut){
     // Check if top and bottom cut is specified
@@ -122,7 +122,8 @@ public class Incision {
    * Check if the given cut is valid.
    *
    * @param eGraph the {@link EnactmentGraph} to check for a valid cut.
-   * @param topCut the top cut communication nodes of the {@link EnactmentGraph}.
+   * @param topCut the top cut communication nodes of the
+   *               {@link EnactmentGraph}.
    * @param bottomCut the bottom cut communication nodes of the
    *                  {@link EnactmentGraph}.
    *
@@ -135,13 +136,16 @@ public class Incision {
   }
 
   /**
-   * Check a specific direction (topBottom or bottomTop) of the cut for validity.
+   * Check a specific direction (topBottom or bottomTop) of the cut
+   * for validity.
    *
    * @param eGraph {@link EnactmentGraph} to check for a valid cut.
-   * @param startTasks represents the starting tasks to check for validity.
-   * @param endTasks represents the end tasks to stop checking for validity.
-   * @param topBottom specifies the direction to check: from top to bottom
-   *                  or bottom to top.
+   * @param startTasks represents the starting tasks to check for
+   *                   validity.
+   * @param endTasks represents the end tasks to stop checking for
+   *                 validity.
+   * @param topBottom specifies the direction to check: from top to
+   *                  bottom or bottom to top.
    *
    * @return true if cut is valid for the specified direction.
    */
@@ -171,7 +175,8 @@ public class Incision {
   }
 
   /**
-   * Remaps the edges of the cut to the node representing the distributed engine.
+   * Remaps the edges of the cut to the node representing the
+   * distributed engine.
    *
    * @param eGraph the full {@link EnactmentGraph}.
    * @param dependency the dependency edge to remap.
@@ -189,8 +194,8 @@ public class Incision {
    * Copy the tasks and edges below the current task.
    *
    * @param eGraph the full {@link EnactmentGraph}.
-   * @param cutOutGraph the cut out {@link EnactmentGraph} to add tasks
-   *                    and edges to.
+   * @param cutOutGraph the cut out {@link EnactmentGraph}
+   *                    to add tasks and edges to.
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
@@ -209,8 +214,8 @@ public class Incision {
    * Copy the tasks and edges above the current task.
    *
    * @param eGraph the full {@link EnactmentGraph}.
-   * @param cutOutGraph the cut out {@link EnactmentGraph} to add
-   *                    tasks and edges to.
+   * @param cutOutGraph the cut out {@link EnactmentGraph}
+   *                    to add tasks and edges to.
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
@@ -226,7 +231,8 @@ public class Incision {
   }
 
   /**
-   * Copy the edge with the corresponding source and destination tasks.
+   * Copy the edge with the corresponding source and
+   * destination tasks.
    *
    * @param cutOutGraph the cut out {@link EnactmentGraph}.
    * @param edge the edge to copy.
