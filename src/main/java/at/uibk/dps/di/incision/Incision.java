@@ -35,41 +35,15 @@ public class Incision {
    *
    * @return the resulting cut out {@link EnactmentGraph}.
    */
-  public EnactmentGraph cut(EnactmentGraph eGraph, Set<Task> topCut,
+  public EnactmentGraph cut(final EnactmentGraph eGraph, Set<Task> topCut,
       Set<Task> bottomCut) throws IllegalArgumentException {
 
-    // Check if top and bottom cut is specified
-    if (topCut == null || topCut.size() == 0 || bottomCut == null || bottomCut.size() == 0) {
-      throw new IllegalArgumentException("Both, top and bottom cut must be specified!");
-    }
-
-    // Check if elements in top and bottom cut are communication nodes
-    topCut.forEach((task) -> {if(!(task instanceof Communication)) { throw new IllegalArgumentException("Top cut must be a set of communication nodes!");}} );
-    bottomCut.forEach((task) -> {if(!(task instanceof Communication)) { throw new IllegalArgumentException("Bottom cut must be a set of communication nodes!");}} );
-
-    // Check if the cut is valid
-    if(!isCutValid(eGraph, topCut, bottomCut)) {
-      throw new IllegalArgumentException("The cut is invalid!");
-    }
+    validateInput(eGraph, topCut, bottomCut);
 
     // Create the cut out graph
     EnactmentGraph cutOutGraph = cutGraph(eGraph, topCut, bottomCut);
 
-    // Create and insert the function node for the distributed engine
-    Task functionNode = new Task(topCut.toString() + bottomCut.toString());
-    eGraph.addVertex(functionNode);
-
-    // Substitute the edges before the bottom cut
-    for (Task bTask : bottomCut) {
-      eGraph.getInEdges(bTask).forEach(
-          (dependency -> remapDependency(eGraph, dependency, functionNode, bTask)));
-    }
-
-    // Substitute the edges after the top cut
-    for (Task tTask : topCut) {
-      eGraph.getOutEdges(tTask).forEach(
-          (dependency -> remapDependency(eGraph, dependency, tTask, functionNode)));
-    }
+    insertFunctionNode(eGraph, topCut, bottomCut);
 
     // Remove outsourced edges and vertices from the initial graph.
     cutOutGraph.getEdges().forEach((edge) -> eGraph.removeEdge(eGraph.getEdge(edge.getId())));
@@ -84,6 +58,63 @@ public class Incision {
     topCut.forEach((tTask) -> PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask)));
 
     return cutOutGraph;
+  }
+
+  /**
+   * Insert a function node and remap dependencies.
+   *
+   * @param eGraph the reference to the original input {@link EnactmentGraph}. This
+   *         {@link EnactmentGraph} will be adapted and contains the distributed engine
+   *         node after this method call.
+   * @param topCut communication nodes representing the top cut of the
+   *        {@link EnactmentGraph}.
+   * @param bottomCut communication nodes representing the bottom cut of the
+   *        {@link EnactmentGraph}.
+   */
+  private void insertFunctionNode(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut) {
+    // Create and insert the function node for the distributed engine
+    final Task functionNode = new Task(topCut.toString() + bottomCut.toString());
+    eGraph.addVertex(functionNode);
+
+    // Substitute the edges before the bottom cut
+    for (Task bTask : bottomCut) {
+      eGraph.getInEdges(bTask).forEach(
+          (dependency -> remapDependency(eGraph, dependency, functionNode, bTask)));
+    }
+
+    // Substitute the edges after the top cut
+    for (Task tTask : topCut) {
+      eGraph.getOutEdges(tTask).forEach(
+          (dependency -> remapDependency(eGraph, dependency, tTask, functionNode)));
+    }
+  }
+
+  /**
+   * Validate the input to the cutting method.
+   *
+   * @param eGraph the reference to the original input {@link EnactmentGraph}. This
+   *         {@link EnactmentGraph} will be adapted and contains the distributed engine
+   *         node after this method call.
+   * @param topCut communication nodes representing the top cut of the
+   *        {@link EnactmentGraph}.
+   * @param bottomCut communication nodes representing the bottom cut of the
+   *        {@link EnactmentGraph}.
+   */
+  void validateInput(EnactmentGraph eGraph, Set<Task> topCut, Set<Task> bottomCut){
+
+    // Check if top and bottom cut is specified
+    if (topCut == null || topCut.size() == 0 || bottomCut == null || bottomCut.size() == 0) {
+      throw new IllegalArgumentException("Both, top and bottom cut must be specified!");
+    }
+
+    // Check if elements in top and bottom cut are communication nodes
+    topCut.forEach((task) -> {if(!(task instanceof Communication)) { throw new IllegalArgumentException("Top cut must be a set of communication nodes!");}} );
+    bottomCut.forEach((task) -> {if(!(task instanceof Communication)) { throw new IllegalArgumentException("Bottom cut must be a set of communication nodes!");}} );
+
+    // Check if the cut is valid
+    if(!isCutValid(eGraph, topCut, bottomCut)) {
+      throw new IllegalArgumentException("The cut is invalid!");
+    }
   }
 
   /**
@@ -145,7 +176,7 @@ public class Incision {
    * @param from new source of the edge.
    * @param to new destination of the edge.
    */
-  private void remapDependency(EnactmentGraph eGraph, Dependency dependency, Task from, Task to) {
+  private void remapDependency(EnactmentGraph eGraph, final Dependency dependency, Task from, Task to) {
     Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
     eGraph.removeEdge(dependency);
     PropertyServiceDependency.addDataDependency(from, to, PropertyServiceDependency.getJsonKey(tmp), eGraph);
@@ -159,10 +190,10 @@ public class Incision {
    * @param currentTasks the current tasks to check.
    * @param task the current task.
    */
-  private void copyBelow(EnactmentGraph eGraph, EnactmentGraph cutOutGraph,
-      Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,  AbstractMap.SimpleEntry<Task, Dependency> task){
+  private void copyBelow(EnactmentGraph eGraph, final EnactmentGraph cutOutGraph,
+      final Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,  AbstractMap.SimpleEntry<Task, Dependency> task){
 
-    for (Dependency edge : eGraph.getOutEdges(task.getKey())) {
+    for (final Dependency edge : eGraph.getOutEdges(task.getKey())) {
       if (!task.getValue().equals(edge)) {
         copyEdge(cutOutGraph, edge, currentTasks, task.getKey(), eGraph.getDest(edge));
       }
@@ -180,7 +211,7 @@ public class Incision {
   private void copyAbove(EnactmentGraph eGraph, EnactmentGraph cutOutGraph,
       Stack<AbstractMap.SimpleEntry<Task, Dependency>> currentTasks,  AbstractMap.SimpleEntry<Task, Dependency> task){
 
-    for (Dependency edge : eGraph.getInEdges(task.getKey())) {
+    for (final Dependency edge : eGraph.getInEdges(task.getKey())) {
       if (!task.getValue().equals(edge)) {
         copyEdge(cutOutGraph, edge, currentTasks, task.getKey(), eGraph.getSource(edge));
       }
@@ -200,9 +231,9 @@ public class Incision {
       Task currentTask, Task nextTask) {
 
     // Copy the current and next task
-    Task from = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
+    final Task from = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
         : UtilsDeepCopy.deepCopyTask(currentTask);
-    Task to = nextTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(nextTask)
+    final Task to = nextTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(nextTask)
         : UtilsDeepCopy.deepCopyTask(nextTask);
 
     // Make a copy of the edge

@@ -42,20 +42,20 @@ public class EnactmentGraphs {
      * @return the medium sized Enactment Graph.
      */
     public static EnactmentGraph getMediumSizedEnactmentGraph(){
-        Task comm1 = new Communication("commNode1");
-        Task comm2 = new Communication("commNode2");
-        Task comm3 = new Communication("commNode3");
-        Task comm4 = new Communication("commNode4");
-        Task comm5 = new Communication("commNode5");
-        Task comm6 = new Communication("commNode6");
-        Task comm7 = new Communication("commNode7");
-        Task comm8 = new Communication("commNode8");
-        Task task1 = new Task("taskNode1");
-        Task task2 = new Task("taskNode2");
-        Task task3 = new Task("taskNode3");
-        Task task4 = new Task("taskNode4");
-        Task task5 = new Task("taskNode5");
-        Task task6 = new Task("taskNode6");
+        final Task comm1 = new Communication("commNode1");
+        final Task comm2 = new Communication("commNode2");
+        final Task comm3 = new Communication("commNode3");
+        final Task comm4 = new Communication("commNode4");
+        final Task comm5 = new Communication("commNode5");
+        final Task comm6 = new Communication("commNode6");
+        final Task comm7 = new Communication("commNode7");
+        final Task comm8 = new Communication("commNode8");
+        final Task task1 = new Task("taskNode1");
+        final Task task2 = new Task("taskNode2");
+        final Task task3 = new Task("taskNode3");
+        final Task task4 = new Task("taskNode4");
+        final Task task5 = new Task("taskNode5");
+        final Task task6 = new Task("taskNode6");
         EnactmentGraph graph = new EnactmentGraph();
         PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
         PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
@@ -90,13 +90,13 @@ public class EnactmentGraphs {
      * @return the {@link EnactmentGraph} with more complex data flow.
      */
     public static EnactmentGraph getMoreComplexDataFlowEnactmentGraph() {
-        Task comm1 = new Communication("commNode1");
-        Task comm2 = new Communication("commNode2");
-        Task comm3 = new Communication("commNode3");
-        Task comm4 = new Communication("commNode4");
-        Task comm5 = new Communication("commNode5");
-        Task task1 = new Task("taskNode1");
-        Task task2 = new Task("taskNode2");
+        final Task comm1 = new Communication("commNode1");
+        final Task comm2 = new Communication("commNode2");
+        final Task comm3 = new Communication("commNode3");
+        final Task comm4 = new Communication("commNode4");
+        final Task comm5 = new Communication("commNode5");
+        final Task task1 = new Task("taskNode1");
+        final Task task2 = new Task("taskNode2");
         EnactmentGraph graph = new EnactmentGraph();
         PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
         PropertyServiceData.setContent(comm2, new JsonPrimitive("value"));
