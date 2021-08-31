@@ -35,6 +35,9 @@ dependencies {
     // dependency to opendse
     implementation 'com.github.FedorSmirnov89:opendse:-SNAPSHOT'
 
+    // Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     // JUnit 5
     testImplementation(platform('org.junit:junit-bom:5.7.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
