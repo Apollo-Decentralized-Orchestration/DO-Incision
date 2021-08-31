@@ -129,7 +129,7 @@ public class Incision {
    *
    * @return true if the cut is valid.
    */
-  boolean isCutValid(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut) {
+  public boolean isCutValid(final EnactmentGraph eGraph, final Set<Task> topCut, final Set<Task> bottomCut) {
     // Check both directions for validity
     return checkDirection(eGraph, topCut, bottomCut, true)
         && checkDirection(eGraph, bottomCut, topCut, false);

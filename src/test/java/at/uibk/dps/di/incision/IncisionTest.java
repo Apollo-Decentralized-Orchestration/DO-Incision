@@ -219,6 +219,8 @@ class IncisionTest {
         bottomCut.add(full.getVertex("commNode7"));
 
         assertFalse(incision.isCutValid(full, topCut, bottomCut));
+
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(full, topCut, bottomCut));
     }
 
     /**
@@ -237,40 +239,49 @@ class IncisionTest {
      */
     @Test
     void checkInvalidCutComplexDataFlowEnactmentGraph() {
-        EnactmentGraph full = EnactmentGraphs.getMoreComplexDataFlowEnactmentGraph();
+        EnactmentGraph eGraph = EnactmentGraphs.getMoreComplexDataFlowEnactmentGraph();
 
         Incision incision = new Incision();
 
         Set<Task> topCut = new HashSet<>();
-        topCut.add(full.getVertex("commNode2"));
-        topCut.add(full.getVertex("commNode3"));
+        topCut.add(eGraph.getVertex("commNode2"));
+        topCut.add(eGraph.getVertex("commNode3"));
 
         Set<Task> bottomCut = new HashSet<>();
-        bottomCut.add(full.getVertex("commNode4"));
-        bottomCut.add(full.getVertex("commNode5"));
+        bottomCut.add(eGraph.getVertex("commNode4"));
+        bottomCut.add(eGraph.getVertex("commNode5"));
 
-        assertFalse(incision.isCutValid(full, topCut, bottomCut));
+        assertFalse(incision.isCutValid(eGraph, topCut, bottomCut));
+
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(eGraph, topCut, bottomCut));
     }
 
-    /*
-    public static void main(String[] args) throws IllegalArgumentException {
-        Incision cutter = new Incision();
+    /**
+     * Check an invalid cut (missing top cut) of a {@link EnactmentGraph} with more complex data flow.
+     * The {@link EnactmentGraph} consists of 2 task nodes (tX) and 5 communication nodes (cX). It
+     * contains parallel and sequential nodes.
+     *
+     * Cut @ c2 c3 and c4 c5
+     *
+     * Graphical representation of the {@link EnactmentGraph} with more complex data flow:
+     *
+     *       c3 c1 c2
+     *        \ | /  \
+     *         t1    t2
+     *         |     |
+     *         c4    c5
+     */
+    @Test
+    void checkMissingTopCut(){
+        EnactmentGraph eGraph = EnactmentGraphs.getMoreComplexDataFlowEnactmentGraph();
+        Incision incision = new Incision();
 
-        EnactmentGraph full = EnactmentGraphs.getMediumSizedEnactmentGraph();
-        Set<Task> topNodes = new HashSet<>();
-        topNodes.add(full.getVertex("commNode3"));
-        topNodes.add(full.getVertex("commNode2"));
+        Set<Task> topCut = new HashSet<>();
 
-        Set<Task> bottomNodes = new HashSet<>();
-        bottomNodes.add(full.getVertex("commNode7"));
-        bottomNodes.add(full.getVertex("commNode6"));
+        Set<Task> bottomCut = new HashSet<>();
+        bottomCut.add(eGraph.getVertex("commNode4"));
+        bottomCut.add(eGraph.getVertex("commNode5"));
 
-        EnactmentGraph result;
-        try {
-            result = cutter.cut(full, topNodes, bottomNodes);
-            EnactmentGraphViewer.view(full);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }*/
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(eGraph, topCut, bottomCut));
+    }
 }
