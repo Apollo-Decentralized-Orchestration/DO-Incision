@@ -3,7 +3,7 @@ package at.uibk.dps.di.incision;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
-import at.uibk.dps.ee.model.utils.UtilsDeepCopy;
+import at.uibk.dps.ee.model.utils.UtilsCopy;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Dependency;
 import net.sf.opendse.model.Task;
@@ -185,7 +185,7 @@ public class Incision {
    */
   private void remapDependency(final EnactmentGraph eGraph, final Dependency dependency,
       final Task taskFrom, final Task taskTo) {
-    final Dependency tmp = UtilsDeepCopy.deepCopyDependency(dependency);
+    final Dependency tmp = UtilsCopy.deepCopyDependency(dependency);
     eGraph.removeEdge(dependency);
     PropertyServiceDependency.addDataDependency(taskFrom, taskTo, PropertyServiceDependency.getJsonKey(tmp), eGraph);
   }
@@ -245,13 +245,13 @@ public class Incision {
       final Task currentTask, final Task nextTask) {
 
     // Copy the current and next task
-    final Task taskFrom = currentTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(currentTask)
-        : UtilsDeepCopy.deepCopyTask(currentTask);
-    final Task taskTo = nextTask instanceof Communication ? UtilsDeepCopy.deepCopyCommunication(nextTask)
-        : UtilsDeepCopy.deepCopyTask(nextTask);
+    final Task taskFrom = currentTask instanceof Communication ? UtilsCopy.deepCopyCommunication(currentTask)
+        : UtilsCopy.deepCopyTask(currentTask);
+    final Task taskTo = nextTask instanceof Communication ? UtilsCopy.deepCopyCommunication(nextTask)
+        : UtilsCopy.deepCopyTask(nextTask);
 
     // Make a copy of the edge
-    final Dependency tmpEdge = UtilsDeepCopy.deepCopyDependency(edge);
+    final Dependency tmpEdge = UtilsCopy.deepCopyDependency(edge);
 
     // Add edge with the given tasks to the cut out graph
     PropertyServiceDependency.addDataDependency(taskFrom, taskTo, PropertyServiceDependency.getJsonKey(tmpEdge), cutOutGraph);
