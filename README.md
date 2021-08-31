@@ -1,4 +1,5 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7726444b173d46a99540f01845ec42ec)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Apollo-Decentralized-Orchestration/DO-Incision&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/7726444b173d46a99540f01845ec42ec)](https://www.codacy.com?utm_source=github.com&utm_medium=referral&utm_content=Apollo-Decentralized-Orchestration/DO-Incision&utm_campaign=Badge_Coverage)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Incision
