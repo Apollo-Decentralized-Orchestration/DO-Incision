@@ -30,6 +30,15 @@ dependencies {
     }else {
         // dependencies to other parts of the Apollo Core EE
         implementation 'com.github.Apollo-Core:EE-Model:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Deploy:-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-IO:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Core:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Guice:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Enactables:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Control:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Visualization:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:SC-Core:main-SNAPSHOT'
+        implementation 'com.github.Apollo-core:EE-Docker:master-SNAPSHOT'
     }
 
     // dependency to opendse
@@ -37,6 +46,7 @@ dependencies {
 
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation group: 'com.io7m.xom', name: 'xom', version: '1.2.10'
 
     // JUnit 5
     testImplementation(platform('org.junit:junit-bom:5.7.2'))
