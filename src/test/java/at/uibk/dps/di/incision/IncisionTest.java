@@ -2,6 +2,9 @@ package at.uibk.dps.di.incision;
 
 import at.uibk.dps.di.resources.EnactmentGraphs;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
+import at.uibk.dps.ee.model.graph.EnactmentSpecification;
+import at.uibk.dps.ee.model.graph.ResourceGraph;
+import net.sf.opendse.model.Mappings;
 import net.sf.opendse.model.Task;
 import org.junit.jupiter.api.Test;
 
@@ -78,7 +81,9 @@ class IncisionTest {
         assertEquals(full.getVertex("taskNode4"), full.getSource(full.getEdge("taskNode4--commNode6")));
 
         // Cut the workflow
-        EnactmentGraph result = incision.cut(full, topCut, bottomCut);
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(full, new ResourceGraph(), new Mappings<>());
+        EnactmentSpecification resultEnactmentSpecification = incision.cut(enactmentSpecification, topCut, bottomCut);
+        EnactmentGraph result = resultEnactmentSpecification.getEnactmentGraph();
 
         // Check if edges are deleted after the cut
         assertNull(full.getEdge("taskNode3--commNode5"));
@@ -220,7 +225,8 @@ class IncisionTest {
 
         assertFalse(incision.isCutValid(full, topCut, bottomCut));
 
-        assertThrows(IllegalArgumentException.class, () -> incision.cut(full, topCut, bottomCut));
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(full, new ResourceGraph(), new Mappings<>());
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 
     /**
@@ -253,7 +259,8 @@ class IncisionTest {
 
         assertFalse(incision.isCutValid(eGraph, topCut, bottomCut));
 
-        assertThrows(IllegalArgumentException.class, () -> incision.cut(eGraph, topCut, bottomCut));
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new Mappings<>());
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 
     /**
@@ -282,6 +289,7 @@ class IncisionTest {
         bottomCut.add(eGraph.getVertex("commNode4"));
         bottomCut.add(eGraph.getVertex("commNode5"));
 
-        assertThrows(IllegalArgumentException.class, () -> incision.cut(eGraph, topCut, bottomCut));
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new Mappings<>());
+        assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 }
