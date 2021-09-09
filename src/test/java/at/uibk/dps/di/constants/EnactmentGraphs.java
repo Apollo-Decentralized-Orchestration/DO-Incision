@@ -1,4 +1,4 @@
-package at.uibk.dps.di.resources;
+package at.uibk.dps.di.constants;
 
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;

@@ -1,14 +1,21 @@
 package at.uibk.dps.di.incision;
 
-import at.uibk.dps.di.resources.EnactmentGraphs;
+import at.uibk.dps.di.constants.EnactmentGraphs;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.graph.EnactmentSpecification;
 import at.uibk.dps.ee.model.graph.ResourceGraph;
 import net.sf.opendse.model.Mappings;
 import net.sf.opendse.model.Task;
+import nu.xom.ParsingException;
 import org.junit.jupiter.api.Test;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -291,5 +298,77 @@ class IncisionTest {
 
         EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new Mappings<>());
         assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
+    }
+
+    /**
+     * Check the cut of an {@link EnactmentSpecification} from an external AFCL mapping file. The
+     * Workflow consists of a sequence of 6 task nodes (tX) and 7 communication nodes (cX).
+     *
+     * Graphical representation of the {@link EnactmentGraph}:
+     *
+     *  c0
+     *  |
+     *  t1
+     *  |
+     *  c1
+     *  |
+     *  t2
+     *  |
+     *  c2
+     *  |
+     *  t3
+     *  |
+     *  c3
+     *  |
+     *  t4
+     *  |
+     *  c4
+     *  |
+     *  t5
+     *  |
+     *  c5
+     *  |
+     *  t6
+     *  |
+     *  c6
+     *
+     * @throws ParsingException on parsing failure.
+     * @throws IOException on io failure.
+     */
+    @Test void checkCut() throws ParsingException, IOException {
+        String specificationFromAFCL = Utils.specFromAFCL(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("wf.yaml")).getPath(),
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
+
+        EnactmentSpecification enactmentSpecification = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
+        EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
+
+        Incision incision = new Incision();
+        Set<Task> topCut = new HashSet<>();
+        topCut.add(eGraph.getVertex("noop1/result"));
+        Set<Task> bottomCut = new HashSet<>();
+        bottomCut.add(eGraph.getVertex("noop5/result"));
+
+        EnactmentSpecification cutOutGraph = incision.cut(enactmentSpecification, topCut, bottomCut);
+
+        String specificationAdapted = Utils.fromEnactmentSpecificationToString(enactmentSpecification);
+
+        Diff difference = DiffBuilder.compare(specificationFromAFCL)
+            .withTest(specificationAdapted)
+            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
+            .checkForSimilar()
+            .build();
+
+        assertTrue(difference.hasDifferences());
+
+        difference = DiffBuilder.compare(specificationFromAFCL)
+            .withTest(Utils.fromEnactmentSpecificationToString(cutOutGraph))
+            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
+            .checkForSimilar()
+            .build();
+
+        assertTrue(difference.hasDifferences());
+
+        //new ImplementationRunBare().implement("{ \"input.json\" : \"3\" }", specificationAdapted, Utils.DISTRIBUTED_ENGINE_CONFIGURATION);
     }
 }

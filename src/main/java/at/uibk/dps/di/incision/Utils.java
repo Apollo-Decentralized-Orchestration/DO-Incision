@@ -34,7 +34,7 @@ public class Utils {
     public static final String DISTRIBUTED_ENGINE_TYPE_ID = "dEE";
 
     /**
-     * Represents the name of the enacmtne engine.
+     * Represents the name of the enactment engine.
      */
     public static final String ENGINE = "Enactment Engine (Local Machine)";
 
