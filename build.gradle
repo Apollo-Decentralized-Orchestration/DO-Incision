@@ -51,6 +51,8 @@ dependencies {
     // JUnit 5
     testImplementation(platform('org.junit:junit-bom:5.7.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
+    implementation 'org.xmlunit:xmlunit-core:2.2.1'
+
 }
 
 jacocoTestReport {
