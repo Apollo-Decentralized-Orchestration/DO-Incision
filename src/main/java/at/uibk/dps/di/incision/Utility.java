@@ -22,7 +22,12 @@ import java.nio.charset.StandardCharsets;
  *
  * @author Stefan Pedratscher
  */
-public class Utility {
+public final class Utility {
+
+    /**
+     * Private constructor to avoid unnecessary instantiation of the class.
+     */
+    private Utility() { }
 
     /**
      * Represents the location of the distributed engine.

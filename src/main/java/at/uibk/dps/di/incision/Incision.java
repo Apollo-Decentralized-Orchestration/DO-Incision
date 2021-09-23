@@ -23,7 +23,7 @@ public class Incision {
   /**
    * The JsonKey identifier.
    */
-  private final String jsonKeyIdentifier = "JsonKey";
+  private final static String jsonKeyIdentifier = "JsonKey";
 
   /**
    * Cut the {@link EnactmentGraph} at a specific position (two given cuts)
@@ -117,7 +117,7 @@ public class Incision {
    * @return the identifier of the newly created function node.
    */
   private String insertFunctionNode(final EnactmentSpecification enactmentSpecification, final Set<Task> topCut, final Set<Task> bottomCut) {
-    EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
+    final EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
 
     // Create and insert the function node for the distributed engine
     final String functionNodeId = topCut.toString() + bottomCut.toString();
@@ -140,7 +140,7 @@ public class Incision {
     }
 
     // Add mapping for the distributed engine
-    Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
+    final Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
     final Mapping mapping = new Mapping<>(
         functionNodeId + "--" + Utility.DE_AWS_US_EAST_1 + "--" + Utility.DE_AWS_US_EAST_1,
         eGraph.getTask(functionNodeId), distributedEngineResource);
