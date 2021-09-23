@@ -68,11 +68,15 @@ public class Incision {
     // Mark leaf and root nodes of the cut out graph and adapt input and output
     topCut.forEach((tTask) -> {
       PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask));
-      cutOutGraph.getVertex(tTask).setAttribute("JsonKey", eGraph.getEdge(tTask.getId() + "--" + functionNodeId).getAttribute("JsonKey"));
+      Dependency edge = eGraph.getEdge(tTask.getId() + "--" + functionNodeId);
+      edge.setAttribute("JsonKey", edge.getAttribute("JsonKey") + "_" + tTask.getId());
+      cutOutGraph.getVertex(tTask).setAttribute("JsonKey", edge.getAttribute("JsonKey"));
     });
     bottomCut.forEach((bTask) -> {
       PropertyServiceData.makeLeaf(cutOutGraph.getVertex(bTask));
-      cutOutGraph.getVertex(bTask.getId()).setAttribute("JsonKey", eGraph.getEdge(functionNodeId + "--" + bTask.getId()).getAttribute("JsonKey"));
+      Dependency edge = eGraph.getEdge(functionNodeId + "--" + bTask.getId());
+      edge.setAttribute("JsonKey", edge.getAttribute("JsonKey") + "_" + bTask.getId());
+      cutOutGraph.getVertex(bTask.getId()).setAttribute("JsonKey", edge.getAttribute("JsonKey"));
     });
 
     // Create the enactment specification of the cut out graph
