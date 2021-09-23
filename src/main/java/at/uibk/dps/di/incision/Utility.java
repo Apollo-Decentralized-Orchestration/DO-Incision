@@ -25,11 +25,6 @@ import java.nio.charset.StandardCharsets;
 public final class Utility {
 
     /**
-     * Private constructor to avoid unnecessary instantiation of the class.
-     */
-    private Utility() { }
-
-    /**
      * Represents the location of the distributed engine.
      */
     public static final String DE_AWS_US_EAST_1 = "https://1m3c0y7o0d.execute-api.us-east-1.amazonaws.com/default/enactment-engine";
@@ -76,6 +71,11 @@ public final class Utility {
         + "    <property name=\"mappingsToPick\">1</property>\n"
         + "    <property name=\"sizeThresholdKb\">10</property>\n" + "  </module>\n"
         + "</configuration>";
+
+    /**
+     * Private constructor to avoid unnecessary instantiation of the class.
+     */
+    private Utility() { }
 
     /**
      * Transforms a string to an {@link EnactmentSpecification}.
