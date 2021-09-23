@@ -335,9 +335,9 @@ class IncisionTest {
      * @throws ParsingException on parsing failure.
      * @throws IOException on io failure.
      */
-    @Test void checkCut() throws ParsingException, IOException {
+    @Test void checkCutFromAFCL() throws ParsingException, IOException {
         String specificationFromAFCL = Utils.specFromAFCL(
-            Objects.requireNonNull(getClass().getClassLoader().getResource("wf.yaml")).getPath(),
+            Objects.requireNonNull(getClass().getClassLoader().getResource("workflow.yaml")).getPath(),
             Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
 
         EnactmentSpecification enactmentSpecification = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
@@ -370,5 +370,66 @@ class IncisionTest {
         assertTrue(difference.hasDifferences());
 
         //new ImplementationRunBare().implement("{ \"input.json\" : \"3\" }", specificationAdapted, Utils.DISTRIBUTED_ENGINE_CONFIGURATION);
+    }
+
+    /**
+     * Test multiple inputs and outputs on the cut out graph. The tested graph consists of
+     * 7 task nodes (tX) and 8 communication nodes (cX).
+     *
+     * Cut @ c1 c2 and c3 c4
+     *
+     * Graphical representation of the {@link EnactmentGraph}:
+     *
+     *       c0
+     *      / \
+     *     t1  t2
+     *     |   |
+     *     c1  c2
+     *     |   |
+     *     t3  t4
+     *     |   |
+     *     c3  c4
+     *     |   |
+     *     t5  t6
+     *     |   |
+     *     c5  c6
+     *      \ /
+     *      t7
+     *      |
+     *      c7
+     */
+    @Test
+    void multipleInputsAndOutputs() throws ParsingException, IOException {
+        String specificationFromAFCL = Utils.specFromAFCL(
+            Objects.requireNonNull(getClass().getClassLoader().getResource("workflowMultipleInputs.yaml")).getPath(),
+            Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
+
+        EnactmentSpecification enactmentSpecification = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
+        EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
+
+        Incision incision = new Incision();
+        Set<Task> topCut = new HashSet<>();
+        topCut.add(eGraph.getVertex("noop1/result"));
+        topCut.add(eGraph.getVertex("noop2/result"));
+        Set<Task> bottomCut = new HashSet<>();
+        bottomCut.add(eGraph.getVertex("noop3/result"));
+        bottomCut.add(eGraph.getVertex("noop4/result"));
+
+        EnactmentGraph cutOutGraph = incision.cut(enactmentSpecification, topCut, bottomCut).getEnactmentGraph();
+
+        assertEquals("input_noop1/result", cutOutGraph.getTask("noop1/result").getAttribute("JsonKey"));
+        assertEquals("input_noop2/result", cutOutGraph.getTask("noop2/result").getAttribute("JsonKey"));
+        assertEquals("result_noop3/result", cutOutGraph.getTask("noop3/result").getAttribute("JsonKey"));
+        assertEquals("result_noop4/result", cutOutGraph.getTask("noop4/result").getAttribute("JsonKey"));
+
+        assertEquals("input", cutOutGraph.getEdge("noop1/result--noop3").getAttribute("JsonKey"));
+        assertEquals("input", cutOutGraph.getEdge("noop2/result--noop4").getAttribute("JsonKey"));
+        assertEquals("result", cutOutGraph.getEdge("noop3--noop3/result").getAttribute("JsonKey"));
+        assertEquals("result", cutOutGraph.getEdge("noop4--noop4/result").getAttribute("JsonKey"));
+
+        assertEquals("input_noop1/result", eGraph.getEdge("noop1/result--[noop2/result, noop1/result][noop4/result, noop3/result]").getAttribute("JsonKey"));
+        assertEquals("input_noop2/result", eGraph.getEdge("noop2/result--[noop2/result, noop1/result][noop4/result, noop3/result]").getAttribute("JsonKey"));
+        assertEquals("result_noop3/result", eGraph.getEdge("[noop2/result, noop1/result][noop4/result, noop3/result]--noop3/result").getAttribute("JsonKey"));
+        assertEquals("result_noop4/result", eGraph.getEdge("[noop2/result, noop1/result][noop4/result, noop3/result]--noop4/result").getAttribute("JsonKey"));
     }
 }
