@@ -29,7 +29,7 @@ public class UtilsTest {
     @Test
     void checkSpecificationReaderWriter() throws ParsingException, IOException {
         String specificationFromAFCL = Utils.specFromAFCL(
-            Objects.requireNonNull(getClass().getClassLoader().getResource("wf.yaml")).getPath(),
+            Objects.requireNonNull(getClass().getClassLoader().getResource("workflow.yaml")).getPath(),
             Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
 
         EnactmentSpecification enactmentSpecificationFromString = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
