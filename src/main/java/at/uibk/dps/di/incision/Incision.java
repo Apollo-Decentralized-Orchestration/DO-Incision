@@ -21,6 +21,11 @@ import java.util.stream.Collectors;
 public class Incision {
 
   /**
+   * The JsonKey identifier.
+   */
+  private final String jsonKeyIdentifier = "JsonKey";
+
+  /**
    * Cut the {@link EnactmentGraph} at a specific position (two given cuts)
    * and adapt the {@link EnactmentSpecification}.
    *
@@ -42,7 +47,7 @@ public class Incision {
   public EnactmentSpecification cut(final EnactmentSpecification enactmentSpecification, final Set<Task> topCut,
       final Set<Task> bottomCut) {
 
-    EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
+    final EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
 
     // Validate the top and bottom cuts
     validateInput(eGraph, topCut, bottomCut);
@@ -51,11 +56,12 @@ public class Incision {
     final EnactmentGraph cutOutGraph = cutGraph(eGraph, topCut, bottomCut);
 
     // Insert new distributed engine node
-    String functionNodeId = insertFunctionNode(enactmentSpecification, topCut, bottomCut);
+    final String functionNodeId = insertFunctionNode(enactmentSpecification, topCut, bottomCut);
 
-    // Remove outsourced edges, vertices and mappings from the initial graph and add mappings of the cut out graph.
-    Mappings<Task, Resource> mappingsCutOutGraph = new Mappings<>();
-    Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
+    // Remove outsourced edges, vertices and mappings from the
+    // initial graph and add mappings of the cut out graph.
+    final Mappings<Task, Resource> mappingsCutOutGraph = new Mappings<>();
+    final Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
     cutOutGraph.getEdges().forEach((edge) -> eGraph.removeEdge(eGraph.getEdge(edge.getId())));
     cutOutGraph.getVertices().forEach((vertice) -> {
       if(!(topCut.contains(vertice) || bottomCut.contains(vertice))) {
@@ -68,30 +74,30 @@ public class Incision {
     // Mark leaf and root nodes of the cut out graph and adapt input and output
     topCut.forEach((tTask) -> {
       PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask));
-      Dependency edge = eGraph.getEdge(tTask.getId() + "--" + functionNodeId);
-      edge.setAttribute("JsonKey", edge.getAttribute("JsonKey") + "_" + tTask.getId());
-      cutOutGraph.getVertex(tTask).setAttribute("JsonKey", edge.getAttribute("JsonKey"));
+      final Dependency edge = eGraph.getEdge(tTask.getId() + "--" + functionNodeId);
+      edge.setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier) + "_" + tTask.getId());
+      cutOutGraph.getVertex(tTask).setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier));
     });
     bottomCut.forEach((bTask) -> {
       PropertyServiceData.makeLeaf(cutOutGraph.getVertex(bTask));
-      Dependency edge = eGraph.getEdge(functionNodeId + "--" + bTask.getId());
-      edge.setAttribute("JsonKey", edge.getAttribute("JsonKey") + "_" + bTask.getId());
-      cutOutGraph.getVertex(bTask.getId()).setAttribute("JsonKey", edge.getAttribute("JsonKey"));
+      final Dependency edge = eGraph.getEdge(functionNodeId + "--" + bTask.getId());
+      edge.setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier) + "_" + bTask.getId());
+      cutOutGraph.getVertex(bTask.getId()).setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier));
     });
 
     // Create the enactment specification of the cut out graph
-    EnactmentSpecification resultEnactmentSpecification = new EnactmentSpecification(
+    final EnactmentSpecification resultEnactmentSpecification = new EnactmentSpecification(
         cutOutGraph,
         enactmentSpecification.getResourceGraph(),
         mappingsCutOutGraph);
 
     // Create new communication nodes for specification and configuration
-    addCommunicationNode(eGraph, "Constant/" + Utils.SPECIFICATION,
-        prepareNodeConstantString(Utils.fromEnactmentSpecificationToString(resultEnactmentSpecification)),
-        eGraph.getTask(functionNodeId), Utils.SPECIFICATION);
-    addCommunicationNode(eGraph, "Constant/" + Utils.CONFIGURATION,
-        prepareNodeConstantString(Utils.DISTRIBUTED_ENGINE_CONFIGURATION),
-        eGraph.getTask(functionNodeId), Utils.CONFIGURATION);
+    addCommunicationNode(eGraph, "Constant/" + Utility.SPECIFICATION,
+        prepareNodeConstantString(Utility.fromEnactmentSpecificationToString(resultEnactmentSpecification)),
+        eGraph.getTask(functionNodeId), Utility.SPECIFICATION);
+    addCommunicationNode(eGraph, "Constant/" + Utility.CONFIGURATION,
+        prepareNodeConstantString(Utility.DE_CONFIGURATION),
+        eGraph.getTask(functionNodeId), Utility.CONFIGURATION);
 
     return resultEnactmentSpecification;
   }
@@ -116,30 +122,30 @@ public class Incision {
     // Create and insert the function node for the distributed engine
     final String functionNodeId = topCut.toString() + bottomCut.toString();
     final Task functionNode = new Task(functionNodeId);
-    functionNode.setAttribute("TypeID", Utils.DISTRIBUTED_ENGINE_TYPE_ID);
+    functionNode.setAttribute("TypeID", Utility.DE_TYPE_ID);
     functionNode.setAttribute("UsageType", "User");
     eGraph.addVertex(functionNode);
 
     // Add the distributed engine resource
-    Resource distributedEngineResource = new Resource(Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1);
-    distributedEngineResource.setAttribute("Uri", Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1);
-    ResourceGraph rGraph = enactmentSpecification.getResourceGraph();
+    final Resource distributedEngineResource = new Resource(Utility.DE_AWS_US_EAST_1);
+    distributedEngineResource.setAttribute("Uri", Utility.DE_AWS_US_EAST_1);
+    final ResourceGraph rGraph = enactmentSpecification.getResourceGraph();
     rGraph.addVertex(distributedEngineResource);
-    Resource engineResource = rGraph.getVertex(Utils.ENGINE);
+    final Resource engineResource = rGraph.getVertex(Utility.ENGINE);
     if(engineResource != null) {
       rGraph.addEdge(
-          new Link(Utils.ENGINE + "--" + Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1),
-          new Pair<>(rGraph.getVertex(Utils.ENGINE), distributedEngineResource)
+          new Link(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1),
+          new Pair<>(rGraph.getVertex(Utility.ENGINE), distributedEngineResource)
       );
     }
 
     // Add mapping for the distributed engine
     Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
-    Mapping mapping = new Mapping<>(
-        functionNodeId + "--" + Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1 + "--" + Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1,
+    final Mapping mapping = new Mapping<>(
+        functionNodeId + "--" + Utility.DE_AWS_US_EAST_1 + "--" + Utility.DE_AWS_US_EAST_1,
         eGraph.getTask(functionNodeId), distributedEngineResource);
     mapping.setAttribute("EnactmentMode", "Serverless");
-    mapping.setAttribute("ImplementationId", Utils.DISTRIBUTED_ENGINE_AWS_US_EAST_1);
+    mapping.setAttribute("ImplementationId", Utility.DE_AWS_US_EAST_1);
     mappings.add(mapping);
 
     // Substitute the edges before the bottom cut
@@ -166,23 +172,24 @@ public class Incision {
    * @param toNode the node to connect the communication node with.
    * @param jsonKey the jsonKey of the communication node.
    */
-  private void addCommunicationNode(EnactmentGraph eGraph, String communicationId, String content, Task toNode, String jsonKey) {
+  private void addCommunicationNode(final EnactmentGraph eGraph, final String communicationId,
+      final String content, final Task toNode, final String jsonKey) {
 
     // Create communication node
-    Communication communication = new Communication(communicationId);
+    final Communication communication = new Communication(communicationId);
     communication.setAttribute("Content", content);
     communication.setAttribute("DataAvailable", true);
     communication.setAttribute("DataType", "String");
     communication.setAttribute("NodeType", "Constant");
 
     // Create dependency
-    Dependency dependency2 = new Dependency(communicationId + "--" + toNode);
-    dependency2.setAttribute("JsonKey", jsonKey);
-    dependency2.setAttribute("Type", "Data");
+    final Dependency dependency = new Dependency(communicationId + "--" + toNode);
+    dependency.setAttribute(jsonKeyIdentifier, jsonKey);
+    dependency.setAttribute("Type", "Data");
 
     // Add dependency
     PropertyServiceDependency.addDataDependency(communication, toNode,
-        PropertyServiceDependency.getJsonKey(dependency2), eGraph);
+        PropertyServiceDependency.getJsonKey(dependency), eGraph);
   }
 
   /**
@@ -400,7 +407,7 @@ public class Incision {
    *
    * @return the final prepared string.
    */
-  private String prepareNodeConstantString(String input) {
+  private String prepareNodeConstantString(final String input) {
     return "\"" + input.replace("\"", "'").replaceAll("[\\t\\n\\r]+","") + "\"";
   }
 }

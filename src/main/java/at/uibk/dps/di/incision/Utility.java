@@ -17,21 +17,22 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Class containing several utility functions and constants for the distributed engine.
+ * Class containing several utility functions and
+ * constants for the distributed engine.
  *
  * @author Stefan Pedratscher
  */
-public class Utils {
+public class Utility {
 
     /**
      * Represents the location of the distributed engine.
      */
-    public static final String DISTRIBUTED_ENGINE_AWS_US_EAST_1 = "https://1m3c0y7o0d.execute-api.us-east-1.amazonaws.com/default/enactment-engine";
+    public static final String DE_AWS_US_EAST_1 = "https://1m3c0y7o0d.execute-api.us-east-1.amazonaws.com/default/enactment-engine";
 
     /**
      * Represents the identifier for the distributed engine node.
      */
-    public static final String DISTRIBUTED_ENGINE_TYPE_ID = "dEE";
+    public static final String DE_TYPE_ID = "dEE";
 
     /**
      * Represents the name of the enactment engine.
@@ -51,7 +52,7 @@ public class Utils {
     /**
      * Represents the default configuration for the distributed engine.
      */
-    public static final String DISTRIBUTED_ENGINE_CONFIGURATION = "<configuration>\n"
+    public static final String DE_CONFIGURATION = "<configuration>\n"
         + "  <module class=\"at.uibk.dps.ee.control.modules.EnactmentVerticleModule\"/>\n"
         + "  <module class=\"at.uibk.dps.ee.io.modules.InputReaderFileModule\">\n"
         + "    <property name=\"filePath\">./inputData/inputSingleAtomic.json</property>\n"
@@ -81,7 +82,8 @@ public class Utils {
      * @throws ParsingException on parsing failure.
      * @throws IOException on io failure.
      */
-    public static EnactmentSpecification fromStringToEnactmentSpecification(String specification) throws ParsingException, IOException {
+    public static EnactmentSpecification fromStringToEnactmentSpecification(final String specification)
+        throws ParsingException, IOException {
         final nu.xom.Builder parser = new nu.xom.Builder();
         final nu.xom.Document doc = parser.build(specification, null);
         final nu.xom.Element eSpec = doc.getRootElement();
@@ -103,7 +105,7 @@ public class Utils {
      *
      * @return string representation of the {@link EnactmentSpecification}.
      */
-    public static String fromEnactmentSpecificationToString(EnactmentSpecification enactmentSpecification) {
+    public static String fromEnactmentSpecificationToString(final EnactmentSpecification enactmentSpecification) {
         final SpecificationWriter writer = new SpecificationWriter();
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
         writer.write(enactmentSpecification, stream);
@@ -118,7 +120,7 @@ public class Utils {
      *
      * @return the string specification.
      */
-    public static String specFromAFCL(String filePathAfcl, String filePathTypeMappings){
+    public static String specFromAFCL(final String filePathAfcl, final String filePathTypeMappings){
         final EnactmentGraphProvider eGraphProv = new AfclReader(filePathAfcl);
         final ResourceGraphProvider rGraphProv = new ResourceGraphProviderFile(filePathTypeMappings);
         final SpecificationProviderFile specProv =

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Stefan Pedtascher
  */
-public class UtilsTest {
+public class UtilityTest {
 
     /**
      * Check the reading and writing of an {@link EnactmentSpecification}.
@@ -28,13 +28,13 @@ public class UtilsTest {
      */
     @Test
     void checkSpecificationReaderWriter() throws ParsingException, IOException {
-        String specificationFromAFCL = Utils.specFromAFCL(
+        String specificationFromAFCL = Utility.specFromAFCL(
             Objects.requireNonNull(getClass().getClassLoader().getResource("workflow.yaml")).getPath(),
             Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
 
-        EnactmentSpecification enactmentSpecificationFromString = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
+        EnactmentSpecification enactmentSpecificationFromString = Utility.fromStringToEnactmentSpecification(specificationFromAFCL);
 
-        String enactmentSpecificationToString = Utils.fromEnactmentSpecificationToString(enactmentSpecificationFromString);
+        String enactmentSpecificationToString = Utility.fromEnactmentSpecificationToString(enactmentSpecificationFromString);
 
         Diff difference = DiffBuilder.compare(specificationFromAFCL)
             .withTest(enactmentSpecificationToString)

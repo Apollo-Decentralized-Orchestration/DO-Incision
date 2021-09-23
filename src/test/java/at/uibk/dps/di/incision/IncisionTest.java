@@ -336,11 +336,11 @@ class IncisionTest {
      * @throws IOException on io failure.
      */
     @Test void checkCutFromAFCL() throws ParsingException, IOException {
-        String specificationFromAFCL = Utils.specFromAFCL(
+        String specificationFromAFCL = Utility.specFromAFCL(
             Objects.requireNonNull(getClass().getClassLoader().getResource("workflow.yaml")).getPath(),
             Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
 
-        EnactmentSpecification enactmentSpecification = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
+        EnactmentSpecification enactmentSpecification = Utility.fromStringToEnactmentSpecification(specificationFromAFCL);
         EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
 
         Incision incision = new Incision();
@@ -351,7 +351,7 @@ class IncisionTest {
 
         EnactmentSpecification cutOutGraph = incision.cut(enactmentSpecification, topCut, bottomCut);
 
-        String specificationAdapted = Utils.fromEnactmentSpecificationToString(enactmentSpecification);
+        String specificationAdapted = Utility.fromEnactmentSpecificationToString(enactmentSpecification);
 
         Diff difference = DiffBuilder.compare(specificationFromAFCL)
             .withTest(specificationAdapted)
@@ -362,14 +362,14 @@ class IncisionTest {
         assertTrue(difference.hasDifferences());
 
         difference = DiffBuilder.compare(specificationFromAFCL)
-            .withTest(Utils.fromEnactmentSpecificationToString(cutOutGraph))
+            .withTest(Utility.fromEnactmentSpecificationToString(cutOutGraph))
             .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
             .checkForSimilar()
             .build();
 
         assertTrue(difference.hasDifferences());
 
-        //new ImplementationRunBare().implement("{ \"input.json\" : \"3\" }", specificationAdapted, Utils.DISTRIBUTED_ENGINE_CONFIGURATION);
+        //new ImplementationRunBare().implement("{ \"input.json\" : \"3\" }", specificationAdapted, Utility.DE_CONFIGURATION);
     }
 
     /**
@@ -400,11 +400,11 @@ class IncisionTest {
      */
     @Test
     void multipleInputsAndOutputs() throws ParsingException, IOException {
-        String specificationFromAFCL = Utils.specFromAFCL(
+        String specificationFromAFCL = Utility.specFromAFCL(
             Objects.requireNonNull(getClass().getClassLoader().getResource("workflowMultipleInputs.yaml")).getPath(),
             Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
 
-        EnactmentSpecification enactmentSpecification = Utils.fromStringToEnactmentSpecification(specificationFromAFCL);
+        EnactmentSpecification enactmentSpecification = Utility.fromStringToEnactmentSpecification(specificationFromAFCL);
         EnactmentGraph eGraph = enactmentSpecification.getEnactmentGraph();
 
         Incision incision = new Incision();
