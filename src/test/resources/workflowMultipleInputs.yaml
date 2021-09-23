@@ -1,0 +1,84 @@
+---
+name: "sixAtomics"
+dataIns:
+  - name: "input"
+    type: "string"
+    source: "input"
+workflowBody:
+  - function:
+      name: "noop1"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "sixAtomics/input"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop2"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "sixAtomics/input"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop3"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "noop1/result"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop4"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "noop2/result"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop5"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "noop3/result"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop6"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "noop4/result"
+      dataOuts:
+        - name: "result"
+          type: "string"
+  - function:
+      name: "noop7"
+      type: "noop"
+      dataIns:
+        - name: "input"
+          type: "string"
+          source: "noop6/result"
+        - name: "input2"
+          type: "string"
+          source: "noop5/result"
+      dataOuts:
+        - name: "result"
+          type: "string"
+dataOuts:
+  - name: "result"
+    type: "string"
+    source: "noop7/result"
