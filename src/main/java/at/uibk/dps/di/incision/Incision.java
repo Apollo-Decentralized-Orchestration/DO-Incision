@@ -1,12 +1,10 @@
 package at.uibk.dps.di.incision;
 
-import at.uibk.dps.ee.model.graph.EnactmentGraph;
-import at.uibk.dps.ee.model.graph.EnactmentSpecification;
-import at.uibk.dps.ee.model.graph.ResourceGraph;
-import at.uibk.dps.ee.model.properties.PropertyServiceData;
-import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
+import at.uibk.dps.ee.model.graph.*;
+import at.uibk.dps.ee.model.properties.*;
 import at.uibk.dps.ee.model.utils.UtilsCopy;
-import edu.uci.ics.jung.graph.util.Pair;
+import com.google.gson.JsonPrimitive;
+import edu.uci.ics.jung.graph.util.EdgeType;
 import net.sf.opendse.model.*;
 import net.sf.opendse.model.properties.TaskPropertyService;
 
@@ -19,11 +17,6 @@ import java.util.stream.Collectors;
  * @author Stefan Pedratscher
  */
 public class Incision {
-
-  /**
-   * The JsonKey identifier.
-   */
-  private final static String jsonKeyIdentifier = "JsonKey";
 
   /**
    * Cut the {@link EnactmentGraph} at a specific position (two given cuts)
@@ -60,44 +53,52 @@ public class Incision {
 
     // Remove outsourced edges, vertices and mappings from the
     // initial graph and add mappings of the cut out graph.
-    final Mappings<Task, Resource> mappingsCutOutGraph = new Mappings<>();
-    final Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
-    cutOutGraph.getEdges().forEach((edge) -> eGraph.removeEdge(eGraph.getEdge(edge.getId())));
+    final MappingsConcurrent mappingsCutOutGraph = new MappingsConcurrent();
+    final MappingsConcurrent mappings = enactmentSpecification.getMappings();
+    cutOutGraph.getEdges().forEach((edge) -> {
+
+      // Check if already deleted
+      try { eGraph.removeEdge(eGraph.getEdge(edge.getId())); } catch(IllegalArgumentException ignore) {}
+    });
     cutOutGraph.getVertices().forEach((vertice) -> {
       if(!(topCut.contains(vertice) || bottomCut.contains(vertice))) {
-        mappings.get(vertice).forEach(mappingsCutOutGraph::add);
-        mappings.removeAll(mappings.get(vertice));
+        if(!vertice.getId().contains("result") && !vertice.getId().contains("comm")){ // TODO replace this if with a contains
+          Set<Mapping<Task, Resource>> map = mappings.getMappings(vertice);
+          map.forEach(mappingsCutOutGraph::addMapping);
+          map.forEach(mappings::removeMapping);
+        }
         eGraph.removeVertex(eGraph.getVertex(vertice.getId()));
       }
     });
 
     // Mark leaf and root nodes of the cut out graph and adapt input and output
     topCut.forEach((tTask) -> {
-      PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask));
+      PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask.getId()));
       final Dependency edge = eGraph.getEdge(tTask.getId() + "--" + functionNodeId);
-      edge.setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier) + "_" + tTask.getId());
-      cutOutGraph.getVertex(tTask).setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier));
+      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge) + "_" + tTask.getId());
+      PropertyServiceData.setJsonKey(cutOutGraph.getVertex(tTask.getId()), PropertyServiceDependency.getJsonKey(edge));
     });
     bottomCut.forEach((bTask) -> {
-      PropertyServiceData.makeLeaf(cutOutGraph.getVertex(bTask));
+      PropertyServiceData.makeLeaf(cutOutGraph.getVertex(bTask.getId()));
       final Dependency edge = eGraph.getEdge(functionNodeId + "--" + bTask.getId());
-      edge.setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier) + "_" + bTask.getId());
-      cutOutGraph.getVertex(bTask.getId()).setAttribute(jsonKeyIdentifier, edge.getAttribute(jsonKeyIdentifier));
+      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge) + "_" + bTask.getId());
+      PropertyServiceData.setJsonKey(cutOutGraph.getVertex(bTask.getId()), PropertyServiceDependency.getJsonKey(edge));
     });
 
     // Create the enactment specification of the cut out graph
     final EnactmentSpecification resultEnactmentSpecification = new EnactmentSpecification(
         cutOutGraph,
         enactmentSpecification.getResourceGraph(),
-        mappingsCutOutGraph);
+        mappingsCutOutGraph,
+        UUID.randomUUID().toString());
 
     // Create new communication nodes for specification and configuration
-    addCommunicationNode(eGraph, "Constant/" + Utility.SPECIFICATION,
+    addCommunicationNode(eGraph, "Constant/" + Utility.SPECIFICATION + "_" + functionNodeId,
         prepareNodeConstantString(Utility.fromEnactmentSpecificationToString(resultEnactmentSpecification)),
-        eGraph.getTask(functionNodeId), Utility.SPECIFICATION);
-    addCommunicationNode(eGraph, "Constant/" + Utility.CONFIGURATION,
+        eGraph.getVertex(functionNodeId), Utility.SPECIFICATION);
+    addCommunicationNode(eGraph, "Constant/" + Utility.CONFIGURATION + "_" + functionNodeId,
         prepareNodeConstantString(Utility.DE_CONFIGURATION),
-        eGraph.getTask(functionNodeId), Utility.CONFIGURATION);
+        eGraph.getVertex(functionNodeId), Utility.CONFIGURATION);
 
     return resultEnactmentSpecification;
   }
@@ -121,32 +122,25 @@ public class Incision {
 
     // Create and insert the function node for the distributed engine
     final String functionNodeId = topCut.toString() + bottomCut.toString();
-    final Task functionNode = new Task(functionNodeId);
-    functionNode.setAttribute("TypeID", Utility.DE_TYPE_ID);
-    functionNode.setAttribute("UsageType", "User");
+    final Task functionNode = PropertyServiceFunctionUser.createUserTask(functionNodeId, Utility.DE_TYPE_ID);
+    PropertyServiceFunction.setUsageType(PropertyServiceFunction.UsageType.User, functionNode);
     eGraph.addVertex(functionNode);
 
     // Add the distributed engine resource
-    final Resource distributedEngineResource = new Resource(Utility.DE_AWS_US_EAST_1);
-    distributedEngineResource.setAttribute("Uri", Utility.DE_AWS_US_EAST_1);
+    final Resource distributedEngineResource = PropertyServiceResourceServerless.createServerlessResource(Utility.DE_AWS_US_EAST_1,  Utility.DE_AWS_US_EAST_1);
     final ResourceGraph rGraph = enactmentSpecification.getResourceGraph();
     rGraph.addVertex(distributedEngineResource);
     final Resource engineResource = rGraph.getVertex(Utility.ENGINE);
     if(engineResource != null) {
-      rGraph.addEdge(
-          new Link(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1),
-          new Pair<>(rGraph.getVertex(Utility.ENGINE), distributedEngineResource)
-      );
+      if(!rGraph.containsEdge(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1)){
+        rGraph.addEdge(new Link(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1),
+            rGraph.getVertex(Utility.ENGINE), distributedEngineResource,
+            EdgeType.DIRECTED);
+      }
     }
 
     // Add mapping for the distributed engine
-    final Mappings<Task, Resource> mappings = enactmentSpecification.getMappings();
-    final Mapping mapping = new Mapping<>(
-        functionNodeId + "--" + Utility.DE_AWS_US_EAST_1 + "--" + Utility.DE_AWS_US_EAST_1,
-        eGraph.getTask(functionNodeId), distributedEngineResource);
-    mapping.setAttribute("EnactmentMode", "Serverless");
-    mapping.setAttribute("ImplementationId", Utility.DE_AWS_US_EAST_1);
-    mappings.add(mapping);
+    enactmentSpecification.getMappings().addMapping(PropertyServiceMapping.createMapping(eGraph.getVertex(functionNodeId), distributedEngineResource, PropertyServiceMapping.EnactmentMode.Serverless, Utility.DE_AWS_US_EAST_1));
 
     // Substitute the edges before the bottom cut
     for (final Task bTask : bottomCut) {
@@ -177,15 +171,14 @@ public class Incision {
 
     // Create communication node
     final Communication communication = new Communication(communicationId);
-    communication.setAttribute("Content", content);
-    communication.setAttribute("DataAvailable", true);
-    communication.setAttribute("DataType", "String");
-    communication.setAttribute("NodeType", "Constant");
+    PropertyServiceData.setContent(communication, new JsonPrimitive(content));
+    PropertyServiceData.setDataType(communication, PropertyServiceData.DataType.String);
+    PropertyServiceData.setNodeType(communication, PropertyServiceData.NodeType.Constant);
 
     // Create dependency
     final Dependency dependency = new Dependency(communicationId + "--" + toNode);
-    dependency.setAttribute(jsonKeyIdentifier, jsonKey);
-    dependency.setAttribute("Type", "Data");
+    PropertyServiceDependency.setJsonKey(dependency, jsonKey);
+    PropertyServiceDependency.setType(dependency, PropertyServiceDependency.TypeDependency.Data);
 
     // Add dependency
     PropertyServiceDependency.addDataDependency(communication, toNode,

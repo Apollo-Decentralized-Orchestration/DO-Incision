@@ -4,17 +4,16 @@ import at.uibk.dps.ee.io.afcl.AfclReader;
 import at.uibk.dps.ee.io.resources.ResourceGraphProviderFile;
 import at.uibk.dps.ee.io.spec.SpecificationProviderFile;
 import at.uibk.dps.ee.model.graph.*;
+import at.uibk.dps.ee.model.persistance.EnactmentSpecTransformer;
 import net.sf.opendse.io.SpecificationReader;
 import net.sf.opendse.io.SpecificationWriter;
-import net.sf.opendse.model.Mappings;
-import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Specification;
-import net.sf.opendse.model.Task;
 import nu.xom.ParsingException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 /**
  * Class containing several utility functions and
@@ -93,11 +92,12 @@ public final class Utility {
         final nu.xom.Document doc = parser.build(specification, null);
         final nu.xom.Element eSpec = doc.getRootElement();
         final SpecificationReader reader = new SpecificationReader();
-        final Specification spec = reader.toSpecification(eSpec);
-        final EnactmentGraph eGraph = new EnactmentGraph(spec.getApplication());
-        final ResourceGraph rGraph = new ResourceGraph(spec.getArchitecture());
-        final Mappings<Task, Resource> mappings = spec.getMappings();
-        final EnactmentSpecification result = new EnactmentSpecification(eGraph, rGraph, mappings);
+        final Specification specOdse = reader.toSpecification(eSpec);
+        EnactmentSpecification spec = EnactmentSpecTransformer.toApollo(specOdse);
+        final EnactmentGraph eGraph = spec.getEnactmentGraph();
+        final ResourceGraph rGraph = spec.getResourceGraph();
+        final MappingsConcurrent mappings = spec.getMappings();
+        final EnactmentSpecification result = new EnactmentSpecification(eGraph, rGraph, mappings, UUID.randomUUID().toString());
         spec.getAttributeNames()
             .forEach(attrName -> result.setAttribute(attrName, spec.getAttribute(attrName)));
         return result;
@@ -111,9 +111,10 @@ public final class Utility {
      * @return string representation of the {@link EnactmentSpecification}.
      */
     public static String fromEnactmentSpecificationToString(final EnactmentSpecification enactmentSpecification) {
+        Specification specification = EnactmentSpecTransformer.toOdse(enactmentSpecification);
         final SpecificationWriter writer = new SpecificationWriter();
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        writer.write(enactmentSpecification, stream);
+        writer.write(specification, stream);
         return stream.toString(StandardCharsets.UTF_8);
     }
 
@@ -131,10 +132,11 @@ public final class Utility {
         final SpecificationProviderFile specProv =
             new SpecificationProviderFile(eGraphProv, rGraphProv, filePathTypeMappings);
 
-        final Specification spec = specProv.getSpecification();
+        final EnactmentSpecification spec = specProv.getSpecification();
+        Specification specification = EnactmentSpecTransformer.toOdse(spec);
         final SpecificationWriter writer = new SpecificationWriter();
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        writer.write(spec, stream);
+        writer.write(specification, stream);
         return stream.toString(StandardCharsets.UTF_8);
     }
 }
