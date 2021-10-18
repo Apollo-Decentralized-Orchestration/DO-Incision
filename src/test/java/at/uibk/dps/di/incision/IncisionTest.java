@@ -1,10 +1,9 @@
 package at.uibk.dps.di.incision;
 
 import at.uibk.dps.di.constants.EnactmentGraphs;
-import at.uibk.dps.ee.model.graph.EnactmentGraph;
-import at.uibk.dps.ee.model.graph.EnactmentSpecification;
-import at.uibk.dps.ee.model.graph.ResourceGraph;
-import net.sf.opendse.model.Mappings;
+import at.uibk.dps.ee.io.resources.ResourceGraphProviderFile;
+import at.uibk.dps.ee.io.spec.SpecificationProviderFile;
+import at.uibk.dps.ee.model.graph.*;
 import net.sf.opendse.model.Task;
 import nu.xom.ParsingException;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,54 +57,61 @@ class IncisionTest {
     void cutTestMediumSizedEnactmentGraph() throws IllegalArgumentException {
         Incision incision = new Incision();
 
-        EnactmentGraph full = EnactmentGraphs.getMediumSizedEnactmentGraph();
+        EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph();
 
         // Specify the top and bottom edges to cut
         Set<Task> topCut = new HashSet<>();
         Set<Task> bottomCut = new HashSet<>();
-        topCut.add(full.getVertex("commNode2"));
-        topCut.add(full.getVertex("commNode3"));
-        bottomCut.add(full.getVertex("commNode6"));
-        bottomCut.add(full.getVertex("commNode7"));
+        topCut.add(eGraph.getVertex("commNode2"));
+        topCut.add(eGraph.getVertex("commNode3"));
+        bottomCut.add(eGraph.getVertex("commNode6"));
+        bottomCut.add(eGraph.getVertex("commNode7"));
 
         // Check if edges are present before the cut
-        assertNotNull(full.getEdge("taskNode3--commNode5"));
-        assertNotNull(full.getEdge("taskNode2--commNode4"));
-        assertNotNull(full.getEdge("commNode5--taskNode5"));
-        assertNotNull(full.getEdge("commNode4--taskNode4"));
+        assertNotNull(eGraph.getEdge("taskNode3--commNode5"));
+        assertNotNull(eGraph.getEdge("taskNode2--commNode4"));
+        assertNotNull(eGraph.getEdge("commNode5--taskNode5"));
+        assertNotNull(eGraph.getEdge("commNode4--taskNode4"));
 
         // Check if tasks are present before the cut
-        assertNotNull(full.getVertex("taskNode2"));
-        assertNotNull(full.getVertex("taskNode3"));
-        assertNotNull(full.getVertex("commNode4"));
-        assertNotNull(full.getVertex("commNode5"));
-        assertNotNull(full.getVertex("taskNode4"));
-        assertNotNull(full.getVertex("taskNode5"));
+        assertNotNull(eGraph.getVertex("taskNode2"));
+        assertNotNull(eGraph.getVertex("taskNode3"));
+        assertNotNull(eGraph.getVertex("commNode4"));
+        assertNotNull(eGraph.getVertex("commNode5"));
+        assertNotNull(eGraph.getVertex("taskNode4"));
+        assertNotNull(eGraph.getVertex("taskNode5"));
 
         // Check edge connection before the cut
-        assertEquals(full.getVertex("taskNode3"), full.getDest(full.getEdge("commNode3--taskNode3")));
-        assertEquals(full.getVertex("taskNode2"), full.getDest(full.getEdge("commNode2--taskNode2")));
-        assertEquals(full.getVertex("taskNode5"), full.getSource(full.getEdge("taskNode5--commNode7")));
-        assertEquals(full.getVertex("taskNode4"), full.getSource(full.getEdge("taskNode4--commNode6")));
+        assertEquals(eGraph.getVertex("taskNode3"), eGraph.getDest(eGraph.getEdge("commNode3--taskNode3")));
+        assertEquals(eGraph.getVertex("taskNode2"), eGraph.getDest(eGraph.getEdge("commNode2--taskNode2")));
+        assertEquals(eGraph.getVertex("taskNode5"), eGraph.getSource(eGraph.getEdge("taskNode5--commNode7")));
+        assertEquals(eGraph.getVertex("taskNode4"), eGraph.getSource(eGraph.getEdge("taskNode4--commNode6")));
 
         // Cut the workflow
-        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(full, new ResourceGraph(), new Mappings<>());
-        EnactmentSpecification resultEnactmentSpecification = incision.cut(enactmentSpecification, topCut, bottomCut);
+        final EnactmentGraphProvider eGraphProvider = () -> eGraph;
+        final ResourceGraphProvider rGraphProv = new ResourceGraphProviderFile(Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
+        final SpecificationProviderFile specProv = new SpecificationProviderFile(eGraphProvider, rGraphProv, Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
+        final EnactmentSpecification spec = specProv.getSpecification();
+        /*MappingsConcurrent mappings = spec.getMappings();
+        mappings.forEach((mapping) -> {
+            mapping.setAttribute("Duration", 2000);
+        });*/
+        EnactmentSpecification resultEnactmentSpecification = incision.cut(spec, topCut, bottomCut);
         EnactmentGraph result = resultEnactmentSpecification.getEnactmentGraph();
 
         // Check if edges are deleted after the cut
-        assertNull(full.getEdge("taskNode3--commNode5"));
-        assertNull(full.getEdge("taskNode2--commNode4"));
-        assertNull(full.getEdge("commNode5--taskNode5"));
-        assertNull(full.getEdge("commNode4--taskNode4"));
+        assertThrows(IllegalArgumentException.class, () -> eGraph.getEdge("taskNode3--commNode5"));
+        assertThrows(IllegalArgumentException.class, () -> eGraph.getEdge("taskNode2--commNode4"));
+        assertThrows(IllegalArgumentException.class, () -> eGraph.getEdge("commNode5--taskNode5"));
+        assertThrows(IllegalArgumentException.class, () -> eGraph.getEdge("commNode4--taskNode4"));
 
         // Check if tasks are deleted after the cut
-        assertNull(full.getVertex("taskNode2"));
-        assertNull(full.getVertex("taskNode3"));
-        assertNull(full.getVertex("commNode4"));
-        assertNull(full.getVertex("commNode5"));
-        assertNull(full.getVertex("taskNode4"));
-        assertNull(full.getVertex("taskNode5"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("taskNode2"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("taskNode3"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("commNode4"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("commNode5"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("taskNode4"));
+        assertThrows(IllegalStateException.class, () -> eGraph.getVertex("taskNode5"));
 
         // Check if tasks are in resulting cut out graph
         assertNotNull(result.getVertex("commNode2"));
@@ -135,17 +142,17 @@ class IncisionTest {
         assertTrue((boolean) result.getVertex("commNode2").getAttribute("Root"));
 
         // Check if resulting cut out graph does not contain the nodes
-        assertNull(result.getVertex("taskNode1"));
-        assertNull(result.getVertex("commNode1"));
-        assertNull(result.getVertex("commNode8"));
-        assertNull(result.getVertex("taskNode6"));
+        assertThrows(IllegalStateException.class, () -> result.getVertex("taskNode1"));
+        assertThrows(IllegalStateException.class, () -> result.getVertex("commNode1"));
+        assertThrows(IllegalStateException.class, () -> result.getVertex("commNode8"));
+        assertThrows(IllegalStateException.class, () -> result.getVertex("taskNode6"));
 
         // check if distributed engine node exists and is connected
-        assertNotNull(full.getVertex("[commNode3, commNode2][commNode7, commNode6]"));
-        assertNotNull(full.getEdge("[commNode3, commNode2][commNode7, commNode6]--commNode6"));
-        assertNotNull(full.getEdge("[commNode3, commNode2][commNode7, commNode6]--commNode7"));
-        assertNotNull(full.getEdge("commNode3--[commNode3, commNode2][commNode7, commNode6]"));
-        assertNotNull(full.getEdge("commNode2--[commNode3, commNode2][commNode7, commNode6]"));
+        assertNotNull(eGraph.getVertex("[commNode3, commNode2][commNode7, commNode6]"));
+        assertNotNull(eGraph.getEdge("[commNode3, commNode2][commNode7, commNode6]--commNode6"));
+        assertNotNull(eGraph.getEdge("[commNode3, commNode2][commNode7, commNode6]--commNode7"));
+        assertNotNull(eGraph.getEdge("commNode3--[commNode3, commNode2][commNode7, commNode6]"));
+        assertNotNull(eGraph.getEdge("commNode2--[commNode3, commNode2][commNode7, commNode6]"));
     }
 
     /**
@@ -232,7 +239,7 @@ class IncisionTest {
 
         assertFalse(incision.isCutValid(full, topCut, bottomCut));
 
-        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(full, new ResourceGraph(), new Mappings<>());
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(full, new ResourceGraph(), new MappingsConcurrent(), UUID.randomUUID().toString());
         assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 
@@ -266,7 +273,7 @@ class IncisionTest {
 
         assertFalse(incision.isCutValid(eGraph, topCut, bottomCut));
 
-        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new Mappings<>());
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new MappingsConcurrent(), UUID.randomUUID().toString());
         assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 
@@ -296,7 +303,7 @@ class IncisionTest {
         bottomCut.add(eGraph.getVertex("commNode4"));
         bottomCut.add(eGraph.getVertex("commNode5"));
 
-        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new Mappings<>());
+        EnactmentSpecification enactmentSpecification = new EnactmentSpecification(eGraph, new ResourceGraph(), new MappingsConcurrent(), UUID.randomUUID().toString());
         assertThrows(IllegalArgumentException.class, () -> incision.cut(enactmentSpecification, topCut, bottomCut));
     }
 
@@ -417,10 +424,10 @@ class IncisionTest {
 
         EnactmentGraph cutOutGraph = incision.cut(enactmentSpecification, topCut, bottomCut).getEnactmentGraph();
 
-        assertEquals("input_noop1/result", cutOutGraph.getTask("noop1/result").getAttribute("JsonKey"));
-        assertEquals("input_noop2/result", cutOutGraph.getTask("noop2/result").getAttribute("JsonKey"));
-        assertEquals("result_noop3/result", cutOutGraph.getTask("noop3/result").getAttribute("JsonKey"));
-        assertEquals("result_noop4/result", cutOutGraph.getTask("noop4/result").getAttribute("JsonKey"));
+        assertEquals("input_noop1/result", cutOutGraph.getVertex("noop1/result").getAttribute("JsonKey"));
+        assertEquals("input_noop2/result", cutOutGraph.getVertex("noop2/result").getAttribute("JsonKey"));
+        assertEquals("result_noop3/result", cutOutGraph.getVertex("noop3/result").getAttribute("JsonKey"));
+        assertEquals("result_noop4/result", cutOutGraph.getVertex("noop4/result").getAttribute("JsonKey"));
 
         assertEquals("input", cutOutGraph.getEdge("noop1/result--noop3").getAttribute("JsonKey"));
         assertEquals("input", cutOutGraph.getEdge("noop2/result--noop4").getAttribute("JsonKey"));
