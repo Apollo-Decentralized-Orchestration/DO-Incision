@@ -29,7 +29,7 @@ dependencies {
         implementation project (':EE-Model')
     }else {
         // dependencies to other parts of the Apollo Core EE
-        implementation 'com.github.Apollo-Core:EE-Model:propServiceAdaptation-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Model:-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-Deploy:-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-IO:main-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-Core:master-SNAPSHOT'
@@ -38,7 +38,6 @@ dependencies {
         implementation 'com.github.Apollo-Core:EE-Control:master-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-Visualization:master-SNAPSHOT'
         implementation 'com.github.Apollo-Core:SC-Core:main-SNAPSHOT'
-        implementation 'com.github.Apollo-core:EE-Docker:master-SNAPSHOT'
     }
 
     // dependency to opendse
