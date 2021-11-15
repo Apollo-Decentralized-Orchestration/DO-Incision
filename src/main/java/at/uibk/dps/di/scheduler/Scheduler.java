@@ -1,6 +1,7 @@
 package at.uibk.dps.di.scheduler;
 
 import at.uibk.dps.di.incision.Utility;
+import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.ee.model.graph.*;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceMapping;
@@ -145,7 +146,7 @@ public class Scheduler {
 
                     // Get the duration of the predecessor task node
                     double duration = predecessorMappings.stream()
-                        .mapToDouble(PropertyServiceMapping::getDuration).sum() / predecessorMappings.size();
+                        .mapToDouble(PropertyServiceScheduler::getDuration).sum() / predecessorMappings.size();
 
                     // Represents the rank of the predecessor task node
                     double rank = duration + currentTaskRank;
@@ -308,8 +309,8 @@ public class Scheduler {
     public Map<String, at.uibk.dps.di.scheduler.Resource> getResources(EnactmentSpecification specification) {
         Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new HashMap<>();
         for(net.sf.opendse.model.Resource r: specification.getResourceGraph().getVertices()){
-            mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceResource.getInstances(r),
-                PropertyServiceResource.getLatencyLocal(r), PropertyServiceResource.getLatencyGlobal(r)));
+            mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
+                PropertyServiceScheduler.getLatencyLocal(r), PropertyServiceScheduler.getLatencyGlobal(r)));
         }
         return mapResource;
     }
@@ -326,9 +327,9 @@ public class Scheduler {
 
         List<Resource> resources = new ArrayList<>();
         for(net.sf.opendse.model.Resource r: rVertices){
-            resources.add(new Resource(r.getId(), PropertyServiceResource.getInstances(r),
-                PropertyServiceResource.getLatencyLocal(r),
-                PropertyServiceResource.getLatencyGlobal(r))
+            resources.add(new Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
+                PropertyServiceScheduler.getLatencyLocal(r),
+                PropertyServiceScheduler.getLatencyGlobal(r))
             );
         }
 
@@ -394,7 +395,7 @@ public class Scheduler {
                 double duration = -1.0;
                 for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
                     if(mR.getTarget().getId().contains(resource.getType())) {
-                        duration = PropertyServiceMapping.getDuration(mR);
+                        duration = PropertyServiceScheduler.getDuration(mR);
                     }
                 }
                 if(duration == -1.0){

@@ -29,7 +29,7 @@ dependencies {
         implementation project (':EE-Model')
     }else {
         // dependencies to other parts of the Apollo Core EE
-        implementation 'com.github.Apollo-Core:EE-Model:-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Model:v1.0.0'
         implementation 'com.github.Apollo-Core:EE-Deploy:-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-IO:main-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-Core:master-SNAPSHOT'
