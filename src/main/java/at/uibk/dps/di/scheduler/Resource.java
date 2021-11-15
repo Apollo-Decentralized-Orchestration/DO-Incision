@@ -128,7 +128,7 @@ public class Resource {
     }
 
     public Double maxDuration(){
-        return Collections.max(available);
+        return available.isEmpty() ? 0.0 : Collections.max(available);
     }
 
     /**
