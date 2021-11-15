@@ -1,5 +1,6 @@
 package at.uibk.dps.di.scheduler;
 
+import at.uibk.dps.di.incision.Utility;
 import at.uibk.dps.ee.model.graph.*;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceMapping;
@@ -21,7 +22,7 @@ public class Scheduler {
     /**
      * Keeps track of the calculated ranks.
      */
-    private Map<Task, Double> mapRank;
+    public Map<Task, Double> mapRank;
 
     /**
      * Keeps track of the calculated finish times.
@@ -65,7 +66,7 @@ public class Scheduler {
      *
      * @return list of predecessor task nodes.
      */
-    private Collection<Task> getPredecessorTaskNodes(EnactmentGraph eGraph, Task node) {
+    public Collection<Task> getPredecessorTaskNodes(EnactmentGraph eGraph, Task node) {
         if(node instanceof Communication) {
 
             // The predecessor of a communication node is a task node
@@ -168,9 +169,27 @@ public class Scheduler {
             }
         }
 
+
         return rankedTasks;
     }
 
+    public ArrayList<Task> rankAndSort(EnactmentSpecification specification) {
+
+        // Rank tasks
+        ArrayList<Task> rankedTasks = rank(specification);
+
+        // Sort ranked tasks
+        rankedTasks.sort((o1, o2) -> {
+            double rank1 = mapRank.get(o1);
+            double rank2 = mapRank.get(o2);
+            if (rank1 == rank2) {
+                return 0;
+            }
+            return rank1 < rank2 ? 1 : -1;
+        });
+
+        return rankedTasks;
+    }
 
     /**
      * Extract the cuts from the {@link EnactmentGraph} knowing where which task should run.
@@ -197,7 +216,7 @@ public class Scheduler {
             Resource currentResource = mapResource.get(current);
 
             // Check if it is the local resource
-            if (!currentResource.getType().equals("Enactment Engine (Local Machine)")) { // todo
+            if (!currentResource.getType().equals(Utility.ENGINE)) {
                 Set<Task> topCut = new HashSet<>();
                 Set<Task> bottomCut = new HashSet<>();
 
@@ -260,6 +279,39 @@ public class Scheduler {
             }
         }
         return proposedCuts;
+    }
+
+    /**
+     * Get the order of the tasks on a resource
+     * @param specification
+     * @return
+     */
+    public List<Task> getTaskOrderOnResource(EnactmentSpecification specification, Resource resource) {
+
+        ArrayList<Task> rankedTasks = rank(specification);
+
+        rankedTasks.sort((o1, o2) -> {
+            double rank1 = mapRank.get(o1);
+            double rank2 = mapRank.get(o2);
+            if (rank1 == rank2) {
+                return 0;
+            }
+            return rank1 < rank2 ? 1 : -1;
+        });
+
+        return rankedTasks
+            .stream()
+            .filter(task -> task instanceof Communication && PropertyServiceData.isLeaf(task))
+            .collect(Collectors.toList());
+    }
+
+    public Map<String, at.uibk.dps.di.scheduler.Resource> getResources(EnactmentSpecification specification) {
+        Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new HashMap<>();
+        for(net.sf.opendse.model.Resource r: specification.getResourceGraph().getVertices()){
+            mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceResource.getInstances(r),
+                PropertyServiceResource.getLatencyLocal(r), PropertyServiceResource.getLatencyGlobal(r)));
+        }
+        return mapResource;
     }
 
     /**

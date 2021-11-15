@@ -70,33 +70,35 @@ public class Resource {
      * @param taskDuration the duration of the node.
      * @param prevOnSameResource true if the previous task was on the same resource.
      *
+     * @return the finish time of the task.
      */
-    public void setResource(double possibleStart, double taskDuration, boolean prevOnSameResource) {
+    public Double setResource(double possibleStart, double taskDuration, boolean prevOnSameResource) {
 
         // Iterate over all active instances
         for(int i = 0; i < available.size(); i++) {
 
             // Check if resource is available at the optimal start time
             if(available.get(i) <= possibleStart) {
-                available.set(i, prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal);
-                return;
+                Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+                available.set(i, finishTime);
+                return finishTime;
             }
         }
 
         // If we have more instances then currently set we can assign a fresh instance
         if(totalNumInstances > available.size()){
-            available.add(prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal);
-            return;
+            Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+            available.add(finishTime);
+            return finishTime;
         }
 
         // Calculate the minimal available time of all resource instances
         double minimalTime = Collections.min(available);
 
         // Set the minimal instance on the resource
-        available.set(
-            available.indexOf(minimalTime),
-            prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal
-        );
+        Double finishTime = prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal;
+        available.set(available.indexOf(minimalTime), finishTime);
+        return finishTime;
     }
 
     /**
@@ -123,6 +125,10 @@ public class Resource {
 
         // Return the minimal time on the resources
         return prevOnSameResource ? Collections.min(available) + latencyLocal : Collections.min(available) + latencyGlobal;
+    }
+
+    public Double maxDuration(){
+        return Collections.max(available);
     }
 
     /**
