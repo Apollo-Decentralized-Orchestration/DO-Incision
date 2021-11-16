@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PropertyServiceSchedulerTest {
+
     @Test
     public void testMappingDuration() {
         Mapping<Task, Resource> mapping = PropertyServiceMapping.createMapping(new Task("task"),

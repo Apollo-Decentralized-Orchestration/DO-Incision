@@ -131,12 +131,10 @@ public class Incision {
     final ResourceGraph rGraph = enactmentSpecification.getResourceGraph();
     rGraph.addVertex(distributedEngineResource);
     final Resource engineResource = rGraph.getVertex(Utility.ENGINE);
-    if(engineResource != null) {
-      if(!rGraph.containsEdge(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1)){
+    if(engineResource != null && !rGraph.containsEdge(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1)) {
         rGraph.addEdge(new Link(Utility.ENGINE + "--" + Utility.DE_AWS_US_EAST_1),
             rGraph.getVertex(Utility.ENGINE), distributedEngineResource,
             EdgeType.DIRECTED);
-      }
     }
 
     // Add mapping for the distributed engine

@@ -4,13 +4,12 @@ import at.uibk.dps.di.incision.Utility;
 import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.ee.model.graph.*;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
-import at.uibk.dps.ee.model.properties.PropertyServiceMapping;
-import at.uibk.dps.ee.model.properties.PropertyServiceResource;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -23,17 +22,17 @@ public class Scheduler {
     /**
      * Keeps track of the calculated ranks.
      */
-    public Map<Task, Double> mapRank;
+    public final Map<Task, Double> mapRank;
 
     /**
      * Keeps track of the calculated finish times.
      */
-    private Map<Task, Double> mapFinishTime;
+    private final Map<Task, Double> mapFinishTime;
 
     /**
      * Keeps track of the set resources.
      */
-    private Map<Task, Resource> mapResource;
+    private final Map<Task, Resource> mapResource;
 
     /**
      * Default constructor
@@ -139,7 +138,7 @@ public class Scheduler {
                     Set<Mapping<Task, net.sf.opendse.model.Resource>> predecessorMappings = mappings.getMappings(predecessor);
 
                     // Check if duration attribute is specified
-                    if (predecessorMappings.size() == 0) {
+                    if (predecessorMappings.isEmpty()) {
                         throw new IllegalArgumentException(
                             "Node " + predecessor.getId() + " has no function duration");
                     }
@@ -307,7 +306,7 @@ public class Scheduler {
     }
 
     public Map<String, at.uibk.dps.di.scheduler.Resource> getResources(EnactmentSpecification specification) {
-        Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new HashMap<>();
+        Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new ConcurrentHashMap<>();
         for(net.sf.opendse.model.Resource r: specification.getResourceGraph().getVertices()){
             mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
                 PropertyServiceScheduler.getLatencyLocal(r), PropertyServiceScheduler.getLatencyGlobal(r)));

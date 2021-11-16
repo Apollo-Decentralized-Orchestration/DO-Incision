@@ -2,6 +2,7 @@ package at.uibk.dps.di.scheduler;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Class representing the available resources.
@@ -23,7 +24,7 @@ public class Resource {
     /**
      * The time when the resources are available.
      */
-    private ArrayList<Double> available;
+    private List<Double> available;
 
     /**
      * The latency from a resource of the same type.
@@ -41,7 +42,7 @@ public class Resource {
      * @param type the type of the resource.
      * @param totalNumInstances total number of available instances.
      */
-    public Resource(String type, int totalNumInstances) {
+    public Resource(final String type, final int totalNumInstances) {
         this.type = type;
         this.totalNumInstances = totalNumInstances;
         latencyGlobal = 0.0;
@@ -57,7 +58,7 @@ public class Resource {
      * @param latencyLocal  the latency from a resource of the same type.
      * @param latencyGlobal the latency from a resource of a different type.
      */
-    public Resource(String type, int totalNumInstances, double latencyLocal, double latencyGlobal) {
+    public Resource(final String type, final int totalNumInstances, final double latencyLocal, final double latencyGlobal) {
         this(type, totalNumInstances);
         this.latencyLocal = latencyLocal;
         this.latencyGlobal = latencyGlobal;
@@ -72,14 +73,14 @@ public class Resource {
      *
      * @return the finish time of the task.
      */
-    public Double setResource(double possibleStart, double taskDuration, boolean prevOnSameResource) {
+    public Double setResource(final double possibleStart, final double taskDuration, final boolean prevOnSameResource) {
 
         // Iterate over all active instances
         for(int i = 0; i < available.size(); i++) {
 
             // Check if resource is available at the optimal start time
             if(available.get(i) <= possibleStart) {
-                Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+                final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
                 available.set(i, finishTime);
                 return finishTime;
             }
@@ -87,16 +88,16 @@ public class Resource {
 
         // If we have more instances then currently set we can assign a fresh instance
         if(totalNumInstances > available.size()){
-            Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+            final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
             available.add(finishTime);
             return finishTime;
         }
 
         // Calculate the minimal available time of all resource instances
-        double minimalTime = Collections.min(available);
+        final double minimalTime = Collections.min(available);
 
         // Set the minimal instance on the resource
-        Double finishTime = prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal;
+        final Double finishTime = prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal;
         available.set(available.indexOf(minimalTime), finishTime);
         return finishTime;
     }
@@ -109,15 +110,17 @@ public class Resource {
      *
      *  @return the earliest start time possible for the resource.
      */
-    public Double earliestStartTime(double possibleStart, boolean prevOnSameResource){
+    public Double earliestStartTime(final double possibleStart, final boolean prevOnSameResource){
 
-        // If we have instances that are currently not set we can start at the best possible time
+        // If we have instances that are currently not set
+        // we can start at the best possible time
         if(totalNumInstances > available.size()){
             return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal;
         }
 
-        // Iterate over available resources and check if node could start at best possible time
-        for(Double a: available){
+        // Iterate over available resources and check if
+        // node could start at best possible time
+        for(final Double a: available){
             if(a <= possibleStart) {
                 return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal;
             }
@@ -127,6 +130,11 @@ public class Resource {
         return prevOnSameResource ? Collections.min(available) + latencyLocal : Collections.min(available) + latencyGlobal;
     }
 
+    /**
+     * Get the maximum duration of a resource.
+     *
+     * @return the maximum duration of the resource.
+     */
     public Double maxDuration(){
         return available.isEmpty() ? 0.0 : Collections.max(available);
     }
@@ -139,7 +147,7 @@ public class Resource {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
@@ -147,15 +155,13 @@ public class Resource {
         return totalNumInstances;
     }
 
-    public void setTotalNumInstances(int totalNumInstances) {
-        this.totalNumInstances = totalNumInstances;
-    }
+    public void setTotalNumInstances(final int totalNumInstances) { this.totalNumInstances = totalNumInstances; }
 
     public double getLatencyLocal() {
         return latencyLocal;
     }
 
-    public void setLatencyLocal(double latencyLocal) {
+    public void setLatencyLocal(final double latencyLocal) {
         this.latencyLocal = latencyLocal;
     }
 
@@ -163,7 +169,7 @@ public class Resource {
         return latencyGlobal;
     }
 
-    public void setLatencyGlobal(double latencyGlobal) {
+    public void setLatencyGlobal(final double latencyGlobal) {
         this.latencyGlobal = latencyGlobal;
     }
 }

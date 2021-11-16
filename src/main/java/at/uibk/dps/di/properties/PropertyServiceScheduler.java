@@ -11,7 +11,7 @@ import net.sf.opendse.model.properties.AbstractPropertyService;
  *
  * @author Stefan Pedratscher
  */
-public class PropertyServiceScheduler extends AbstractPropertyService {
+public final class PropertyServiceScheduler extends AbstractPropertyService {
 
   private static final String propNameDuration = Property.Duration.name();
   private static final String propNameInstances = Property.Instances.name();
