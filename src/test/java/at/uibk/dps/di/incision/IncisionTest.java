@@ -92,10 +92,6 @@ class IncisionTest {
         final ResourceGraphProvider rGraphProv = new ResourceGraphProviderFile(Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
         final SpecificationProviderFile specProv = new SpecificationProviderFile(eGraphProvider, rGraphProv, Objects.requireNonNull(getClass().getClassLoader().getResource("mapping.json")).getPath());
         final EnactmentSpecification spec = specProv.getSpecification();
-        /*MappingsConcurrent mappings = spec.getMappings();
-        mappings.forEach((mapping) -> {
-            mapping.setAttribute("Duration", 2000);
-        });*/
         EnactmentSpecification resultEnactmentSpecification = incision.cut(spec, topCut, bottomCut);
         EnactmentGraph result = resultEnactmentSpecification.getEnactmentGraph();
 
