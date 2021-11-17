@@ -80,7 +80,7 @@ public class Resource {
 
             // Check if resource is available at the optimal start time
             if(available.get(i) <= possibleStart) {
-                final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+                final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal + latencyLocal;
                 available.set(i, finishTime);
                 return finishTime;
             }
@@ -88,7 +88,7 @@ public class Resource {
 
         // If we have more instances then currently set we can assign a fresh instance
         if(totalNumInstances > available.size()){
-            final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal;
+            final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal + latencyLocal;
             available.add(finishTime);
             return finishTime;
         }
@@ -97,7 +97,7 @@ public class Resource {
         final double minimalTime = Collections.min(available);
 
         // Set the minimal instance on the resource
-        final Double finishTime = prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal;
+        final Double finishTime = prevOnSameResource ? minimalTime + taskDuration + latencyLocal : minimalTime + taskDuration + latencyGlobal + latencyLocal;
         available.set(available.indexOf(minimalTime), finishTime);
         return finishTime;
     }
@@ -115,19 +115,19 @@ public class Resource {
         // If we have instances that are currently not set
         // we can start at the best possible time
         if(totalNumInstances > available.size()){
-            return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal;
+            return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal + latencyLocal;
         }
 
         // Iterate over available resources and check if
         // node could start at best possible time
         for(final Double a: available){
             if(a <= possibleStart) {
-                return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal;
+                return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal + latencyLocal;
             }
         }
 
         // Return the minimal time on the resources
-        return prevOnSameResource ? Collections.min(available) + latencyLocal : Collections.min(available) + latencyGlobal;
+        return prevOnSameResource ? Collections.min(available) + latencyLocal : Collections.min(available) + latencyGlobal + latencyLocal;
     }
 
     /**

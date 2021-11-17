@@ -11,11 +11,11 @@ public class ResourceTest {
         Resource resource = new Resource("type", 1, 100, 400);
 
         assertEquals(100.0, resource.earliestStartTime(0, true));
-        assertEquals(400.0, resource.earliestStartTime(0, false));
+        assertEquals(500.0, resource.earliestStartTime(0, false));
 
         assertEquals(1100.0, resource.setResource(0, 1000.0, true));
 
         assertEquals(1200.0, resource.earliestStartTime(0, true));
-        assertEquals(1500.0, resource.earliestStartTime(0, false));
+        assertEquals(1600.0, resource.earliestStartTime(0, false));
     }
 }
