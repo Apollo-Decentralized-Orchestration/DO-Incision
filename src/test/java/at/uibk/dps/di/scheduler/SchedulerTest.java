@@ -45,7 +45,7 @@ public class SchedulerTest {
         Resource local = specification.getResourceGraph().getVertex(localResourceName);
         PropertyServiceScheduler.setLatencyLocal(local, 0.0);
         PropertyServiceScheduler.setLatencyGlobal(local, 0.0);
-        PropertyServiceScheduler.setInstances(local, 2);
+        PropertyServiceScheduler.setInstances(local, 1);
         Resource noop = specification.getResourceGraph().getVertex(cloudResourceName);
         PropertyServiceScheduler.setLatencyLocal(noop, 200.0);
         PropertyServiceScheduler.setLatencyGlobal(noop, 500.0);

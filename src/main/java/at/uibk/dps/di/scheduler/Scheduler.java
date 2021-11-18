@@ -9,7 +9,6 @@ import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -103,6 +102,54 @@ public class Scheduler {
     }
 
     /**
+     * Calculate the rank of a given task.
+     *
+     * @param currentTaskRank the rank of the current task.
+     * @param predecessor the predecessor of the current task.
+     * @param mappings the task mappings.
+     * @param rankedTasks the ranked tasks.
+     *
+     * @return the rank of the current task.
+     */
+    private double calcRank(double currentTaskRank, Task predecessor, MappingsConcurrent mappings,
+        ArrayList<Task> rankedTasks){
+
+        // Check if predecessor node is a task node
+        if (!(predecessor instanceof Communication)) {
+
+            Set<Mapping<Task, net.sf.opendse.model.Resource>> predecessorMappings = mappings.getMappings(predecessor);
+
+            // Check if duration attribute is specified
+            if (predecessorMappings.isEmpty()) {
+                throw new IllegalArgumentException(
+                    "Node " + predecessor.getId() + " has no function duration");
+            }
+
+            // Get the duration of the predecessor task node
+            double duration = predecessorMappings.stream()
+                .mapToDouble(PropertyServiceScheduler::getDuration).sum() / predecessorMappings.size();
+
+            // Represents the rank of the predecessor task node
+            double rank = duration + currentTaskRank;
+
+            // If predecessor does not contain rank set it, otherwise select the bigger rank
+            if (!mapRank.containsKey(predecessor) || (mapRank.containsKey(predecessor) && rank > mapRank.get(predecessor))) {
+                mapRank.put(predecessor, rank);
+            }
+
+            // Add task node to list of ranked task nodes
+            if (!rankedTasks.contains(predecessor)) {
+                rankedTasks.add(predecessor);
+            }
+
+            // Remember rank of the task
+            currentTaskRank = mapRank.get(predecessor);
+        }
+
+        return currentTaskRank;
+    }
+
+    /**
      * Rank the tasks based on upward rank.
      *
      * @param specification containing the tasks to rank.
@@ -130,39 +177,8 @@ public class Scheduler {
 
             // Iterate over all predecessor nodes
             for(Task predecessor: predecessorNodes) {
-                double currentTaskRank = current.getValue();
 
-                // Check if predecessor node is a task node
-                if (!(predecessor instanceof Communication)) {
-
-                    Set<Mapping<Task, net.sf.opendse.model.Resource>> predecessorMappings = mappings.getMappings(predecessor);
-
-                    // Check if duration attribute is specified
-                    if (predecessorMappings.isEmpty()) {
-                        throw new IllegalArgumentException(
-                            "Node " + predecessor.getId() + " has no function duration");
-                    }
-
-                    // Get the duration of the predecessor task node
-                    double duration = predecessorMappings.stream()
-                        .mapToDouble(PropertyServiceScheduler::getDuration).sum() / predecessorMappings.size();
-
-                    // Represents the rank of the predecessor task node
-                    double rank = duration + currentTaskRank;
-
-                    // If predecessor does not contain rank set it, otherwise select the bigger rank
-                    if (!mapRank.containsKey(predecessor) || (mapRank.containsKey(predecessor) && rank > mapRank.get(predecessor))) {
-                        mapRank.put(predecessor, rank);
-                    }
-
-                    // Add task node to list of ranked task nodes
-                    if (!rankedTasks.contains(predecessor)) {
-                        rankedTasks.add(predecessor);
-                    }
-
-                    // Remember rank of the task
-                    currentTaskRank = mapRank.get(predecessor);
-                }
+                double currentTaskRank = calcRank(current.getValue(), predecessor, mappings, rankedTasks);
 
                 // Add predecessor and its rank to the stack
                 nodeStack.add(new AbstractMap.SimpleEntry<>(predecessor, currentTaskRank));
@@ -189,6 +205,38 @@ public class Scheduler {
         });
 
         return rankedTasks;
+    }
+
+    public Task fixCut(Stack<Task> stack, Set<Task> cut, EnactmentGraph eGraph, Resource currentResource,
+        Task prev, Stack<Task> taskStack, boolean getPredecessor){
+
+        // While there are predecessors check if they are on the same resource
+        while (!stack.isEmpty()) {
+            Task task = stack.pop();
+
+            // Check if on the same resource
+            if (mapResource.get(task).getType().equals(currentResource.getType())) {
+
+                // Get other predecessors to check if they are on same resource
+                if(getPredecessor){
+                    stack.addAll(getPredecessorTaskNodes(eGraph, task));
+                } else {
+                    stack.addAll(getSuccessorTaskNodes(eGraph, task));
+                }
+
+                // Remove predecessor from nodes to check since it is already checked
+                taskStack.remove(task);
+
+                // Remember previous node
+                prev = task;
+            } else {
+
+                // Fix top cut
+                cut.addAll(eGraph.getPredecessors(prev));
+            }
+        }
+
+        return prev;
     }
 
     /**
@@ -225,6 +273,9 @@ public class Scheduler {
                 stackPredecessor.addAll(getPredecessorTaskNodes(eGraph, current));
                 Task prev = current;
 
+                // Fix the cut
+//                prev = fixCut(stackPredecessor, topCut, eGraph, currentResource, prev, taskStack, true);
+
                 // While there are predecessors check if they are on the same resource
                 while (!stackPredecessor.isEmpty()) {
                     Task pre = stackPredecessor.pop();
@@ -253,6 +304,8 @@ public class Scheduler {
                 stackSuccessors.addAll(getSuccessorTaskNodes(eGraph, current));
                 prev = current;
 
+//                prev = fixCut(stackSuccessors, bottomCut, eGraph, currentResource, prev, taskStack, false);
+
                 // While there are successors check if they are on the same resource
                 while (!stackSuccessors.isEmpty()) {
                     Task suc = stackSuccessors.pop();
@@ -279,39 +332,6 @@ public class Scheduler {
             }
         }
         return proposedCuts;
-    }
-
-    /**
-     * Get the order of the tasks on a resource
-     * @param specification
-     * @return
-     */
-    public List<Task> getTaskOrderOnResource(EnactmentSpecification specification, Resource resource) {
-
-        ArrayList<Task> rankedTasks = rank(specification);
-
-        rankedTasks.sort((o1, o2) -> {
-            double rank1 = mapRank.get(o1);
-            double rank2 = mapRank.get(o2);
-            if (rank1 == rank2) {
-                return 0;
-            }
-            return rank1 < rank2 ? 1 : -1;
-        });
-
-        return rankedTasks
-            .stream()
-            .filter(task -> task instanceof Communication && PropertyServiceData.isLeaf(task))
-            .collect(Collectors.toList());
-    }
-
-    public Map<String, at.uibk.dps.di.scheduler.Resource> getResources(EnactmentSpecification specification) {
-        Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new ConcurrentHashMap<>();
-        for(net.sf.opendse.model.Resource r: specification.getResourceGraph().getVertices()){
-            mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
-                PropertyServiceScheduler.getLatencyLocal(r), PropertyServiceScheduler.getLatencyGlobal(r)));
-        }
-        return mapResource;
     }
 
     /**
