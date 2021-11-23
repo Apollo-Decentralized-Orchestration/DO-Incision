@@ -3,6 +3,7 @@ package at.uibk.dps.di.constants;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
+import at.uibk.dps.ee.model.properties.PropertyServiceFunctionUser;
 import at.uibk.dps.ee.visualization.model.EnactmentGraphViewer;
 import com.google.gson.JsonPrimitive;
 import net.sf.opendse.model.Communication;
@@ -55,12 +56,12 @@ public class EnactmentGraphs {
         final Task comm6 = new Communication("commNode6");
         final Task comm7 = new Communication("commNode7");
         final Task comm8 = new Communication("commNode8");
-        final Task task1 = new Task("taskNode1"); task1.setAttribute("Duration", 2000.0); task1.setAttribute("UsageType", "User"); task1.setAttribute("TypeID", "noop");
-        final Task task2 = new Task("taskNode2"); task2.setAttribute("Duration", 2000.0); task2.setAttribute("UsageType", "User"); task2.setAttribute("TypeID", "noop");
-        final Task task3 = new Task("taskNode3"); task3.setAttribute("Duration", 2000.0); task3.setAttribute("UsageType", "User"); task3.setAttribute("TypeID", "noop");
-        final Task task4 = new Task("taskNode4"); task4.setAttribute("Duration", 2000.0); task4.setAttribute("UsageType", "User"); task4.setAttribute("TypeID", "noop");
-        final Task task5 = new Task("taskNode5"); task5.setAttribute("Duration", 2000.0); task5.setAttribute("UsageType", "User"); task5.setAttribute("TypeID", "noop");
-        final Task task6 = new Task("taskNode6"); task6.setAttribute("Duration", 2000.0); task6.setAttribute("UsageType", "User"); task6.setAttribute("TypeID", "noop");
+        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
+        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
+        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
+        final Task task4 = PropertyServiceFunctionUser.createUserTask("taskNode4", "noop");
+        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
+        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
         EnactmentGraph graph = new EnactmentGraph();
         PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
         PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
@@ -77,6 +78,8 @@ public class EnactmentGraphs {
         PropertyServiceDependency.addDataDependency(comm6, task6, "key12", graph);
         PropertyServiceDependency.addDataDependency(comm7, task6, "key13", graph);
         PropertyServiceDependency.addDataDependency(task6, comm8, "key14", graph);
+        PropertyServiceData.makeRoot(comm1);
+        PropertyServiceData.makeLeaf(comm8);
         return graph;
     }
 

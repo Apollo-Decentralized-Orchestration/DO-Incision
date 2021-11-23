@@ -149,6 +149,45 @@ public class Scheduler {
         return currentTaskRank;
     }
 
+
+    private double calcRank2(double currentTaskRank, Task predecessor, MappingsConcurrent mappings,
+        ArrayList<Task> rankedTasks, List<Task> toConsider){
+
+        // Check if predecessor node is a task node
+        if (!(predecessor instanceof Communication)) {
+
+            Set<Mapping<Task, net.sf.opendse.model.Resource>> predecessorMappings = mappings.getMappings(predecessor);
+
+            // Check if duration attribute is specified
+            if (predecessorMappings.isEmpty()) {
+                throw new IllegalArgumentException(
+                    "Node " + predecessor.getId() + " has no function duration");
+            }
+
+            // Get the duration of the predecessor task node
+            double duration = predecessorMappings.stream()
+                .mapToDouble(PropertyServiceScheduler::getDuration).sum() / predecessorMappings.size();
+
+            // Represents the rank of the predecessor task node
+            double rank = duration + currentTaskRank;
+
+            // If predecessor does not contain rank set it, otherwise select the bigger rank
+            if (!mapRank.containsKey(predecessor) || (mapRank.containsKey(predecessor) && rank > mapRank.get(predecessor))) {
+                mapRank.put(predecessor, rank);
+            }
+
+            // Add task node to list of ranked task nodes
+            if (!rankedTasks.contains(predecessor) && toConsider.contains(predecessor)) {
+                rankedTasks.add(predecessor);
+            }
+
+            // Remember rank of the task
+            currentTaskRank = mapRank.get(predecessor);
+        }
+
+        return currentTaskRank;
+    }
+
     /**
      * Rank the tasks based on upward rank.
      *
@@ -184,6 +223,47 @@ public class Scheduler {
                 nodeStack.add(new AbstractMap.SimpleEntry<>(predecessor, currentTaskRank));
             }
         }
+
+        return rankedTasks;
+    }
+
+    public ArrayList<Task> rank2(List<Task> tasks, EnactmentSpecification specification) {
+
+        EnactmentGraph eGraph = specification.getEnactmentGraph();
+        MappingsConcurrent mappings = specification.getMappings();
+
+        ArrayList<Task> rankedTasks = new ArrayList<>();
+
+        // Stack containing nodes to check
+        Stack<AbstractMap.SimpleEntry<Task, Double>> nodeStack = new Stack<>();
+        getLeafNodes(eGraph).forEach(node -> nodeStack.push(new AbstractMap.SimpleEntry<>(node, 0.0)));
+
+        // Continue until all tasks are ranked
+        while (!nodeStack.isEmpty()) {
+
+            AbstractMap.SimpleEntry<Task, Double> current = nodeStack.pop();
+
+            // Get predecessors of the current task on the stack
+            Collection<Task> predecessorNodes = eGraph.getPredecessors(current.getKey());
+
+            // Iterate over all predecessor nodes
+            for(Task predecessor: predecessorNodes) {
+
+                double currentTaskRank = calcRank2(current.getValue(), predecessor, mappings, rankedTasks, tasks);
+
+                // Add predecessor and its rank to the stack
+                nodeStack.add(new AbstractMap.SimpleEntry<>(predecessor, currentTaskRank));
+            }
+        }
+
+        rankedTasks.sort((o1, o2) -> {
+            double rank1 = mapRank.get(o1);
+            double rank2 = mapRank.get(o2);
+            if (rank1 == rank2) {
+                return 0;
+            }
+            return rank1 < rank2 ? -1 : 1;
+        });
 
 
         return rankedTasks;
@@ -356,20 +436,17 @@ public class Scheduler {
         MappingsConcurrent mappings = specification.getMappings();
 
         // Rank the tasks based on upward rank (no latency between tasks)
-        ArrayList<Task> rankedTasks = rank(specification);
 
-        // Sort tasks based on their rank in descending order
-        rankedTasks.sort((o1, o2) -> {
-            double rank1 = mapRank.get(o1);
-            double rank2 = mapRank.get(o2);
-            if (rank1 == rank2) {
-                return 0;
-            }
-            return rank1 < rank2 ? 1 : -1;
-        });
+        List<Task> tasks = new ArrayList<>();
+        tasks.addAll(specification.getEnactmentGraph().getVertices());
+        ArrayList<Task> rankedTasks = rank2(
+            tasks, specification);
+        Stack rankedTaskStack = new Stack<net.sf.opendse.model.Task>();
+        rankedTaskStack.addAll(rankedTasks);
 
-        // Iterate over all ranked tasks
-        for(Task rankedTask: rankedTasks) {
+        while(!rankedTaskStack.isEmpty()){
+
+            net.sf.opendse.model.Task rankedTask = (Task) rankedTaskStack.pop();
 
             // Get predecessor task nodes of current ranked task
             Collection<Task> predecessorTaskNodes = getPredecessorTaskNodes(eGraph, rankedTask);
@@ -439,6 +516,7 @@ public class Scheduler {
             // Set that the resource is used now
             assert bestResource != null;
             bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
+            System.out.println(mapRank);
             mapResource.put(rankedTask, bestResource);
 
             // Set the finish time of the task and its resource type
@@ -450,6 +528,12 @@ public class Scheduler {
                     mappings.removeMapping(mR);
                 }
             }
+
+            Stack rankedTaskStack2 = new Stack<net.sf.opendse.model.Task>();
+            rankedTaskStack2.addAll(rank2(new ArrayList(rankedTaskStack), specification));
+
+            rankedTaskStack.clear();
+            rankedTaskStack.addAll(rankedTaskStack2);
         }
 
         return extractCuts(eGraph, rankedTasks);

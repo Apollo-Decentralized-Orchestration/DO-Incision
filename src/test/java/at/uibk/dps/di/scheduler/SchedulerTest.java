@@ -5,6 +5,7 @@ import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.ee.io.resources.ResourceGraphProviderFile;
 import at.uibk.dps.ee.io.spec.SpecificationProviderFile;
 import at.uibk.dps.ee.model.graph.*;
+import at.uibk.dps.ee.visualization.model.EnactmentGraphViewer;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,15 @@ public class SchedulerTest {
 
     @Test
     void testEvaluate() {
-        EnactmentGraph eGraph = EnactmentGraphs.getComplexEnactmentGraph();
+        EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph();
+
+        /*EnactmentGraphViewer.view(eGraph);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
         final EnactmentSpecification specification = setupSpecification(eGraph);
 
         List<Cut> cuts = new Scheduler().schedule(specification);

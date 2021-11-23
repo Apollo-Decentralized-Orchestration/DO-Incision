@@ -30,15 +30,18 @@ dependencies {
     }else {
         // dependencies to other parts of the Apollo Core EE
         implementation 'com.github.Apollo-Core:EE-Model:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-Deploy:-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-IO:main-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Core:master-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Guice:main-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Enactables:master-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Control:master-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Visualization:master-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:SC-Core:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Deploy:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-IO:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Core:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Guice:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Enactables:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Control:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Visualization:v1.0.0'
+        implementation 'com.github.Apollo-Core:SC-Core:v1.0.0'
     }
+
+    // dependency to Opt4J
+    implementation 'com.github.FedorSmirnov89:opt4j:-SNAPSHOT'
 
     // dependency to opendse
     implementation 'com.github.FedorSmirnov89:opendse:-SNAPSHOT'
@@ -51,6 +54,12 @@ dependencies {
     testImplementation(platform('org.junit:junit-bom:5.7.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     implementation 'org.xmlunit:xmlunit-core:2.2.1'
+
+    // the server dependencies
+    implementation 'io.vertx:vertx-web:4.0.3'
+    implementation 'io.vertx:vertx-web-client:4.0.3'
+    // SLF4J and Logback for logging
+    implementation group: "ch.qos.logback", name: "logback-classic", version: "1.2.3"
 }
 
 jacocoTestReport {
