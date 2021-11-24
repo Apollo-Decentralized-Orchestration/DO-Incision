@@ -399,6 +399,6 @@ public class Incision {
    * @return the final prepared string.
    */
   private String prepareNodeConstantString(final String input) {
-    return "\"" + input.replace("\"", "'").replaceAll("[\\t\\n\\r]+","") + "\"";
+    return input.replace("\"", "'").replaceAll("[\\t\\n\\r]+","");
   }
 }
