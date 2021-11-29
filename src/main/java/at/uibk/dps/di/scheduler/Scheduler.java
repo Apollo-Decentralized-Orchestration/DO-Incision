@@ -9,6 +9,7 @@ import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -31,7 +32,7 @@ public class Scheduler {
     /**
      * Keeps track of the set resources.
      */
-    public final Map<Task, Resource> mapResource;
+    private final Map<Task, Resource> mapResource;
 
     /**
      * Default constructor
@@ -317,6 +318,24 @@ public class Scheduler {
         }
 
         return prev;
+    }
+
+    public void setResources(EnactmentSpecification specification) {
+        MappingsConcurrent mappings = specification.getMappings();
+        mappings.mappingStream().forEach((m) -> {
+            net.sf.opendse.model.Resource r = m.getTarget();
+            mapResource.put(m.getSource(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
+                PropertyServiceScheduler.getLatencyLocal(r), PropertyServiceScheduler.getLatencyGlobal(r)));
+        });
+    }
+
+    public Map<String, at.uibk.dps.di.scheduler.Resource> getResources(EnactmentSpecification specification) {
+        Map<String, at.uibk.dps.di.scheduler.Resource> mapResource = new ConcurrentHashMap<>();
+        for(net.sf.opendse.model.Resource r: specification.getResourceGraph().getVertices()){
+            mapResource.put(r.getId(), new at.uibk.dps.di.scheduler.Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
+                PropertyServiceScheduler.getLatencyLocal(r), PropertyServiceScheduler.getLatencyGlobal(r)));
+        }
+        return mapResource;
     }
 
     /**
