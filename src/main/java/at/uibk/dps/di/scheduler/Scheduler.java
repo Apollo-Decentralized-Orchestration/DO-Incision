@@ -31,7 +31,7 @@ public class Scheduler {
     /**
      * Keeps track of the set resources.
      */
-    private final Map<Task, Resource> mapResource;
+    public final Map<Task, Resource> mapResource;
 
     /**
      * Default constructor
