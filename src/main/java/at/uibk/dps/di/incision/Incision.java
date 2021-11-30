@@ -75,13 +75,13 @@ public class Incision {
     topCut.forEach((tTask) -> {
       PropertyServiceData.makeRoot(cutOutGraph.getVertex(tTask.getId()));
       final Dependency edge = eGraph.getEdge(tTask.getId() + "--" + functionNodeId);
-      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge) + "_" + tTask.getId());
+      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge)/* + "_" + tTask.getId()*/);
       PropertyServiceData.setJsonKey(cutOutGraph.getVertex(tTask.getId()), PropertyServiceDependency.getJsonKey(edge));
     });
     bottomCut.forEach((bTask) -> {
       PropertyServiceData.makeLeaf(cutOutGraph.getVertex(bTask.getId()));
       final Dependency edge = eGraph.getEdge(functionNodeId + "--" + bTask.getId());
-      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge) + "_" + bTask.getId());
+      PropertyServiceDependency.setJsonKey(edge, PropertyServiceDependency.getJsonKey(edge)/* + "_" + bTask.getId()*/);
       PropertyServiceData.setJsonKey(cutOutGraph.getVertex(bTask.getId()), PropertyServiceDependency.getJsonKey(edge));
     });
 
