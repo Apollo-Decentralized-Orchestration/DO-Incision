@@ -366,6 +366,8 @@ public class Incision {
 
     final EnactmentGraph cutOutGraph = new EnactmentGraph();
 
+    List<AbstractMap.SimpleEntry<Task, Dependency>> handled = new ArrayList<>();
+
     // Continue if there are more tasks to proceed
     while(!currentTasks.isEmpty()) {
 
@@ -386,6 +388,9 @@ public class Incision {
         // Continue with the tasks below
         copyBelow(eGraph, cutOutGraph, currentTasks, currentTask);
       }
+
+      handled.add(currentTask);
+      currentTasks.removeAll(handled);
     }
 
     return cutOutGraph;
