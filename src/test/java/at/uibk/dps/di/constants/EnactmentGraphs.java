@@ -20,6 +20,130 @@ import java.util.stream.IntStream;
  */
 public class EnactmentGraphs {
 
+    public static EnactmentGraph getMediumSizedEnactmentGraph3(){
+        final Task comm1 = new Communication("commNode1");
+        final Task comm2 = new Communication("commNode2");
+        final Task comm3 = new Communication("commNode3");
+        final Task comm4 = new Communication("commNode4");
+        final Task comm5 = new Communication("commNode5");
+        final Task comm6 = new Communication("commNode6");
+        final Task comm7 = new Communication("commNode7");
+        final Task comm8 = new Communication("commNode8");
+        final Task comm9 = new Communication("commNode9");
+        final Task comm10 = new Communication("commNode10");
+        final Task comm11 = new Communication("commNode11");
+        final Task comm12 = new Communication("commNode12");
+        final Task comm13 = new Communication("commNode13");
+        final Task comm14 = new Communication("commNode14");
+        final Task comm15 = new Communication("commNode15");
+        final Task comm16 = new Communication("commNode16");
+        final Task comm17 = new Communication("commNode17");
+        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
+        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
+        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
+        final Task task4 = PropertyServiceFunctionUser.createUserTask("taskNode4", "noop");
+        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
+        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
+        final Task task7 = PropertyServiceFunctionUser.createUserTask("taskNode7", "noop");
+        final Task task8 = PropertyServiceFunctionUser.createUserTask("taskNode8", "noop");
+        final Task task9 = PropertyServiceFunctionUser.createUserTask("taskNode9", "noop");
+        final Task task10 = PropertyServiceFunctionUser.createUserTask("taskNode10", "noop");
+        final Task task11 = PropertyServiceFunctionUser.createUserTask("taskNode11", "noop");
+        final Task task12 = PropertyServiceFunctionUser.createUserTask("taskNode12", "noop");
+        final Task task13 = PropertyServiceFunctionUser.createUserTask("taskNode13", "noop");
+        final Task task14 = PropertyServiceFunctionUser.createUserTask("taskNode14", "noop");
+        EnactmentGraph graph = new EnactmentGraph();
+        PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
+        PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
+        PropertyServiceDependency.addDataDependency(task1, comm2, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task1, comm3, "key3", graph);
+        PropertyServiceDependency.addDataDependency(comm2, task2, "key4", graph);
+        PropertyServiceDependency.addDataDependency(comm3, task3, "key5", graph);
+        PropertyServiceDependency.addDataDependency(task2, comm4, "key6", graph);
+        PropertyServiceDependency.addDataDependency(task3, comm5, "key7", graph);
+        PropertyServiceDependency.addDataDependency(comm4, task4, "key8", graph);
+        PropertyServiceDependency.addDataDependency(comm5, task5, "key9", graph);
+        PropertyServiceDependency.addDataDependency(task4, comm6, "key10", graph);
+        PropertyServiceDependency.addDataDependency(task5, comm7, "key11", graph);
+        PropertyServiceDependency.addDataDependency(comm6, task6, "key12", graph);
+        PropertyServiceDependency.addDataDependency(comm7, task7, "key13", graph);
+        PropertyServiceDependency.addDataDependency(task6, comm8, "key14", graph);
+        PropertyServiceDependency.addDataDependency(task7, comm9, "key15", graph);
+        PropertyServiceDependency.addDataDependency(comm8, task8, "key16", graph);
+        PropertyServiceDependency.addDataDependency(comm9, task9, "key17", graph);
+        PropertyServiceDependency.addDataDependency(task8, comm10, "key18", graph);
+        PropertyServiceDependency.addDataDependency(task9, comm11, "key19", graph);
+        PropertyServiceDependency.addDataDependency(comm10, task10, "key20", graph);
+        PropertyServiceDependency.addDataDependency(comm11, task10, "key21", graph);
+        PropertyServiceDependency.addDataDependency(task10, comm12, "key22", graph);
+
+        PropertyServiceDependency.addDataDependency(task1, comm13, "key23", graph);
+        PropertyServiceDependency.addDataDependency(comm13, task11, "key24", graph);
+        PropertyServiceDependency.addDataDependency(task11, comm14, "key25", graph);
+        PropertyServiceDependency.addDataDependency(comm14, task12, "key26", graph);
+        PropertyServiceDependency.addDataDependency(task12, comm15, "key27", graph);
+        PropertyServiceDependency.addDataDependency(comm15, task13, "key28", graph);
+        PropertyServiceDependency.addDataDependency(task13, comm16, "key29", graph);
+        PropertyServiceDependency.addDataDependency(comm16, task14, "key30", graph);
+        PropertyServiceDependency.addDataDependency(task14, comm17, "key31", graph);
+        PropertyServiceDependency.addDataDependency(comm17, task10, "key32", graph);
+        PropertyServiceData.makeRoot(comm1);
+        PropertyServiceData.makeLeaf(comm12);
+        return graph;
+    }
+
+    public static EnactmentGraph getMediumSizedEnactmentGraph2(){
+        final Task comm1 = new Communication("commNode1");
+        final Task comm2 = new Communication("commNode2");
+        final Task comm3 = new Communication("commNode3");
+        final Task comm4 = new Communication("commNode4");
+        final Task comm5 = new Communication("commNode5");
+        final Task comm6 = new Communication("commNode6");
+        final Task comm7 = new Communication("commNode7");
+        final Task comm8 = new Communication("commNode8");
+        final Task comm9 = new Communication("commNode9");
+        final Task comm10 = new Communication("commNode10");
+        final Task comm11 = new Communication("commNode11");
+        final Task comm12 = new Communication("commNode12");
+        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
+        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
+        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
+        final Task task4 = PropertyServiceFunctionUser.createUserTask("taskNode4", "noop");
+        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
+        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
+        final Task task7 = PropertyServiceFunctionUser.createUserTask("taskNode7", "noop");
+        final Task task8 = PropertyServiceFunctionUser.createUserTask("taskNode8", "noop");
+        final Task task9 = PropertyServiceFunctionUser.createUserTask("taskNode9", "noop");
+        final Task task10 = PropertyServiceFunctionUser.createUserTask("taskNode10", "noop");
+        EnactmentGraph graph = new EnactmentGraph();
+        PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
+        PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
+        PropertyServiceDependency.addDataDependency(task1, comm2, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task1, comm3, "key3", graph);
+        PropertyServiceDependency.addDataDependency(comm2, task2, "key4", graph);
+        PropertyServiceDependency.addDataDependency(comm3, task3, "key5", graph);
+        PropertyServiceDependency.addDataDependency(task2, comm4, "key6", graph);
+        PropertyServiceDependency.addDataDependency(task3, comm5, "key7", graph);
+        PropertyServiceDependency.addDataDependency(comm4, task4, "key8", graph);
+        PropertyServiceDependency.addDataDependency(comm5, task5, "key9", graph);
+        PropertyServiceDependency.addDataDependency(task4, comm6, "key10", graph);
+        PropertyServiceDependency.addDataDependency(task5, comm7, "key11", graph);
+        PropertyServiceDependency.addDataDependency(comm6, task6, "key12", graph);
+        PropertyServiceDependency.addDataDependency(comm7, task7, "key13", graph);
+        PropertyServiceDependency.addDataDependency(task6, comm8, "key14", graph);
+        PropertyServiceDependency.addDataDependency(task7, comm9, "key15", graph);
+        PropertyServiceDependency.addDataDependency(comm8, task8, "key16", graph);
+        PropertyServiceDependency.addDataDependency(comm9, task9, "key17", graph);
+        PropertyServiceDependency.addDataDependency(task8, comm10, "key18", graph);
+        PropertyServiceDependency.addDataDependency(task9, comm11, "key19", graph);
+        PropertyServiceDependency.addDataDependency(comm10, task10, "key20", graph);
+        PropertyServiceDependency.addDataDependency(comm11, task10, "key21", graph);
+        PropertyServiceDependency.addDataDependency(task10, comm12, "key22", graph);
+        PropertyServiceData.makeRoot(comm1);
+        PropertyServiceData.makeLeaf(comm12);
+        return graph;
+    }
+
     /**
      * Get a simple medium sized {@link EnactmentGraph}. The medium sized {@link EnactmentGraph} consists
      * of 6 task nodes (tX) and 8 communication nodes (cX). It contains parallel and sequential nodes.

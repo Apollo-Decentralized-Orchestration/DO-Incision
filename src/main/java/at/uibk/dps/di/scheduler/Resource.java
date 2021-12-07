@@ -172,4 +172,12 @@ public class Resource {
     public void setLatencyGlobal(final double latencyGlobal) {
         this.latencyGlobal = latencyGlobal;
     }
+
+    public List<Double> getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(List<Double> available) {
+        this.available = available;
+    }
 }

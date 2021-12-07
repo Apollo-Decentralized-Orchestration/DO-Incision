@@ -7,6 +7,9 @@
         "properties": {
           "Uri": "https://fkwvdybi0a.execute-api.us-east-1.amazonaws.com/default/functino_noop_pub"
         }
+      },
+      {
+        "type": "Demo"
       }
     ]
   }
