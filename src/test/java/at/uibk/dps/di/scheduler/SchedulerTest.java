@@ -11,6 +11,7 @@ import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,6 +60,53 @@ public class SchedulerTest {
     }
 
     @Test
+    void scheduleMediumSizedEnactmentGraph() throws CloneNotSupportedException {
+        EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph();
+        final EnactmentSpecification specification = setupSpecification(eGraph);
+
+        List<Cut> cuts = new Scheduler().schedule(specification);
+
+        assertEquals(2, cuts.size());
+
+        assertEquals("commNode3", cuts.get(0).getTopCut().iterator().next().getId());
+        assertEquals("commNode5", cuts.get(0).getBottomCut().iterator().next().getId());
+        assertEquals("commNode4", cuts.get(1).getTopCut().iterator().next().getId());
+        assertEquals("commNode6", cuts.get(1).getBottomCut().iterator().next().getId());
+    }
+
+    @Test
+    void scheduleMediumSizedEnactmentGraph2() throws CloneNotSupportedException {
+        EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph2();
+        final EnactmentSpecification specification = setupSpecification(eGraph);
+
+        List<Cut> cuts = new Scheduler().schedule(specification);
+
+        assertEquals(2, cuts.size());
+
+        assertEquals("commNode3", cuts.get(0).getTopCut().iterator().next().getId());
+        assertEquals("commNode7", cuts.get(0).getBottomCut().iterator().next().getId());
+        assertEquals("commNode6", cuts.get(1).getTopCut().iterator().next().getId());
+        assertEquals("commNode10", cuts.get(1).getBottomCut().iterator().next().getId());
+    }
+
+    @Test
+    void scheduleMediumSizedEnactmentGraph3() throws CloneNotSupportedException {
+        EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph3();
+        final EnactmentSpecification specification = setupSpecification(eGraph);
+
+        List<Cut> cuts = new Scheduler().schedule(specification);
+
+        assertEquals(3, cuts.size());
+
+        assertEquals("commNode3", cuts.get(0).getTopCut().iterator().next().getId());
+        assertEquals("commNode5", cuts.get(0).getBottomCut().iterator().next().getId());
+        assertEquals("commNode2", cuts.get(1).getTopCut().iterator().next().getId());
+        assertEquals("commNode10", cuts.get(1).getBottomCut().iterator().next().getId());
+        assertEquals("commNode14", cuts.get(2).getTopCut().iterator().next().getId());
+        assertEquals("commNode17", cuts.get(2).getBottomCut().iterator().next().getId());
+    }
+
+    @Test
     void testEvaluate() throws CloneNotSupportedException {
         EnactmentGraph eGraph = EnactmentGraphs.getMediumSizedEnactmentGraph3();
 
@@ -69,6 +117,8 @@ public class SchedulerTest {
             e.printStackTrace();
         }*/
 
+
+        /*
         final EnactmentSpecification specification = setupSpecification(eGraph);
 
         List<Cut> cuts = new Scheduler().schedule(specification);
@@ -84,6 +134,8 @@ public class SchedulerTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        */
+
 /*
         Iterator<Task> topCut1 = cuts.get(0).getTopCut().iterator();
         assertEquals("commNode17", topCut1.next().getId());

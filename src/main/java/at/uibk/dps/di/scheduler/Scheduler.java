@@ -10,7 +10,6 @@ import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,7 +59,7 @@ public class Scheduler {
      * @param eGraph the graph to look for successors.
      * @param node the task node to check for immediate task successors.
      *
-     * @return
+     * @return the immediate successor task nodes.
      */
     private Collection<Task> getSuccessorTaskNodes(EnactmentGraph eGraph, Task node) {
         if (node instanceof Communication) {
@@ -76,6 +75,14 @@ public class Scheduler {
         }
     }
 
+    /**
+     * Get all immediate predecessor task nodes of a specific task.
+     *
+     * @param eGraph the graph to look for predecessors.
+     * @param node the task node to check for immediate task predecessors.
+     *
+     *  @return the immediate predecessor task nodes.
+     */
     public Collection<Task> getPredecessorTaskNodes(EnactmentGraph eGraph, Task node) {
         if(node instanceof Communication) {
 
@@ -90,6 +97,17 @@ public class Scheduler {
         }
     }
 
+    /**
+     * Calculate the rank of a given task.
+     *
+     * @param currentTaskRank the rank of the current task.
+     * @param predecessor the predecessor task for which the rank should be calculated.
+     * @param mappings the resource mappings.
+     * @param rankedTasks resulting list of ranked tasks.
+     * @param toConsider contains all tasks that should be ranked.
+     *
+     * @return the rank of the predecessor.
+     */
     private double calcRank(double currentTaskRank, Task predecessor, MappingsConcurrent mappings,
                              ArrayList<Task> rankedTasks, List<Task> toConsider){
 
@@ -128,8 +146,14 @@ public class Scheduler {
         return currentTaskRank;
     }
 
-    /** -------------- */
-
+    /**
+     * Rank all tasks specified in a list.
+     *
+     * @param tasks the tasks to rank.
+     * @param specification the enactment specification.
+     *
+     * @return a list of ranked tasks.
+     */
     public ArrayList<Task> rank(List<Task> tasks, EnactmentSpecification specification) {
 
         EnactmentGraph eGraph = specification.getEnactmentGraph();
@@ -160,6 +184,19 @@ public class Scheduler {
             }
         }
 
+        return rankedTasks;
+    }
+
+    /**
+     * Sort the tasks based on their rank.
+     *
+     * @param rankedTasks the tasks to sort.
+     *
+     * @return the sorted tasks.
+     */
+    public ArrayList<Task> sort(ArrayList<Task> rankedTasks){
+
+        // Sort the given ranks
         rankedTasks.sort((o1, o2) -> {
             double rank1 = mapRank.get(o1);
             double rank2 = mapRank.get(o2);
@@ -170,38 +207,184 @@ public class Scheduler {
         });
 
         return rankedTasks;
+    }
 
+    /**
+     * Get a specific resource.
+     *
+     * @param resources list of resources to check.
+     * @param typeToLookFor the type to check.
+     *
+     * @return the desired resource.
+     */
+    public Resource getResource(List<Resource> resources, String typeToLookFor) {
+
+        // Iterate over all resources
+        for(Resource r: resources) {
+
+            // Check if it is the desired resource
+            if(r.getType().equals(typeToLookFor)){
+                return r;
+            }
+        }
+        throw new IllegalArgumentException("Could not find resource type " + typeToLookFor);
+    }
+
+    /**
+     * Generate the cuts out of resource assignment.
+     *
+     * @param eGraph the enactment graph.
+     * @param rankedTasks the ranked tasks with resources.
+     *
+     *  @return the generated cuts.
+     */
+    public List<Cut> extractCuts(EnactmentGraph eGraph, ArrayList<Task> rankedTasks) {
+        List<Cut> proposedCuts = new ArrayList<>();
+
+        // Stack containing all tasks to be checked
+        Stack<Task> taskStack = new Stack<>();
+        taskStack.addAll(rankedTasks);
+
+        // Iterate over all tasks
+        while(!taskStack.isEmpty()) {
+
+            // Get a task node from the stack
+            Task current = taskStack.pop();
+
+            // Determine resource on which task node will be executed
+            Resource currentResource = mapResource.get(current);
+
+            // Check if it is the local resource
+            if (!currentResource.getType().equals(Utility.ENGINE)) {
+                Set<Task> topCut = new HashSet<>();
+                Set<Task> bottomCut = new HashSet<>();
+
+                // Create stack for the predecessor task nodes
+                Stack<Task> stackPredecessor = new Stack<>();
+                stackPredecessor.addAll(getPredecessorTaskNodes(eGraph, current));
+                Task prev = current;
+
+                // While there are predecessors check if they are on the same resource
+                while (!stackPredecessor.isEmpty()) {
+                    Task pre = stackPredecessor.pop();
+
+                    // Check if on the same resource
+                    if (mapResource.get(pre).getType().equals(currentResource.getType())) {
+
+                        // Get other predecessors to check if they are on same resource
+                        stackPredecessor.addAll(getPredecessorTaskNodes(eGraph, pre));
+
+                        // Remove predecessor from nodes to check since it is already checked
+                        taskStack.remove(pre);
+
+                        // Remember previous node
+                        prev = pre;
+                    } else {
+
+                        // Fix top cut
+                        topCut.addAll(eGraph.getPredecessors(prev));
+                    }
+                }
+
+                // Create stack for the successor task nodes
+                Stack<Task> stackSuccessors = new Stack<>();
+                stackSuccessors.addAll(getSuccessorTaskNodes(eGraph, current));
+                prev = current;
+
+                // While there are successors check if they are on the same resource
+                while (!stackSuccessors.isEmpty()) {
+                    Task suc = stackSuccessors.pop();
+
+                    // Check if on the same resource
+                    if (mapResource.get(suc).getType().equals(currentResource.getType())) {
+
+                        // Get other successors to check if they are on same resource
+                        stackSuccessors.addAll(getSuccessorTaskNodes(eGraph, suc));
+
+                        // Remove successor from nodes to check since it is already checked
+                        taskStack.remove(suc);
+
+                        // Remember previous node
+                        prev = suc;
+                    } else {
+
+                        // Fix top cut
+                        bottomCut.addAll(eGraph.getSuccessors(prev));
+                    }
+                }
+                proposedCuts.add(new Cut(topCut, bottomCut));
+            }
+        }
+        return proposedCuts;
+    }
+
+    /**
+     * Get all successor ranked tasks starting from a specific task and
+     * the next ranked highest task, if present.
+     *
+     * @param rankedTaskStack the ranked tasks to check.
+     * @param first the task to start looking for successor.
+     * @param eGraph the enactment graph to get successors from.
+     *
+     * @return the successor ranked tasks.
+     */
+    private ArrayList<Task> getSuccessorRankedTasks(Stack<Task> rankedTaskStack, Task first, EnactmentGraph eGraph){
+
+        // Create a stack for the task to check for successors
+        Stack<Task> tasksToAdd = new Stack<>();
+
+        // Add all successors of initial task to the stack
+        tasksToAdd.addAll(getSuccessorTaskNodes(eGraph, first));
+
+        // If possible consider also the next ranked task
+        if(rankedTaskStack.size() > 1) {
+            tasksToAdd.add(rankedTaskStack.pop());
+        }
+
+        // Create list for resulting ranked tasks
+        ArrayList<Task> result = new ArrayList<>();
+
+        // While there are tasks to check
+        while (!tasksToAdd.isEmpty()) {
+
+            // Take a task from the list and add its successors to the list
+            Task task = tasksToAdd.pop();
+            tasksToAdd.addAll(getSuccessorTaskNodes(eGraph, task));
+
+            // Add it to the resulting list if not already added
+            if(!result.contains(task)){
+                result.add(task);
+            }
+        }
+        return result;
     }
 
     public double heft(Task t, ArrayList<Task> rankedTasks, Resource r2, double tmpEft2, EnactmentSpecification specification, List<Resource> resources,
                        double earliestStartTime2, double duration2, boolean tmpPrevTaskOnSameResource2) {
 
-        Resource resource2 = null;
-        for(Resource r: resources) {
-            if(r.getType().equals(r2.getType())){
-                resource2 = r;
-            }
-        }
+        // Get specification, mappings and resource
+        EnactmentGraph eGraph = specification.getEnactmentGraph();
+        MappingsConcurrent mappings = specification.getMappings();
+        Resource resource2 = getResource(resources, r2.getType());
 
-        Map<Task, Double> mapFinishTimeTmp = new HashMap<Task, Double>();
-        mapFinishTimeTmp.putAll(mapFinishTime);
-        Map<Task, Resource> mapResourceTmp = new HashMap<Task, Resource>();
-        mapResourceTmp.putAll(mapResource);
+        // Create temporary hashmaps for finish time and resource assignment
+        Map<Task, Double> mapFinishTimeTmp = new HashMap<>(mapFinishTime);
+        Map<Task, Resource> mapResourceTmp = new HashMap<>(mapResource);
 
+        // Add current task resource and finish time
         mapResourceTmp.put(t, resource2);
         mapFinishTimeTmp.put(t, tmpEft2);
         resource2.setResource(earliestStartTime2, duration2, tmpPrevTaskOnSameResource2);
 
-
-        EnactmentGraph eGraph = specification.getEnactmentGraph();
-        MappingsConcurrent mappings = specification.getMappings();
-
-        Stack rankedTaskStack = new Stack<net.sf.opendse.model.Task>();
+        // Create stack for ranked tasks
+        Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
 
+        // Continue if there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
 
-            net.sf.opendse.model.Task rankedTask = (Task) rankedTaskStack.pop();
+            // Get task from stack
+            net.sf.opendse.model.Task rankedTask = rankedTaskStack.pop();
 
             // Get predecessor task nodes of current ranked task
             Collection<Task> predecessorTaskNodes = getPredecessorTaskNodes(eGraph, rankedTask);
@@ -218,7 +401,6 @@ public class Scheduler {
                     }
                 }
             }
-
 
             // Variables for the best suited resource for the current task
             Resource bestResource = null;
@@ -259,7 +441,6 @@ public class Scheduler {
                 }
 
                 // Calculate potential earliest finish time
-                // TODO eft of whole end FC?!
                 double tmpEft = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
 
                 // Remember resource if it is better than the previous one
@@ -287,112 +468,6 @@ public class Scheduler {
         return resourceDurations.isEmpty() ? 0.0 : Collections.max(resourceDurations);
     }
 
-    public List<Cut> extractCuts(EnactmentGraph eGraph, ArrayList<Task> rankedTasks) {
-        List<Cut> proposedCuts = new ArrayList<>();
-
-        // Stack containing all tasks to be checked
-        Stack<Task> taskStack = new Stack<>();
-        taskStack.addAll(rankedTasks);
-
-        // Iterate over all tasks
-        while(!taskStack.isEmpty()) {
-
-            // Get a task node from the stack
-            Task current = taskStack.pop();
-
-            // Determine resource on which task node will be executed
-            Resource currentResource = mapResource.get(current);
-
-            // Check if it is the local resource
-            if (!currentResource.getType().equals(Utility.ENGINE)) {
-                Set<Task> topCut = new HashSet<>();
-                Set<Task> bottomCut = new HashSet<>();
-
-                // Create stack for the predecessor task nodes
-                Stack<Task> stackPredecessor = new Stack<>();
-                stackPredecessor.addAll(getPredecessorTaskNodes(eGraph, current));
-                Task prev = current;
-
-                // Fix the cut
-//                prev = fixCut(stackPredecessor, topCut, eGraph, currentResource, prev, taskStack, true);
-
-                // While there are predecessors check if they are on the same resource
-                while (!stackPredecessor.isEmpty()) {
-                    Task pre = stackPredecessor.pop();
-
-                    // Check if on the same resource
-                    if (mapResource.get(pre).getType().equals(currentResource.getType())) {
-
-                        // Get other predecessors to check if they are on same resource
-                        stackPredecessor.addAll(getPredecessorTaskNodes(eGraph, pre));
-
-                        // Remove predecessor from nodes to check since it is already checked
-                        taskStack.remove(pre);
-
-                        // Remember previous node
-                        prev = pre;
-                    } else {
-
-                        // Fix top cut
-                        topCut.addAll(eGraph.getPredecessors(prev));
-                    }
-
-                }
-
-                // Create stack for the successor task nodes
-                Stack<Task> stackSuccessors = new Stack<>();
-                stackSuccessors.addAll(getSuccessorTaskNodes(eGraph, current));
-                prev = current;
-
-//                prev = fixCut(stackSuccessors, bottomCut, eGraph, currentResource, prev, taskStack, false);
-
-                // While there are successors check if they are on the same resource
-                while (!stackSuccessors.isEmpty()) {
-                    Task suc = stackSuccessors.pop();
-
-                    // Check if on the same resource
-                    if (mapResource.get(suc).getType().equals(currentResource.getType())) {
-
-                        // Get other successors to check if they are on same resource
-                        stackSuccessors.addAll(getSuccessorTaskNodes(eGraph, suc));
-
-                        // Remove successor from nodes to check since it is already checked
-                        taskStack.remove(suc);
-
-                        // Remember previous node
-                        prev = suc;
-                    } else {
-
-                        // Fix top cut
-                        bottomCut.addAll(eGraph.getSuccessors(prev));
-                    }
-                }
-
-                proposedCuts.add(new Cut(topCut, bottomCut));
-            }
-        }
-        return proposedCuts;
-    }
-
-    private ArrayList<Task> getRTTS(Stack rankedTaskStack, Task first, EnactmentGraph eGraph){
-
-        Stack tasksToAdd = new Stack<Task>();
-        tasksToAdd.addAll(getSuccessorTaskNodes(eGraph, first));
-        if(rankedTaskStack.size()>1){
-            tasksToAdd.add(rankedTaskStack.pop());
-        }
-        ArrayList<Task> rt = new ArrayList<>();
-        while (!tasksToAdd.isEmpty()) {
-            Task t = (Task) tasksToAdd.pop();
-            tasksToAdd.addAll(getSuccessorTaskNodes(eGraph, t));
-            if(!rt.contains(t)){
-                rt.add(t);
-            }
-        }
-
-        return rt;
-    }
-
     /**
      * Evaluate and schedule the tasks to the resources.
      *
@@ -416,11 +491,9 @@ public class Scheduler {
 
         // Rank the tasks based on upward rank (no latency between tasks)
 
-        List<Task> tasks = new ArrayList<>();
-        tasks.addAll(specification.getEnactmentGraph().getVertices());
-        ArrayList<Task> rankedTasks = rank(
-                tasks, specification);
-        Stack rankedTaskStack = new Stack<Task>();
+        List<Task> tasks = new ArrayList<>(eGraph.getVertices());
+        ArrayList<Task> rankedTasks = sort(rank(tasks, specification));
+        Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
 
         while(!rankedTaskStack.isEmpty()) {
@@ -480,17 +553,8 @@ public class Scheduler {
                 // Calculate potential earliest finish time
                 // TODO eft of whole end FC?!
                 //ArrayList<Task> rt = new ArrayList<>(rankedTaskStack); //getRTTS((Stack) rankedTaskStack.clone(), rankedTask, eGraph);
-                ArrayList<Task> rt = getRTTS((Stack) rankedTaskStack.clone(), rankedTask, eGraph);
-                rt.sort((o1, o2) -> {
-                    double rank1 = mapRank.get(o1);
-                    double rank2 = mapRank.get(o2);
-                    if (rank1 == rank2) {
-                        return 0;
-                    }
-                    return rank1 < rank2 ? -1 : 1;
-                });
+                ArrayList<Task> rt = sort(getSuccessorRankedTasks((Stack<Task>) rankedTaskStack.clone(), rankedTask, eGraph));
                 double tmpEft2 = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
-
                 ArrayList<Resource> resources2 = new ArrayList<>();
                 for(Resource r: resources){
                     Resource n = new Resource(r.getType(), r.getTotalNumInstances(), r.getLatencyLocal(), r.getLatencyGlobal());
@@ -519,7 +583,6 @@ public class Scheduler {
             // Set that the resource is used now
             assert bestResource != null;
             bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
-            System.out.println(mapRank);
             mapResource.put(rankedTask, bestResource);
 
             // Set the finish time of the task and its resource type
@@ -532,131 +595,6 @@ public class Scheduler {
                     mappings.removeMapping(mR);
                 }
             }
-        }
-
-        return extractCuts(eGraph, rankedTasks);
-    }
-
-    /**
-     * Evaluate and schedule the tasks to the resources.
-     *
-     * @param specification the {@link EnactmentSpecification}.
-     */
-    public List<Cut> schedulebkup(EnactmentSpecification specification) {
-
-        ResourceGraph rGraph = specification.getResourceGraph();
-        Collection<net.sf.opendse.model.Resource> rVertices = rGraph.getVertices();
-
-        List<Resource> resources = new ArrayList<>();
-        for(net.sf.opendse.model.Resource r: rVertices){
-            resources.add(new Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
-                    PropertyServiceScheduler.getLatencyLocal(r),
-                    PropertyServiceScheduler.getLatencyGlobal(r))
-            );
-        }
-
-        EnactmentGraph eGraph = specification.getEnactmentGraph();
-        MappingsConcurrent mappings = specification.getMappings();
-
-        // Rank the tasks based on upward rank (no latency between tasks)
-
-        List<Task> tasks = new ArrayList<>();
-        tasks.addAll(specification.getEnactmentGraph().getVertices());
-        ArrayList<Task> rankedTasks = rank(
-                tasks, specification);
-        Stack rankedTaskStack = new Stack<net.sf.opendse.model.Task>();
-        rankedTaskStack.addAll(rankedTasks);
-
-        while(!rankedTaskStack.isEmpty()) {
-
-            net.sf.opendse.model.Task rankedTask = (Task) rankedTaskStack.pop();
-
-            // Get predecessor task nodes of current ranked task
-            Collection<Task> predecessorTaskNodes = getPredecessorTaskNodes(eGraph, rankedTask);
-
-            // Earliest start time the function can start (maximum finish time of predecessor tasks)
-            double earliestStartTime = 0;
-
-            // Find the minimum start time by inspecting the finish times of the predecessor tasks
-            for (Task p : predecessorTaskNodes) {
-                double finishTime = mapFinishTime.get(p);
-                if (earliestStartTime < finishTime) {
-                    earliestStartTime = finishTime;
-                }
-            }
-
-
-            // Variables for the best suited resource for the current task
-            Resource bestResource = null;
-            boolean bestPrevTaskOnSameResource = false;
-            double bestEft = 0;
-            double bestDuration = 0;
-
-            // Earliest finish time
-            double eft = Double.MAX_VALUE;
-
-            // The mappings of the ranked task
-            Set<Mapping<Task, net.sf.opendse.model.Resource>> mappingsRankedTask = mappings.getMappings(rankedTask);
-
-            // Iterate over all available resources
-            for(Resource resource: resources) {
-
-                // Check if previous task was on the same resource
-                boolean tmpPrevTaskOnSameResource = false;
-                for(Task predecessor: predecessorTaskNodes){
-                    if(mapResource.get(predecessor).getType().equals(resource.getType())) {
-                        tmpPrevTaskOnSameResource = true;
-                        break;
-                    }
-                }
-
-                // Get the duration of the ranked task on resource r
-                double duration = -1.0;
-                for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
-                    if(mR.getTarget().getId().contains(resource.getType())) {
-                        duration = PropertyServiceScheduler.getDuration(mR);
-                    }
-                }
-                if(duration == -1.0){
-                    throw new IllegalArgumentException(
-                            "Node " + rankedTask.getId() + " has no function duration on resource " + resource.getType());
-                }
-
-
-                // Calculate potential earliest finish time
-                double tmpEft = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
-
-                // Remember resource if it is better than the previous one
-                if (eft > tmpEft) {
-                    bestResource = resource;
-                    bestPrevTaskOnSameResource = tmpPrevTaskOnSameResource;
-                    bestEft = tmpEft;
-                    bestDuration = duration;
-                }
-                eft = tmpEft;
-            }
-
-            // Set that the resource is used now
-            assert bestResource != null;
-            bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
-            System.out.println(mapRank);
-            mapResource.put(rankedTask, bestResource);
-
-            // Set the finish time of the task and its resource type
-            mapFinishTime.put(rankedTask, bestEft);
-
-            // Keep only best mapping
-            for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
-                if(!mR.getTarget().getId().contains(bestResource.getType())){
-                    mappings.removeMapping(mR);
-                }
-            }
-
-            Stack rankedTaskStack2 = new Stack<net.sf.opendse.model.Task>();
-            rankedTaskStack2.addAll(rank(new ArrayList(rankedTaskStack), specification));
-
-            rankedTaskStack.clear();
-            rankedTaskStack.addAll(rankedTaskStack2);
         }
 
         return extractCuts(eGraph, rankedTasks);
