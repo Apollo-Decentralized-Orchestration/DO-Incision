@@ -11,10 +11,7 @@ import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -74,7 +71,7 @@ public class SchedulerTest {
 
         final EnactmentSpecification specification = setupSpecification(eGraph);
 
-        List<Cut> cuts = new SchedulerV2().schedule(specification);
+        List<Cut> cuts = new Scheduler().schedule(specification);
 
         MappingsConcurrent ms = specification.getMappings();
         for(Mapping<Task, Resource> m: ms) {
