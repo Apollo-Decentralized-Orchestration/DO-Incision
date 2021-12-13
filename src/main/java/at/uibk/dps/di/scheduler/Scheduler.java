@@ -359,22 +359,57 @@ public class Scheduler {
         return result;
     }
 
-    public double heft(Task t, ArrayList<Task> rankedTasks, Resource r2, double tmpEft2, EnactmentSpecification specification, List<Resource> resources,
-                       double earliestStartTime2, double duration2, boolean tmpPrevTaskOnSameResource2) {
+    /**
+     * Get the duration of a task.
+     *
+     * @param rankedTask the task to get the duration for.
+     * @param mappingsRankedTask the mappings of the ranked task.
+     * @param resource the resource of the task to get the duration for.
+     *
+     * @return the duration of the task on the specified resource.
+     */
+    private double getDuration(Task rankedTask, Set<Mapping<Task, net.sf.opendse.model.Resource>> mappingsRankedTask, Resource resource) {
+        for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
+            if(mR.getTarget().getId().contains(resource.getType())) {
+                return PropertyServiceScheduler.getDuration(mR);
+            }
+        }
+        throw new IllegalArgumentException(
+                "Node " + rankedTask.getId() + " has no function duration on resource " + resource.getType());
+    }
+
+    /**
+     * Perform HEFT on the given input.
+     *
+     * @param currentTask the task to start with heft.
+     * @param rankedTasks all ranked tasks that should be scheduled in heft.
+     * @param resourceOfCurrentTask the resource of the task to start with.
+     * @param eftOfCurrentTask the earliest finish time of the task to start with.
+     * @param specification the full enactment specification.
+     * @param resources the resources on which the tasks can run on.
+     * @param earliestStartTimeOfCurrentTask the earliest start time og the task to start with.
+     * @param durationCurrentTask the duration of the task to start with.
+     * @param prevTaskOnSameResourceCurrentTask determines if a previous task was on the same resource.
+     *
+     * @return the duration of the workflow after scheduled with HEFT.
+     */
+    public double heft(Task currentTask, ArrayList<Task> rankedTasks, Resource resourceOfCurrentTask,
+                       double eftOfCurrentTask, EnactmentSpecification specification, List<Resource> resources,
+                       double earliestStartTimeOfCurrentTask, double durationCurrentTask, boolean prevTaskOnSameResourceCurrentTask) {
 
         // Get specification, mappings and resource
         EnactmentGraph eGraph = specification.getEnactmentGraph();
         MappingsConcurrent mappings = specification.getMappings();
-        Resource resource2 = getResource(resources, r2.getType());
+        Resource resource2 = getResource(resources, resourceOfCurrentTask.getType());
 
         // Create temporary hashmaps for finish time and resource assignment
         Map<Task, Double> mapFinishTimeTmp = new HashMap<>(mapFinishTime);
         Map<Task, Resource> mapResourceTmp = new HashMap<>(mapResource);
 
         // Add current task resource and finish time
-        mapResourceTmp.put(t, resource2);
-        mapFinishTimeTmp.put(t, tmpEft2);
-        resource2.setResource(earliestStartTime2, duration2, tmpPrevTaskOnSameResource2);
+        mapResourceTmp.put(currentTask, resource2);
+        mapFinishTimeTmp.put(currentTask, eftOfCurrentTask);
+        resource2.setResource(earliestStartTimeOfCurrentTask, durationCurrentTask, prevTaskOnSameResourceCurrentTask);
 
         // Create stack for ranked tasks
         Stack<Task> rankedTaskStack = new Stack<>();
@@ -429,16 +464,7 @@ public class Scheduler {
                 }
 
                 // Get the duration of the ranked task on resource r
-                double duration = -1.0;
-                for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
-                    if(mR.getTarget().getId().contains(resource.getType())) {
-                        duration = PropertyServiceScheduler.getDuration(mR);
-                    }
-                }
-                if(duration == -1.0){
-                    throw new IllegalArgumentException(
-                            "Node " + rankedTask.getId() + " has no function duration on resource " + resource.getType());
-                }
+                double duration = getDuration(rankedTask, mappingsRankedTask, resource);
 
                 // Calculate potential earliest finish time
                 double tmpEft = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
@@ -473,11 +499,13 @@ public class Scheduler {
      *
      * @param specification the {@link EnactmentSpecification}.
      */
-    public List<Cut> schedule(EnactmentSpecification specification) throws CloneNotSupportedException {
+    public List<Cut> schedule(EnactmentSpecification specification) {
 
+        // Get the resource graph and the vertices of the specification
         ResourceGraph rGraph = specification.getResourceGraph();
         Collection<net.sf.opendse.model.Resource> rVertices = rGraph.getVertices();
 
+        // Transform to an internal representation for the resources
         List<Resource> resources = new ArrayList<>();
         for(net.sf.opendse.model.Resource r: rVertices){
             resources.add(new Resource(r.getId(), PropertyServiceScheduler.getInstances(r),
@@ -486,19 +514,21 @@ public class Scheduler {
             );
         }
 
+        // Get the enactment graph and the mappings from the specification
         EnactmentGraph eGraph = specification.getEnactmentGraph();
         MappingsConcurrent mappings = specification.getMappings();
 
         // Rank the tasks based on upward rank (no latency between tasks)
-
         List<Task> tasks = new ArrayList<>(eGraph.getVertices());
         ArrayList<Task> rankedTasks = sort(rank(tasks, specification));
         Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
 
+        // Continue while there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
 
-            Task rankedTask = (Task) rankedTaskStack.pop();
+            // Get the task with highest rank
+            Task rankedTask = rankedTaskStack.pop();
 
             // Get predecessor task nodes of current ranked task
             Collection<Task> predecessorTaskNodes = getPredecessorTaskNodes(eGraph, rankedTask);
@@ -539,42 +569,39 @@ public class Scheduler {
                 }
 
                 // Get the duration of the ranked task on resource r
-                double duration = -1.0;
-                for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
-                    if(mR.getTarget().getId().contains(resource.getType())) {
-                        duration = PropertyServiceScheduler.getDuration(mR);
-                    }
-                }
-                if(duration == -1.0){
-                    throw new IllegalArgumentException(
-                            "Node " + rankedTask.getId() + " has no function duration on resource " + resource.getType());
+                double duration = getDuration(rankedTask, mappingsRankedTask, resource);
+
+                // --> START call the heft algorithm on a specific part of the workflow
+                // Calculate the new ranked tasks that should be checked with heft
+                ArrayList<Task> recallRankedTasks = sort(getSuccessorRankedTasks((Stack<Task>) rankedTaskStack.clone(), rankedTask, eGraph));
+
+                // Calculate the earliest start time
+                double recallEst = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
+
+                // Create a copy of the current resource state
+                ArrayList<Resource> recallResources = new ArrayList<>();
+                for(Resource res: resources){
+                    Resource recallRes = new Resource(res.getType(), res.getTotalNumInstances(), res.getLatencyLocal(), res.getLatencyGlobal());
+                    List<Double> avail = new ArrayList<>(res.getAvailable());
+                    recallRes.setAvailable(avail);
+                    recallResources.add(recallRes);
                 }
 
-                // Calculate potential earliest finish time
-                // TODO eft of whole end FC?!
-                //ArrayList<Task> rt = new ArrayList<>(rankedTaskStack); //getRTTS((Stack) rankedTaskStack.clone(), rankedTask, eGraph);
-                ArrayList<Task> rt = sort(getSuccessorRankedTasks((Stack<Task>) rankedTaskStack.clone(), rankedTask, eGraph));
-                double tmpEft2 = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
-                ArrayList<Resource> resources2 = new ArrayList<>();
-                for(Resource r: resources){
-                    Resource n = new Resource(r.getType(), r.getTotalNumInstances(), r.getLatencyLocal(), r.getLatencyGlobal());
-                    List<Double> ds = new ArrayList<>(r.getAvailable());
-                    n.setAvailable(ds);
-                    resources2.add(n);
-                }
-                double tmpEft = heft(rankedTask, rt, resource, tmpEft2, specification, resources2, earliestStartTime, duration, tmpPrevTaskOnSameResource);
+                // Schedule with heft
+                double tmpEft = heft(rankedTask, recallRankedTasks, resource, recallEst, specification, recallResources, earliestStartTime, duration, tmpPrevTaskOnSameResource);
+                // <-- END call the heft algorithm on a specific part of the workflow
 
                 // Remember resource if it is better than the previous one
                 if (eft > tmpEft) {
                     bestResource = resource;
                     bestPrevTaskOnSameResource = tmpPrevTaskOnSameResource;
-                    bestEft = tmpEft2;
+                    bestEft = recallEst;
                     bestDuration = duration;
                 }
                 if(eft == tmpEft && tmpPrevTaskOnSameResource){
                     bestResource = resource;
                     bestPrevTaskOnSameResource = tmpPrevTaskOnSameResource;
-                    bestEft = tmpEft2;
+                    bestEft = recallEst;
                     bestDuration = duration;
                 }
                 eft = tmpEft;
@@ -597,6 +624,7 @@ public class Scheduler {
             }
         }
 
+        // Extract the cuts from the new resource mappings
         return extractCuts(eGraph, rankedTasks);
     }
 }
