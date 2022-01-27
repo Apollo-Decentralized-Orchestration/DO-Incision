@@ -62,7 +62,7 @@ public class Incision {
     });
     cutOutGraph.getVertices().forEach((vertice) -> {
       if(!(topCut.contains(vertice) || bottomCut.contains(vertice))) {
-        if(!vertice.getId().contains("result") && !vertice.getId().contains("comm")){ // TODO replace this if with a contains
+        if(!(vertice instanceof Communication)) {
           Set<Mapping<Task, Resource>> map = mappings.getMappings(vertice);
           map.forEach(mappingsCutOutGraph::addMapping);
           map.forEach(mappings::removeMapping);

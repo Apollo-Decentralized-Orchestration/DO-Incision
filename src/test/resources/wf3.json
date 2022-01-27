@@ -1,0 +1,19 @@
+[
+  {
+    "functionType": "Pass",
+    "resources": [
+      {
+        "type": "Serverless",
+        "properties": {
+          "Uri": "https://vbt81rsfof.execute-api.us-east-1.amazonaws.com/Pass/"
+        }
+      },
+      {
+        "type": "Local",
+        "properties": {
+          "Image": "csat2065/pass"
+        }
+      }
+    ]
+  }
+]

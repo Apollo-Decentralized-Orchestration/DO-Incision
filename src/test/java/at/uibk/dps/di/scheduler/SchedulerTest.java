@@ -81,6 +81,14 @@ public class SchedulerTest {
 
         List<Cut> cuts = new Scheduler().schedule(specification);
 
+        EnactmentGraphViewer.view(specification.getEnactmentGraph());
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         assertEquals(2, cuts.size());
 
         assertEquals("commNode3", cuts.get(0).getTopCut().iterator().next().getId());

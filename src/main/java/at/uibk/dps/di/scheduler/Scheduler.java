@@ -53,6 +53,13 @@ public class Scheduler {
                 .collect(Collectors.toList());
     }
 
+    private Collection<Task> getRootNodes(EnactmentGraph eGraph) {
+        return eGraph.getVertices()
+                .stream()
+                .filter(task -> task instanceof Communication && PropertyServiceData.isRoot(task))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Get all immediate successor task nodes of a specific task.
      *
@@ -186,6 +193,49 @@ public class Scheduler {
 
         return rankedTasks;
     }
+
+    public ArrayList<Task> rankDownWardsAndSort(List<Task> tasks, EnactmentSpecification specification) {
+
+        EnactmentGraph eGraph = specification.getEnactmentGraph();
+        MappingsConcurrent mappings = specification.getMappings();
+
+        ArrayList<Task> rankedTasks = new ArrayList<>();
+
+        // Stack containing nodes to check
+        Stack<AbstractMap.SimpleEntry<Task, Double>> nodeStack = new Stack<>();
+        getRootNodes(eGraph).forEach(node -> nodeStack.push(new AbstractMap.SimpleEntry<>(node, 0.0)));
+
+        // Continue until all tasks are ranked
+        while (!nodeStack.isEmpty()) {
+
+            AbstractMap.SimpleEntry<Task, Double> current = nodeStack.pop();
+
+            // Get predecessors of the current task on the stack
+            Collection<Task> successorNodes = eGraph.getSuccessors(current.getKey());
+
+            // Iterate over all successor nodes
+            for(Task successor: successorNodes) {
+
+                double currentTaskRank = calcRank(current.getValue(), successor, mappings, rankedTasks, tasks);
+
+                // Add successor and its rank to the stack
+                nodeStack.add(new AbstractMap.SimpleEntry<>(successor, currentTaskRank));
+                successor.setAttribute("rank", currentTaskRank);
+            }
+        }
+
+        rankedTasks.sort((o1, o2) -> {
+            double rank1 = mapRank.get(o1);
+            double rank2 = mapRank.get(o2);
+            if (rank1 == rank2) {
+                return 0;
+            }
+            return rank1 > rank2 ? -1 : 1;
+        });
+
+        return rankedTasks;
+    }
+
 
     /**
      * Sort the tasks based on their rank.
@@ -483,16 +533,21 @@ public class Scheduler {
             assert bestResource != null;
             bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
             mapResourceTmp.put(rankedTask, bestResource);
+            rankedTask.setAttribute("tmpHeft" + runn, bestResource.getType());
+
 
             // Set the finish time of the task and its resource type
             mapFinishTimeTmp.put(rankedTask, bestEft);
         }
+        runn++;
         Set<Double> resourceDurations = mapResourceTmp.values().stream()
                 .map(at.uibk.dps.di.scheduler.Resource::maxDuration)
                 .collect(Collectors.toSet());
 
         return resourceDurations.isEmpty() ? 0.0 : Collections.max(resourceDurations);
     }
+
+    int runn = 0;
 
     /**
      * Evaluate and schedule the tasks to the resources.
@@ -521,6 +576,7 @@ public class Scheduler {
         // Rank the tasks based on upward rank (no latency between tasks)
         List<Task> tasks = new ArrayList<>(eGraph.getVertices());
         ArrayList<Task> rankedTasks = sort(rank(tasks, specification));
+        //ArrayList<Task> rankedTasks = rankDownWardsAndSort(tasks, specification);
         Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
 
@@ -529,6 +585,12 @@ public class Scheduler {
 
             // Get the task with highest rank
             Task rankedTask = rankedTaskStack.pop();
+
+            /*
+            rankedTasks = sort(rank(rankedTaskStack, specification));
+            rankedTaskStack = new Stack<>();
+            rankedTaskStack.addAll(rankedTasks);
+            */
 
             // Get predecessor task nodes of current ranked task
             Collection<Task> predecessorTaskNodes = getPredecessorTaskNodes(eGraph, rankedTask);
@@ -611,6 +673,10 @@ public class Scheduler {
             assert bestResource != null;
             bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
             mapResource.put(rankedTask, bestResource);
+            rankedTask.setAttribute("resource", bestResource.getType());
+            rankedTask.setAttribute("est", earliestStartTime);
+            rankedTask.setAttribute("duration", bestDuration);
+            rankedTask.setAttribute("preOnSame", bestPrevTaskOnSameResource);
 
             // Set the finish time of the task and its resource type
             mapFinishTime.put(rankedTask, bestEft);

@@ -1,0 +1,13 @@
+[
+  {
+    "functionType": "dummy",
+    "resources": [
+      {
+        "type": "Serverless",
+        "properties": {
+          "Uri": "https://gsyhelawyk.execute-api.us-east-1.amazonaws.com/default/dummy"
+        }
+      }
+    ]
+  }
+]

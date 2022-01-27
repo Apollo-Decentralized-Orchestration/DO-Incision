@@ -1,0 +1,39 @@
+---
+name: "longSeq"
+dataIns:
+  - name: "input"
+    type: "string"
+    source: "input"
+workflowBody:
+  - while:
+      name: "while"
+      dataIns:
+        - name: "whileIt"
+          type: "string"
+          source: "longSeq/input"
+      loopBody:
+        - function:
+            name: "dummy"
+            type: "dummy"
+            dataIns:
+              - name: "in"
+                type: "string"
+                source: "while/whileIt"
+            dataOuts:
+              - name: "out"
+                type: "string"
+      condition:
+        - data1: "while/counter"
+          data2: 3
+          type: "number"
+          operator: "<"
+          negation: "false"
+          combinedWith: "and"
+      dataOuts:
+        - name: "whileIt"
+          type: "string"
+          source: "dummy/out"
+dataOuts:
+  - name: "output"
+    type: "string"
+    source: "while/whileIt"
