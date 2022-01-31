@@ -38,6 +38,8 @@ dependencies {
         implementation 'com.github.Apollo-Core:EE-Control:v1.0.0'
         implementation 'com.github.Apollo-Core:EE-Visualization:v1.0.0'
         implementation 'com.github.Apollo-Core:SC-Core:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Docker:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Deploy:v1.0.0'
     }
 
     // dependency to Opt4J

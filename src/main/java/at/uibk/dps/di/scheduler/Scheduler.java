@@ -10,6 +10,8 @@ import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -190,7 +192,7 @@ public class Scheduler {
 
                 // Add predecessor and its rank to the stack
                 nodeStack.add(new AbstractMap.SimpleEntry<>(predecessor, currentTaskRank));
-                predecessor.setAttribute("rank", currentTaskRank);
+                //predecessor.setAttribute("rank", currentTaskRank);
             }
         }
 
@@ -224,7 +226,7 @@ public class Scheduler {
 
                 // Add successor and its rank to the stack
                 nodeStack.add(new AbstractMap.SimpleEntry<>(successor, currentTaskRank));
-                successor.setAttribute("rank", currentTaskRank);
+                //successor.setAttribute("rank", currentTaskRank);
             }
 
         }
@@ -544,8 +546,8 @@ public class Scheduler {
             assert bestResource != null;
             bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
             mapResourceTmp.put(rankedTask, bestResource);
-            rankedTask.setAttribute("tmpHeft" + runn, bestResource.getType());
-            rankedTask.setAttribute("rankHeft" + runn, mapRank.get(rankedTask));
+            //rankedTask.setAttribute("tmpHeft" + runn, bestResource.getType());
+            //rankedTask.setAttribute("rankHeft" + runn, mapRank.get(rankedTask));
 
             // Set the finish time of the task and its resource type
             mapFinishTimeTmp.put(rankedTask, bestEft);
@@ -628,12 +630,21 @@ public class Scheduler {
 
                 // Check if previous task was on the same resource
                 boolean tmpPrevTaskOnSameResource = false;
+                boolean tmpPrevPrevTaskOnSameResource = false;
                 for(Task predecessor: predecessorTaskNodes){
                     if(mapResource.get(predecessor).getType().equals(resource.getType())) {
                         tmpPrevTaskOnSameResource = true;
+                        Collection<Task> predecessorPredTaskNodes = getPredecessorTaskNodes(eGraph, predecessor);
+                        for(Task prepredecessor: predecessorPredTaskNodes){
+                            if(mapResource.get(prepredecessor).getType().equals(resource.getType())) {
+                                tmpPrevPrevTaskOnSameResource = true;
+                            }
+                        }
                         break;
                     }
                 }
+
+
 
                 // Get the duration of the ranked task on resource r
                 double duration = getDuration(rankedTask, mappingsRankedTask, resource);
@@ -688,12 +699,31 @@ public class Scheduler {
 
             // Set that the resource is used now
             assert bestResource != null;
-            bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
+            Double fTime = bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
             mapResource.put(rankedTask, bestResource);
             rankedTask.setAttribute("resource", bestResource.getType().contains("http") ? "Cloud" : "L");
-            rankedTask.setAttribute("est", earliestStartTime);
+            /*rankedTask.setAttribute("est", earliestStartTime);
             rankedTask.setAttribute("duration", bestDuration);
             rankedTask.setAttribute("preOnSame", bestPrevTaskOnSameResource);
+*/
+
+            int idx = 0;
+            for(int i = 0; i < bestResource.getAvailable().size(); i++) {
+                if(bestResource.getAvailable().get(i).equals(fTime)) {
+                    idx = i;
+                }
+            }
+            if(bestResource.view.size() < idx + 1) {
+                bestResource.view.add("");
+            }
+            //System.out.println(rankedTask.getId() + " est" + earliestStartTime + " - " + bestResource.view.length());
+            if(earliestStartTime/100 > bestResource.view.get(idx).length()) {
+                bestResource.view.set(idx, bestResource.view.get(idx) + StringUtils.repeat(" ", (int) (earliestStartTime/100 - bestResource.view.get(idx).length())));
+            }
+            int durationActuial = (int) (fTime - earliestStartTime);
+            bestResource.view.set(idx, bestResource.view.get(idx) + "[t" + rankedTask.getId().substring(rankedTask.getId().length()-2, rankedTask.getId().length()) + StringUtils.repeat("*", durationActuial / 100 - 5) + "]");
+
+            //System.out.println(rankedTask.getId() + " on " + bestResource.getType() + " - Ftime" + fTime + ". From " + earliestStartTime + " - " + bestResource.getAvailable() + "::" + StringUtils.repeat("7", (int) (Double.parseDouble(bestResource.getAvailable().get(0).toString())/10)));
 
             double rankTMP = earliestStartTime + bestDuration + bestResource.getLatencyLocal();
             if(!bestPrevTaskOnSameResource) {
@@ -707,7 +737,11 @@ public class Scheduler {
 
             // Set the finish time of the task and its resource type
             mapFinishTime.put(rankedTask, bestEft);
-            rankedTask.setAttribute("ft", bestEft);
+            //rankedTask.setAttribute("ft", bestEft);
+
+            String some = bestResource.getType().contains("http") ? "Cloud" : "L";
+            some += "; est: " + earliestStartTime + "; ft: " + bestEft + "; id: " + rankedTask.getId();
+            //rankedTask.setAttribute("some", some);
 
             // Keep only best mapping
             for(Mapping<Task, net.sf.opendse.model.Resource> mR: mappingsRankedTask){
@@ -717,7 +751,21 @@ public class Scheduler {
             }
         }
 
+
+        System.out.print("T: ");
+        for(int i = 1; i < 41; i++) {
+            System.out.print(StringUtils.repeat(" ", 4) + (i));
+        }
+        System.out.println();
+
+        for(Resource r: resources) {
+            String pref = r.getType().contains("Local") ? "L" : "C";
+            for(String s: r.view){
+                System.out.println(pref + ": " + s);
+            }
+        }
+
         // Extract the cuts from the new resource mappings
-        return extractCuts(eGraph, rankedTasks);
+        return extractCuts(eGraph, sortOther(rankDownWards(new ArrayList<>(eGraph.getVertices()), specification, false)));
     }
 }

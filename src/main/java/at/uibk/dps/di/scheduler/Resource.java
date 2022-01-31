@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class Resource {
 
+    public List<String> view = new ArrayList<>();
     /**
      * The type of the resource.
      */
