@@ -1,5 +1,6 @@
 package at.uibk.dps.di;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.di.scheduler.Cut;
 import at.uibk.dps.di.scheduler.Scheduler;
 import at.uibk.dps.ee.deploy.run.ImplementationRunBare;
+import at.uibk.dps.ee.deploy.spec.SpecFromString;
 import at.uibk.dps.ee.io.resources.ResourceGraphProviderFile;
 import at.uibk.dps.ee.io.spec.SpecificationProviderFile;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
@@ -23,6 +25,7 @@ import at.uibk.dps.ee.visualization.model.EnactmentGraphViewer;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
+import nu.xom.ParsingException;
 
 public class Runner {
 
@@ -144,24 +147,24 @@ public class Runner {
 
     public void run() {
         // Get the eGraph and specification (including function durations, task mappings, latencies)
-        EnactmentSpecification specification = setupSpecification(getDynamicWf(5, 2), "src/test/resources/wf3.json");
+        EnactmentSpecification specification = setupSpecification(getDynamicWf(10, 2), "src/test/resources/wf3.json");
 
         List<Cut> cuts = new Scheduler().schedule(specification);
 
         // Cut the workflow at the given position
         for(Cut cut: cuts) {
-            //new Incision().cut(specification, cut.getTopCut(), cut.getBottomCut());
+            new Incision().cut(specification, cut.getTopCut(), cut.getBottomCut());
         }
 
         String specificationAdapted = Utility.fromEnactmentSpecificationToString(specification);
         //EnactmentGraphViewer.view(specification.getEnactmentGraph());
 
         String input = new String(new char[500000]).replace("\0", "*");
-        String in = "{ 'in': '" + input + "', 'sleep': 0.5 }";
+        String in = "{ 'in': '" + input + "' }";
 
         // Run the workflow
         double start = System.currentTimeMillis();
-        new ImplementationRunBare().implement(in, specificationAdapted, CONFIG);
+        //new ImplementationRunBare().implement(in, specificationAdapted, CONFIG);
         double end = System.currentTimeMillis();
         System.out.println("Duration: " + (end - start));
 
