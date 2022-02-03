@@ -11,7 +11,7 @@
       {
         "type": "Local",
         "properties": {
-          "Image": "csat2065/pass1"
+          "Image": "csat2065/passfib"
         }
       }
     ]

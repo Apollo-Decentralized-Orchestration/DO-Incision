@@ -121,43 +121,45 @@ public class Runner {
 
         // Set up resource instances and latencies
         Resource local = specification.getResourceGraph().getVertex(localResourceName);
-        PropertyServiceScheduler.setLatencyLocal(local, 65.0);
+        PropertyServiceScheduler.setLatencyLocal(local, 95.66);
         PropertyServiceScheduler.setLatencyGlobal(local, 0.0);
         PropertyServiceScheduler.setInstances(local, 1);
         Resource noop = specification.getResourceGraph().getVertex(cloudResourceName);
-        PropertyServiceScheduler.setLatencyLocal(noop, 450.0);
-        PropertyServiceScheduler.setLatencyGlobal(noop, 2050.0);
+        PropertyServiceScheduler.setLatencyLocal(noop, 406.66);
+        PropertyServiceScheduler.setLatencyGlobal(noop, 1727.0);
         PropertyServiceScheduler.setInstances(noop, 1000);
 
         // Set up function durations
         MappingsConcurrent mappings = specification.getMappings();
-        mappings.mappingStream().forEach((map) -> {
+        /*mappings.mappingStream().forEach((map) -> {
             if(map.getId().contains(localResourceName)) {
                 // Docker
-                PropertyServiceScheduler.setDuration(map, 5.0);
+                PropertyServiceScheduler.setDuration(map, 914.94);
             } else {
                 // Cloud
-                PropertyServiceScheduler.setDuration(map, 5.0);
+                PropertyServiceScheduler.setDuration(map, 914.94);
             }
-        });
-        mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 1000.0));
+        });*/
+        mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4914.94));
+        //mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4900));
 
         return specification;
     }
 
     public void run() {
+
         // Get the eGraph and specification (including function durations, task mappings, latencies)
-        EnactmentSpecification specification = setupSpecification(getDynamicWf(10, 2), "src/test/resources/wf3.json");
+        EnactmentSpecification specification = setupSpecification(getDynamicWf(5, 2), "src/test/resources/wf3.json");
 
         List<Cut> cuts = new Scheduler().schedule(specification);
 
         // Cut the workflow at the given position
         for(Cut cut: cuts) {
-            new Incision().cut(specification, cut.getTopCut(), cut.getBottomCut());
+            //new Incision().cut(specification, cut.getTopCut(), cut.getBottomCut());
         }
 
-        String specificationAdapted = Utility.fromEnactmentSpecificationToString(specification);
-        //EnactmentGraphViewer.view(specification.getEnactmentGraph());
+        String specificationAdapted = Utility.fromEnactmentSpecificationToString(specification).replaceAll("[\\t\\n\\r]+","").replaceAll("( )+", " ");
+        EnactmentGraphViewer.view(specification.getEnactmentGraph());
 
         String input = new String(new char[500000]).replace("\0", "*");
         String in = "{ 'in': '" + input + "' }";
