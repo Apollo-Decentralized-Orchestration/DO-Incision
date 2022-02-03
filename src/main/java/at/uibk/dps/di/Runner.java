@@ -140,7 +140,7 @@ public class Runner {
                 PropertyServiceScheduler.setDuration(map, 914.94);
             }
         });*/
-        mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4914.94));
+        mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4873.45));
         //mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4900));
 
         return specification;
