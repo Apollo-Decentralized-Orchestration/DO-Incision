@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 public class Scheduler {
 
+    boolean dynRank = true;
     /**
      * Keeps track of the calculated ranks.
      */
@@ -490,7 +491,10 @@ public class Scheduler {
         Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
 
-
+        System.out.println("Spaces");
+        for(Resource r: resources) {
+            r.printSPaces();
+        }
 
         // Continue if there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
@@ -576,21 +580,24 @@ public class Scheduler {
                         rankTMP += resource.getLatencyLocal();
                     }
                 }*/
-
+                rankTMP = /*mapRank.get(rankedTask) - */ -rankTMP;
                 Double tmp = mapRank.remove(rankedTask);
                 mapRank.put(rankedTask, rankTMP);
 
-                // Dynamically rerank
-                rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, true));
-                rankedTaskStack = new Stack<>();
-                rankedTaskStack.addAll(rankedTasks);
+                if(dynRank) {
+                    // Dynamically rerank
+                    rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, true));
+                    rankedTaskStack = new Stack<>();
+                    rankedTaskStack.addAll(rankedTasks);
+                }
                 //System.out.println(mapRank);
 
                 double tmpEft = -1;
                 rec = 0;
                 if(rec == 0) {
                     // Calculate potential earliest finish time
-                    tmpEft = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
+                    System.out.print(rankedTask.getId());
+                    tmpEft = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource, duration);
                     if (eft > tmpEft) {
                         bestResource = resource;
                         bestPrevTaskOnSameResource = tmpPrevTaskOnSameResource;
@@ -601,7 +608,7 @@ public class Scheduler {
                     eft = tmpEft;
                 } else {
                     ArrayList<Task> recallRankedTasks = sortOther(getSuccessorRankedTasks((Stack<Task>) rankedTaskStack.clone(), rankedTask, eGraph));
-                    double recallEst = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
+                    double recallEst = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource, duration);
                     ArrayList<Resource> recallResources = new ArrayList<>();
                     for(Resource res: resources){
                         Resource recallRes = new Resource(res.getType(), res.getTotalNumInstances(), res.getLatencyLocal(), res.getLatencyGlobal());
@@ -653,13 +660,15 @@ public class Scheduler {
             if(!bestPrevTaskOnSameResource) {
                 rankTMP += bestResource.getLatencyGlobal();
             }
+            rankTMP = /*mapRank.get(rankedTask) - */ -rankTMP;
             mapRank.remove(rankedTask);
             mapRank.put(rankedTask, rankTMP);
-            // Dynamically rerank
-            rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, false));
-            rankedTaskStack = new Stack<>();
-            rankedTaskStack.addAll(rankedTasks);
-
+            if(dynRank) {
+                // Dynamically rerank
+                rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, false));
+                rankedTaskStack = new Stack<>();
+                rankedTaskStack.addAll(rankedTasks);
+            }
             // Set that the resource is used now
             assert bestResource != null;
 
@@ -676,7 +685,7 @@ public class Scheduler {
             Double actualFt = bestResource.setResource(earliestStartTime, bestDuration, bestPrevTaskOnSameResource);
             mapResourceTmp.put(rankedTask, bestResource);
             rankedTask.setAttribute("tmpHeft-" + currentTask.getId() + "-r-" + resourceOfCurrentTask.getType(), bestResource.getType().contains("Local") ? "L" : "Cloud");
-            System.out.println("-----" + currentTask.getId() + " on " + resourceOfCurrentTask.getType() + ": best " + bestResource.getType() + " for " + rankedTask.getId() + ", bc est=" +earliestStartTime + " and eft=" + bestEft + ", actual FT: " + actualFt);
+            //System.out.println("-----" + currentTask.getId() + " on " + resourceOfCurrentTask.getType() + ": best " + bestResource.getType() + " for " + rankedTask.getId() + ", bc est=" +earliestStartTime + " and eft=" + bestEft + ", actual FT: " + actualFt);
             //rankedTask.setAttribute("rankHeft" + runn, mapRank.get(rankedTask));
 
             // Set the finish time of the task and its resource type
@@ -722,8 +731,11 @@ public class Scheduler {
         List<Task> tasks = new ArrayList<>(eGraph.getVertices());
         //ArrayList<Task> rankedTasks = sort(rank(tasks, specification));
         ArrayList<Task> rankedTasks = sortOther(rankDownWards(tasks, specification, false));
+        System.out.println(mapRank);
         Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
+
+        //System.out.println(mapRank);
 
         // Continue while there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
@@ -787,8 +799,6 @@ public class Scheduler {
                     }
                 }
 
-
-
                 // Get the duration of the ranked task on resource r
                 double duration = getDuration(rankedTask, mappingsRankedTask, resource);
 
@@ -801,21 +811,25 @@ public class Scheduler {
                         rankTMP += resource.getLatencyLocal();
                     }
                 }*/
-
+                rankTMP = /*mapRank.get(rankedTask) - */ -rankTMP;
                 mapRank.remove(rankedTask);
                 mapRank.put(rankedTask, rankTMP);
 
-                // Dynamically rerank
-                rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, true));
-                rankedTaskStack = new Stack<>();
-                rankedTaskStack.addAll(rankedTasks);
+                if(dynRank) {
+                    // Dynamically rerank
+                    rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, true));
+                    rankedTaskStack = new Stack<>();
+                    rankedTaskStack.addAll(rankedTasks);
+                }
 
                 // --> START call the heft algorithm on a specific part of the workflow
                 // Calculate the new ranked tasks that should be checked with heft
                 ArrayList<Task> recallRankedTasks = sortOther(getSuccessorRankedTasks((Stack<Task>) rankedTaskStack.clone(), rankedTask, eGraph));
 
                 // Calculate the earliest start time
-                double recallEst = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource) + duration;
+                System.out.print(rankedTask);
+                System.out.println(mapRank);
+                double recallEst = resource.earliestStartTime(earliestStartTime, tmpPrevTaskOnSameResource, duration);
 
 
                 resource.setLatencyLocal(ll);
@@ -825,6 +839,7 @@ public class Scheduler {
                     Resource recallRes = new Resource(res.getType(), res.getTotalNumInstances(), res.getLatencyLocal(), res.getLatencyGlobal());
                     List<Double> avail = new ArrayList<>(res.getAvailable());
                     recallRes.setAvailable(avail);
+                    recallRes.spaces = new ArrayList<>(res.spaces);
                     recallResources.add(recallRes);
                 }
 
@@ -840,7 +855,9 @@ public class Scheduler {
                 }
 
                 // Schedule with heft
+                System.out.println("\n\t\tChecking task: " + rankedTask.getId() + " on " + resource.getType());
                 double tmpEft = heft(rankedTask, recallRankedTasks, resource, recallEst, specification, recallResources, earliestStartTime, duration, tmpPrevTaskOnSameResource, 1, mapFinishTime);
+                System.out.println("EFT: " + tmpEft);
                 // <-- END call the heft algorithm on a specific part of the workflow
                 if(rankedTask.getId().contains("4")){
                     System.out.println();
@@ -898,7 +915,7 @@ public class Scheduler {
             int durationActuial = (int) (fTime - earliestStartTime);
             bestResource.view.set(idx, bestResource.view.get(idx) + "[t" + rankedTask.getId().substring(rankedTask.getId().length()-2, rankedTask.getId().length()) + StringUtils.repeat("*", durationActuial / 100 - 5) + "]");
 
-            System.out.println("Task " + rankedTask.getId() + " on " + bestResource.getType() + " @ " + earliestStartTime + " until " + fTime +". Dur is " + (fTime - earliestStartTime));
+            //System.out.println("Task " + rankedTask.getId() + " on " + bestResource.getType() + " @ " + earliestStartTime + " until " + fTime +". Dur is " + (fTime - earliestStartTime));
 
             //System.out.println(rankedTask.getId() + " on " + bestResource.getType() + " - Ftime" + fTime + ". From " + earliestStartTime + " - " + bestResource.getAvailable() + "::" + StringUtils.repeat("7", (int) (Double.parseDouble(bestResource.getAvailable().get(0).toString())/10)));
 
@@ -906,12 +923,15 @@ public class Scheduler {
             if(!bestPrevTaskOnSameResource) {
                 rankTMP += bestResource.getLatencyGlobal();
             }
+            rankTMP = /*mapRank.get(rankedTask) - */ -rankTMP;
             mapRank.remove(rankedTask);
             mapRank.put(rankedTask, rankTMP);
-            rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, false));
-            rankedTaskStack = new Stack<>();
-            rankedTaskStack.addAll(rankedTasks);
-
+            System.out.println("Rank" + rankTMP);
+            if(dynRank) {
+                rankedTasks = sortOther(rankDownWards(rankedTaskStack, specification, false));
+                rankedTaskStack = new Stack<>();
+                rankedTaskStack.addAll(rankedTasks);
+            }
             // Set the finish time of the task and its resource type
             mapFinishTime.put(rankedTask, bestEft);
             //rankedTask.setAttribute("ft", bestEft);
@@ -943,6 +963,12 @@ public class Scheduler {
                 System.out.println(pref + ": " + s);
             }
         }
+
+        System.out.println("Spaces");
+        for(Resource r: resources) {
+            r.printSPaces();
+        }
+
 
         // Extract the cuts from the new resource mappings
         return extractCuts(eGraph, sortOther(rankDownWards(new ArrayList<>(eGraph.getVertices()), specification, false)));

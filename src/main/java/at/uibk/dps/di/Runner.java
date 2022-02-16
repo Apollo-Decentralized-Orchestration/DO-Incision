@@ -53,6 +53,9 @@ public class Runner {
             "    <property name=\"closeOnTerminate\">false</property>\n" +
             "    <property name=\"updatePeriodMs\">100</property>\n" +
             "  </module>\n" +
+            "   <module class=\"at.uibk.dps.sc.core.modules.CapacityLimitationModule\">" +
+            "     <property name=\"maximalTaskNumber\">1</property>" +
+            "  </module>" +
             "  <module class=\"at.uibk.dps.sc.core.modules.SchedulerModule\">\n" +
             "    <property name=\"schedulingMode\">Random</property>\n" +
             "    <property name=\"mappingsToPick\">1</property>\n" +
@@ -131,17 +134,17 @@ public class Runner {
 
         // Set up function durations
         MappingsConcurrent mappings = specification.getMappings();
-        /*mappings.mappingStream().forEach((map) -> {
+        mappings.mappingStream().forEach((map) -> {
             if(map.getId().contains(localResourceName)) {
                 // Docker
-                PropertyServiceScheduler.setDuration(map, 914.94);
+                PropertyServiceScheduler.setDuration(map, 4814.8);
             } else {
                 // Cloud
-                PropertyServiceScheduler.setDuration(map, 914.94);
+                PropertyServiceScheduler.setDuration(map, 4569.2);
             }
-        });*/
-        mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4873.45));
-        //mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4900));
+        });
+        //mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 4873.45));
+        //mappings.mappingStream().forEach((map) -> PropertyServiceScheduler.setDuration(map, 2000));
 
         return specification;
     }
@@ -151,7 +154,7 @@ public class Runner {
         // Get the eGraph and specification (including function durations, task mappings, latencies)
         EnactmentSpecification specification = setupSpecification(getDynamicWf(5, 2), "src/test/resources/wf3.json");
 
-        List<Cut> cuts = new Scheduler().schedule(specification);
+        List<Cut> cuts =  new Scheduler().schedule(specification);
 
         // Cut the workflow at the given position
         for(Cut cut: cuts) {

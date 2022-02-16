@@ -10,6 +10,31 @@ import java.util.List;
  * @author Stefan Pedratscher
  */
 public class Resource {
+    private class Space{
+        double start;
+        double end;
+
+        public Space(double start, double end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public double getStart() {
+            return start;
+        }
+
+        public void setStart(double start) {
+            this.start = start;
+        }
+
+        public double getEnd() {
+            return end;
+        }
+
+        public void setEnd(double end) {
+            this.end = end;
+        }
+    }
 
     public List<String> view = new ArrayList<>();
     /**
@@ -26,6 +51,14 @@ public class Resource {
      * The time when the resources are available.
      */
     private List<Double> available;
+
+    public List<Space> spaces;
+
+    public void printSPaces(){
+        for(Space s: spaces){
+            System.out.println(s.start +" - " + s.getEnd() + ". " + getType());
+        }
+    }
 
     /**
      * The latency from a resource of the same type.
@@ -49,6 +82,7 @@ public class Resource {
         latencyGlobal = 0.0;
         latencyLocal = 0.0;
         available = new ArrayList<>();
+        spaces = new ArrayList<>();
     }
 
     /**
@@ -76,11 +110,40 @@ public class Resource {
      */
     public Double setResource(final double possibleStart, final double taskDuration, final boolean prevOnSameResource) {
 
+        // TODO
+        if(getType().contains("Local")) {
+            for (int i = 0; i < spaces.size(); i++) {
+                final Double finishTime = prevOnSameResource ? possibleStart + latencyLocal + taskDuration : possibleStart + taskDuration + latencyGlobal + latencyLocal;
+                if (spaces.get(i).getStart() <= possibleStart && spaces.get(i).getEnd() >= finishTime) {
+                    System.out.println("----------------------------------------------------USING SPACE");
+                    if(spaces.get(i).getStart() < possibleStart) {
+                        spaces.add(new Space(spaces.get(i).getStart(), possibleStart));
+                    }
+                    if(spaces.get(i).getEnd() > finishTime) {
+                        spaces.add(new Space(finishTime, spaces.get(i).getEnd()));
+                    }
+                    spaces.remove(i);
+                    return finishTime;
+                }
+            }
+        }
+
+
         // Iterate over all active instances
         for(int i = 0; i < available.size(); i++) {
 
             // Check if resource is available at the optimal start time
             if(available.get(i) <= possibleStart) {
+
+                // TODO
+                if(getType().contains("Local")) {
+                    if (available.get(i) != possibleStart) {
+
+                        System.out.println(" ... Adding space for " + getType() + ": " + available.get(i) + " to " + possibleStart);
+                        spaces.add(new Space(available.get(i), possibleStart));
+                    }
+                }
+
                 final Double finishTime = prevOnSameResource ? possibleStart + taskDuration + latencyLocal : possibleStart + taskDuration + latencyGlobal + latencyLocal;
                 available.set(i, finishTime);
                 return finishTime;
@@ -111,24 +174,35 @@ public class Resource {
      *
      *  @return the earliest start time possible for the resource.
      */
-    public Double earliestStartTime(final double possibleStart, final boolean prevOnSameResource){
+    public Double earliestStartTime(final double possibleStart, final boolean prevOnSameResource, final double duration){
 
         // If we have instances that are currently not set
         // we can start at the best possible time
         if(totalNumInstances > available.size()){
-            return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal + latencyLocal;
+            return prevOnSameResource ? possibleStart + latencyLocal + duration : possibleStart + latencyGlobal + latencyLocal+ duration;
+        }
+
+        if(getType().contains("Local")) {
+            for (int i = 0; i < spaces.size(); i++) {
+                final Double finishTime = prevOnSameResource ? possibleStart + latencyLocal + duration : possibleStart + duration + latencyGlobal + latencyLocal;
+                if (spaces.get(i).getStart() <= possibleStart && spaces.get(i).getEnd() >= finishTime) {
+                    System.out.println("............ SPACE DETECTED AND SUITABLE ................ " + this.getType() + " " + (spaces.get(i).getEnd() - spaces.get(i).getStart())
+                            + ", bc " + spaces.get(i).getStart() + " <= " + possibleStart + " && " + spaces.get(i).getEnd() + " >= " + finishTime);
+                    return finishTime;
+                }
+            }
         }
 
         // Iterate over available resources and check if
         // node could start at best possible time
         for(final Double a: available){
             if(a <= possibleStart) {
-                return prevOnSameResource ? possibleStart + latencyLocal : possibleStart + latencyGlobal + latencyLocal;
+                return prevOnSameResource ? possibleStart + duration + latencyLocal : possibleStart + duration + latencyGlobal + latencyLocal;
             }
         }
 
         // Return the minimal time on the resources
-        return prevOnSameResource ? Collections.min(available) + latencyLocal : Collections.min(available) + latencyGlobal + latencyLocal;
+        return prevOnSameResource ? Collections.min(available) + duration + latencyLocal : Collections.min(available) + duration + latencyGlobal + latencyLocal;
     }
 
     /**
