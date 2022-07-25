@@ -10,7 +10,7 @@ import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Task;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -910,7 +910,8 @@ public class Scheduler {
             }
             //System.out.println(rankedTask.getId() + " est" + earliestStartTime + " - " + bestResource.view.length());
             if(earliestStartTime/100 > bestResource.view.get(idx).length()) {
-                bestResource.view.set(idx, bestResource.view.get(idx) + StringUtils.repeat(" ", (int) (earliestStartTime/100 - bestResource.view.get(idx).length())));
+                bestResource.view.set(idx, bestResource.view.get(idx) + StringUtils
+                    .repeat(" ", (int) (earliestStartTime/100 - bestResource.view.get(idx).length())));
             }
             int durationActuial = (int) (fTime - earliestStartTime);
             bestResource.view.set(idx, bestResource.view.get(idx) + "[t" + rankedTask.getId().substring(rankedTask.getId().length()-2, rankedTask.getId().length()) + StringUtils.repeat("*", durationActuial / 100 - 5) + "]");

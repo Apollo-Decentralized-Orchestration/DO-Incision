@@ -52,24 +52,23 @@ public final class Utility {
      * Represents the default configuration for the distributed engine.
      */
     public static final String DE_CONFIGURATION = "<configuration>\n"
-        + "  <module class=\"at.uibk.dps.ee.control.modules.EnactmentVerticleModule\"/>\n"
+        + "  <module class=\"at.uibk.dps.ee.control.modules.EnactmentVerticleModule\">\n"
+        + "    <property name=\"pauseOnStart\">false</property>\n" + "</module>\n"
+        + "<module class=\"at.uibk.dps.ee.enactables.modules.CoreFunctionsModule\"/> "
         + "  <module class=\"at.uibk.dps.ee.io.modules.InputReaderFileModule\">\n"
-        + "    <property name=\"filePath\">./inputData/inputSingleAtomic.json</property>\n"
-        + "  </module>\n" + "  <module class=\"at.uibk.dps.ee.io.modules.LoggingModule\">\n"
-        + "    <property name=\"pathToConfigFile\">./logging/config/logback.xml</property>\n"
-        + "  </module>\n" + "  <module class=\"at.uibk.dps.ee.io.modules.OutputPrinterModule\"/>\n"
+        + "    <property name=\"filePath\">./inputData/sixAtomic.json</property>\n" + "  </module>\n"
+        + "  <module class=\"at.uibk.dps.ee.io.modules.OutputPrinterModule\"/>\n"
         + "  <module class=\"at.uibk.dps.ee.io.modules.SpecificationInputModule\">\n"
-        + "    <property name=\"filePathAfcl\">./demoWfs/singleAtomic.yaml</property>\n"
-        + "    <property name=\"filePathMappingFile\">./typeMappings/singleAtomic.json</property>\n"
+        + "    <property name=\"filePathAfcl\">./demoWfs/sixAtomics.yaml</property>\n"
+        + "    <property name=\"filePathMappingFile\">./typeMappings/sixAtomics.json</property>\n"
         + "  </module>\n"
         + "  <module class=\"at.uibk.dps.ee.visualization.modules.EnactmentViewerModule\">\n"
         + "    <property name=\"closeOnTerminate\">false</property>\n"
         + "    <property name=\"updatePeriodMs\">100</property>\n" + "  </module>\n"
         + "  <module class=\"at.uibk.dps.sc.core.modules.SchedulerModule\">\n"
         + "    <property name=\"schedulingMode\">SingleOption</property>\n"
-        + "    <property name=\"mappingsToPick\">1</property>\n"
-        + "    <property name=\"sizeThresholdKb\">10</property>\n" + "  </module>\n"
-        + "</configuration>";
+        + "    <property name=\"mappingsToPick\">1</property>\n" + "  </module>\n"
+        + "</configuration>\n";
 
     /**
      * Private constructor to avoid unnecessary instantiation of the class.

@@ -29,18 +29,19 @@ dependencies {
         implementation project (':EE-Model')
     }else {
         // dependencies to other parts of the Apollo Core EE
-        implementation 'com.github.Apollo-Core:EE-Model:v1.0.4'
-        implementation 'com.github.Apollo-Core:EE-Deploy:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-IO:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-Core:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-Guice:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-Enactables:v1.0.0'
-        implementation 'com.github.Apollo-Core:EE-Control:v1.0.5'
-        implementation 'com.github.Apollo-Core:EE-Visualization:v1.0.0'
-        implementation 'com.github.Apollo-Core:SC-Core:d129baee74'
+        implementation 'com.github.Apollo-Core:EE-Core:-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Guice:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Model:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-IO:main-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Enactables:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Control:master-SNAPSHOT'
+        implementation 'com.github.Apollo-Core:EE-Visualization:master-SNAPSHOT'
         implementation 'com.github.Apollo-Core:EE-Docker:master-SNAPSHOT'
-        implementation 'com.github.Apollo-Core:EE-Deploy:v1.0.0'
+        implementation 'com.github.Apollo-Core:EE-Deploy:-SNAPSHOT'
     }
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 
     // dependency to Opt4J
     implementation 'com.github.FedorSmirnov89:opt4j:-SNAPSHOT'

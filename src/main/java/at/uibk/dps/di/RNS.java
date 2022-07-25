@@ -76,7 +76,7 @@ public class RNS {
         String specificationAdapted = Utility.fromEnactmentSpecificationToString(specification);
 
         // Run the workflow
-        new ImplementationRunBare().implement(input, specificationAdapted, Utility.DE_CONFIGURATION);
+        //new ImplementationRunBare().implement(input, specificationAdapted, Utility.DE_CONFIGURATION);
     }
 
 
