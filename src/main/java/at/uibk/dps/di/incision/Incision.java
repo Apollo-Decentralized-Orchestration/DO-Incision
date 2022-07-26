@@ -97,7 +97,7 @@ public class Incision {
         prepareNodeConstantString(Utility.fromEnactmentSpecificationToString(resultEnactmentSpecification)),
         eGraph.getVertex(functionNodeId), Utility.SPECIFICATION);
     addCommunicationNode(eGraph, "Constant/" + Utility.CONFIGURATION + "_" + functionNodeId,
-        prepareNodeConstantString(Utility.DE_CONFIGURATION),
+        prepareNodeConstantString(Utility.DE_CONFIGURATION_NO_DOCKER),
         eGraph.getVertex(functionNodeId), Utility.CONFIGURATION);
 
     return resultEnactmentSpecification;

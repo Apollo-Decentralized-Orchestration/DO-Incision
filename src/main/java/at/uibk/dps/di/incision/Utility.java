@@ -26,7 +26,7 @@ public final class Utility {
     /**
      * Represents the location of the distributed engine.
      */
-    public static final String DE_AWS_US_EAST_1 = "https://1m3c0y7o0d.execute-api.us-east-1.amazonaws.com/default/enactment-engine";
+    public static final String DE_AWS_US_EAST_1 = "https://73ibbuimcrtxiilcrmwl2jpx3i0amjaq.lambda-url.us-east-1.on.aws/";
 
     /**
      * Represents the identifier for the distributed engine node.
@@ -52,6 +52,27 @@ public final class Utility {
      * Represents the default configuration for the distributed engine.
      */
     public static final String DE_CONFIGURATION = "<configuration>\n"
+        + "  <module class=\"at.uibk.dps.ee.control.modules.EnactmentVerticleModule\">\n"
+        + "    <property name=\"pauseOnStart\">false</property>\n" + "</module>\n"
+        + "<module class=\"at.uibk.dps.ee.enactables.modules.CoreFunctionsModule\"/> "
+        + "<module class=\"at.uibk.dps.ee.docker.modules.LocalDockerModule\">\n"
+        + "    <property name=\"usedOs\">Unix</property>\n" + "  </module>"
+        + "  <module class=\"at.uibk.dps.ee.io.modules.InputReaderFileModule\">\n"
+        + "    <property name=\"filePath\">./inputData/sixAtomic.json</property>\n" + "  </module>\n"
+        + "  <module class=\"at.uibk.dps.ee.io.modules.OutputPrinterModule\"/>\n"
+        + "  <module class=\"at.uibk.dps.ee.io.modules.SpecificationInputModule\">\n"
+        + "    <property name=\"filePathAfcl\">./demoWfs/sixAtomics.yaml</property>\n"
+        + "    <property name=\"filePathMappingFile\">./typeMappings/sixAtomics.json</property>\n"
+        + "  </module>\n"
+        + "  <module class=\"at.uibk.dps.ee.visualization.modules.EnactmentViewerModule\">\n"
+        + "    <property name=\"closeOnTerminate\">false</property>\n"
+        + "    <property name=\"updatePeriodMs\">100</property>\n" + "  </module>\n"
+        + "  <module class=\"at.uibk.dps.sc.core.modules.SchedulerModule\">\n"
+        + "    <property name=\"schedulingMode\">SingleOption</property>\n"
+        + "    <property name=\"mappingsToPick\">1</property>\n" + "  </module>\n"
+        + "</configuration>\n";
+
+    public static final String DE_CONFIGURATION_NO_DOCKER = "<configuration>\n"
         + "  <module class=\"at.uibk.dps.ee.control.modules.EnactmentVerticleModule\">\n"
         + "    <property name=\"pauseOnStart\">false</property>\n" + "</module>\n"
         + "<module class=\"at.uibk.dps.ee.enactables.modules.CoreFunctionsModule\"/> "
