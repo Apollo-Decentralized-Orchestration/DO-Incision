@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class Scheduler {
 
     boolean dynRank = true;
+
     /**
      * Keeps track of the calculated ranks.
      */
@@ -121,7 +122,7 @@ public class Scheduler {
     private double calcRank(double currentTaskRank, Task predecessor, MappingsConcurrent mappings,
                              ArrayList<Task> rankedTasks, List<Task> toConsider, boolean override){
 
-        // Check if predecessor node is a task node
+        // Check if predecessor node is not communication node (i.e. a task node)
         if (!(predecessor instanceof Communication)) {
 
             Set<Mapping<Task, net.sf.opendse.model.Resource>> predecessorMappings = mappings.getMappings(predecessor);
@@ -132,7 +133,7 @@ public class Scheduler {
                         "Node " + predecessor.getId() + " has no function duration");
             }
 
-            // Get the duration of the predecessor task node
+            // Get the average duration of the predecessor task node
             double duration = predecessorMappings.stream()
                     .mapToDouble(PropertyServiceScheduler::getDuration).sum() / predecessorMappings.size();
 
@@ -202,32 +203,35 @@ public class Scheduler {
 
     public ArrayList<Task> rankDownWards(List<Task> tasks, EnactmentSpecification specification, boolean override) {
 
+        // Get eGraph and task-resource mappings
         EnactmentGraph eGraph = specification.getEnactmentGraph();
         MappingsConcurrent mappings = specification.getMappings();
 
+        // Resulting ranked tasks
         ArrayList<Task> rankedTasks = new ArrayList<>();
 
-        // Stack containing nodes to check
+        // Stack containing nodes to check (communication and task nodes)
         Stack<AbstractMap.SimpleEntry<Task, Double>> nodeStack = new Stack<>();
+
+        // Add all root notes to stack with default rank of 0.0 (root nodes are communication nodes)
         getRootNodes(eGraph).forEach(node -> nodeStack.push(new AbstractMap.SimpleEntry<>(node, 0.0)));
 
         // Continue until all tasks are ranked
         while (!nodeStack.isEmpty()) {
 
+            // Get first node in stack (communication node)
             AbstractMap.SimpleEntry<Task, Double> current = nodeStack.pop();
 
-
-            // Get predecessors of the current task on the stack
+            // Get successors of the current node on the stack (task node)
             Collection<Task> successorNodes = eGraph.getSuccessors(current.getKey());
 
-            // Iterate over all successor nodes
+            // Iterate over all successor nodes (task nodes)
             for (Task successor : successorNodes) {
 
                 double currentTaskRank = calcRank(current.getValue(), successor, mappings, rankedTasks, tasks, override);
 
                 // Add successor and its rank to the stack
                 nodeStack.add(new AbstractMap.SimpleEntry<>(successor, currentTaskRank));
-                //successor.setAttribute("rank", currentTaskRank);
             }
 
         }
@@ -710,7 +714,7 @@ public class Scheduler {
      */
     public List<Cut> schedule(EnactmentSpecification specification) {
 
-        // Get the resource graph and the vertices of the specification
+        // Get the resource graph and the vertices from the specification
         ResourceGraph rGraph = specification.getResourceGraph();
         Collection<net.sf.opendse.model.Resource> rVertices = rGraph.getVertices();
 
@@ -723,24 +727,25 @@ public class Scheduler {
             );
         }
 
-        // Get the enactment graph and the mappings from the specification
+        // Get the enactment graph and the task-resource mappings from the specification
         EnactmentGraph eGraph = specification.getEnactmentGraph();
         MappingsConcurrent mappings = specification.getMappings();
 
-        // Rank the tasks based on upward rank (no latency between tasks)
+        // Get all tasks of the workflow
         List<Task> tasks = new ArrayList<>(eGraph.getVertices());
+
+        // Rank the tasks based on upward rank (no latency between tasks)
+
         //ArrayList<Task> rankedTasks = sort(rank(tasks, specification));
         ArrayList<Task> rankedTasks = sortOther(rankDownWards(tasks, specification, false));
-        System.out.println(mapRank);
+        System.out.println("Ranked Map: " + mapRank);
         Stack<Task> rankedTaskStack = new Stack<>();
         rankedTaskStack.addAll(rankedTasks);
-
-        //System.out.println(mapRank);
 
         // Continue while there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
 
-            // Get the task with highest rank
+            // Get the task with highest priority (lowest rank)
             Task rankedTask = rankedTaskStack.pop();
 
             // Get predecessor task nodes of current ranked task
