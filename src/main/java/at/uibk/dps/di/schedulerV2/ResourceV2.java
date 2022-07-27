@@ -94,6 +94,10 @@ public class ResourceV2 {
         return bestAlternativeFT;
     }
 
+    public double getAverageLatency () {
+        return (this.latencyGlobal + this.latencyLocal) / 2.0;
+    }
+
     public ResourceV2 copy() {
         ResourceV2 copy = new ResourceV2(this.id, this.instances, this.latencyLocal, this.latencyGlobal, this.enactmentSpecification);
         copy.available = new ArrayList<>(this.available);
@@ -106,5 +110,21 @@ public class ResourceV2 {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public double getLatencyLocal() {
+        return latencyLocal;
+    }
+
+    public void setLatencyLocal(double latencyLocal) {
+        this.latencyLocal = latencyLocal;
+    }
+
+    public double getLatencyGlobal() {
+        return latencyGlobal;
+    }
+
+    public void setLatencyGlobal(double latencyGlobal) {
+        this.latencyGlobal = latencyGlobal;
     }
 }

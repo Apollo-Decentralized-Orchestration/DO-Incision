@@ -77,18 +77,34 @@ public class Scheduler {
     }
 
     /**
+     * Dynamically update the rank.
+     *
+     * @param specification containing tasks to rank.
+     */
+    private void updateRank(Map<Task, Double> ranks, Map<Task, ResourceV2> resources, EnactmentSpecification specification, Task task) {
+
+        Collection<Task> successorTaskNodes = GraphUtility.getSuccessorTaskNodes(specification.getEnactmentGraph(), task);
+
+        successorTaskNodes.forEach((t) -> {
+            if(ranks.containsKey(t)) {
+                ranks.replace(t, ranks.get(t) + resources.get(task).getAverageLatency());
+            }
+        });
+    }
+
+    /**
      * Sort tasks by descending order.
      *
      * @param rankedTasks tasks to sort.
      *
      * @return sorted ranks.
      */
-    public Stack<Task> sort(ArrayList<Task> rankedTasks){
+    public Stack<Task> sort(Map<Task, Double> ranks, ArrayList<Task> rankedTasks){
 
         // Sort the given ranks
         rankedTasks.sort((o1, o2) -> {
-            double rank1 = mapRank.get(o1);
-            double rank2 = mapRank.get(o2);
+            double rank1 = ranks.get(o1);
+            double rank2 = ranks.get(o2);
             if (rank1 == rank2) {
                 return 0;
             }
@@ -105,13 +121,10 @@ public class Scheduler {
         Stack<Task> rankedTaskStack, Task rankedTask,
         double pStart) {
 
-        if(GraphUtility.counter == 2) {
-            System.out.println(2);
-        }
-
         // Temporary resource mappings, task stack, function finish time mappings
         Map<Task, ResourceV2> tmpMapResource = new ConcurrentHashMap<>(mapResource);
         Map<Task, Double> tmpMapFT = new ConcurrentHashMap<>(mapFT);
+        Map<Task, Double> tmpMapRank = new ConcurrentHashMap<>(mapRank);
         Stack<Task> taskStack = new Stack<>();
         taskStack.addAll(rankedTaskStack);
 
@@ -130,9 +143,14 @@ public class Scheduler {
         double ft = resource.ftTask(rankedTask, pStart, true, tmpMapResource);
         tmpMapResource.put(rankedTask, resource);
         tmpMapFT.put(rankedTask, ft);
-        rankedTask.setAttribute(GraphUtility.counter + "_ft", ft + "_" + resource.getId());
+        rankedTask.setAttribute(GraphUtility.counter + "_ft", ft + "_" + (resource.getId().contains("Local") ? "L" : "CLOUD"));
 
         double maxFT = 0.0;
+
+        tmpMapRank.remove(rankedTask);
+        updateRank(tmpMapRank, tmpMapResource, specification, rankedTask);
+        taskStack = sort(tmpMapRank, new ArrayList<>(tmpMapRank.keySet()));
+        tmpMapRank.forEach((ta,r) -> ta.setAttribute(GraphUtility.counter + "_rank_heft:", r));
 
         while(!taskStack.empty()) {
             Task t = taskStack.pop();
@@ -157,10 +175,16 @@ public class Scheduler {
             bestResource.ftTask(t, possStart, true, tmpMapResource);
             tmpMapResource.put(t, bestResource);
             tmpMapFT.put(t, bestFT);
-            t.setAttribute(GraphUtility.counter + "_ft", bestFT + "_" + bestResource.getId());
+            rankedTask.setAttribute(GraphUtility.counter + "_rank_heft_after:", tmpMapRank.get(rankedTask));
+            tmpMapRank.remove(t);
+            t.setAttribute(GraphUtility.counter + "_ft_" + rankedTask + "_" + (resource.getId().contains("Local") ? "L" : "CLOUD"),  bestFT + "_" + (bestResource.getId().contains("Local") ? "L" : "CLOUD"));
             if(maxFT < bestFT) {
                 maxFT = bestFT;
             }
+
+            System.out.println("handled task: " + t);
+            updateRank(tmpMapRank, tmpMapResource, specification, t);
+            taskStack = sort(tmpMapRank, new ArrayList<>(tmpMapRank.keySet()));
         }
 
         return maxFT;
@@ -175,7 +199,6 @@ public class Scheduler {
 
         // Get the resource and enactment graph and the vertices from the specification
         ResourceGraph rGraph = specification.getResourceGraph();
-        EnactmentGraph eGraph = specification.getEnactmentGraph();
 
         // Transform to an internal representation for the resources
         List<ResourceV2> resources = new ArrayList<>();
@@ -187,7 +210,7 @@ public class Scheduler {
         rankUpWards(specification);
 
         // Sort ranked tasks
-        Stack<Task> rankedTaskStack = sort(new ArrayList<>(mapRank.keySet()));
+        Stack<Task> rankedTaskStack = sort(mapRank, new ArrayList<>(mapRank.keySet()));
 
         // Continue while there are ranked tasks
         while(!rankedTaskStack.isEmpty()) {
@@ -207,7 +230,6 @@ public class Scheduler {
 
             // Iterate over all possible resources
             for(ResourceV2 resource: resources) {
-
                 double tmpFT = heft(specification, resources, resource, rankedTaskStack, rankedTask, possStart);
                 GraphUtility.counter++;
                 if(tmpFT < bestFT) {
@@ -215,11 +237,17 @@ public class Scheduler {
                     bestResource = resource;
                 }
             }
+
             double ft = bestResource.ftTask(rankedTask, possStart, true, mapResource);
             mapResource.put(rankedTask, bestResource);
             mapFT.put(rankedTask, ft);
+            mapRank.remove(rankedTask);
             System.out.println("Fixed task " + rankedTask + " on " + bestResource.getId() + " with FT=" + ft);
-            rankedTask.setAttribute("FINAL_FT", ft + "_" + bestResource.getId());
+            rankedTask.setAttribute("FINAL_FT", ft + "_" + (bestResource.getId().contains("Local") ? "L" : "CLOUD"));
+
+            updateRank(mapRank, mapResource, specification, rankedTask);
+            rankedTaskStack = sort(mapRank, new ArrayList<>(mapRank.keySet()));
+            mapRank.forEach((t,r) -> t.setAttribute(GraphUtility.counter + "_rank:", r));
         }
     }
 }
