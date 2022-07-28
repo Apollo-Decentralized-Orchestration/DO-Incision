@@ -102,6 +102,6 @@ public class GraphUtility {
             }
         }
 
-        throw new IllegalArgumentException("Could not find duration for " + task.getId());
+        throw new IllegalArgumentException("Could not find duration for " + task.getId() + " on resource " + resource.getId());
     }
 }
