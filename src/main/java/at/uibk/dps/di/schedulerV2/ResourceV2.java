@@ -25,17 +25,30 @@ public class ResourceV2 {
      */
     private List<Double> available;
 
+    private List<LatencyMapping> latencyMappings;
+
+
     ResourceV2(String id, int instances, double latencyLocal, double latencyGlobal,
-        EnactmentSpecification enactmentSpecification) {
+        EnactmentSpecification enactmentSpecification,  List<LatencyMapping> latencyMappings) {
         this.id = id;
         this.instances = instances;
         this.latencyLocal = latencyLocal;
         this.latencyGlobal = latencyGlobal;
         this.enactmentSpecification = enactmentSpecification;
         this.available = new ArrayList<>();
+        this.latencyMappings = latencyMappings;
     }
 
-    double ftTask(Task task, double possibleStart, boolean fix, Map<Task, ResourceV2> mapResource) {
+    ResourceV2(String id, int instances,
+        EnactmentSpecification enactmentSpecification, List<LatencyMapping> latencyMappings) {
+        this.id = id;
+        this.instances = instances;
+        this.enactmentSpecification = enactmentSpecification;
+        this.available = new ArrayList<>();
+        this.latencyMappings = latencyMappings;
+    }
+
+    double ftTask(Task task, double possibleStart, boolean fix, Map<Task, ResourceV2> mapResource, boolean longTerm) {
 
         // Get duration of function on specific resource
         double duration = GraphUtility.getTaskDurationOnResource(enactmentSpecification, task, this);
@@ -45,19 +58,43 @@ public class ResourceV2 {
 
         // Check if at least one previous task was on the same rsource
         Collection<Task> predecessors = GraphUtility.getPredecessorTaskNodes(enactmentSpecification.getEnactmentGraph(), task);
-        boolean prevOnSameResource = false;
+
+        double maxLatency = 0.0;
+        //boolean prevOnSameResource = false;
         for(Task p: predecessors) {
-            if(mapResource.get(p).getId().equals(this.getId())) {
-                prevOnSameResource = true;
-                break;
+            if(!longTerm){
+                for(LatencyMapping latencyMapping: latencyMappings) {
+                    if((this.getId().contains(latencyMapping.getNode1()) && mapResource.get(p).getId().contains(latencyMapping.getNode2()))
+                        || this.getId().contains(latencyMapping.getNode2()) && mapResource.get(p).getId().contains(latencyMapping.getNode1())){
+                        if(maxLatency < latencyMapping.getLatency()) {
+                            maxLatency = latencyMapping.getLatency();
+                        }
+                    }
+                }
+            } else {
+                for (LatencyMapping lm : latencyMappings) {
+                    if ((this.getId().contains(lm.getNode1()) && this.getId().contains(lm.getNode2()))) {
+                        if(maxLatency < lm.getLatency()) {
+                            maxLatency = lm.getLatency();
+                        }
+                    }
+                }
+            }
+        }
+        if(predecessors.size() == 0) {
+            if(this.getId().contains("aws")) {
+                maxLatency = 500.0;
             }
         }
 
+        ft+=maxLatency;
+        /*
         if(prevOnSameResource) {
             ft += latencyLocal;
         } else {
             ft += latencyGlobal;
-        }
+        }*/
+
 
         // TODO reuse always resource is possible, maybe adapt?
         // Check if available instance has optimal start time (reuse same resource if possible)
@@ -87,7 +124,7 @@ public class ResourceV2 {
         }
 
         // Set best other alternative resource
-        double bestAlternativeFT = available.get(bestAlternativeIndex) + duration + (prevOnSameResource ? latencyLocal : latencyGlobal);
+        double bestAlternativeFT = available.get(bestAlternativeIndex) + duration + maxLatency;
         if(fix) {
             available.set(bestAlternativeIndex, bestAlternativeFT);
         }
@@ -99,7 +136,7 @@ public class ResourceV2 {
     }
 
     public ResourceV2 copy() {
-        ResourceV2 copy = new ResourceV2(this.id, this.instances, this.latencyLocal, this.latencyGlobal, this.enactmentSpecification);
+        ResourceV2 copy = new ResourceV2(this.id, this.instances, this.latencyLocal, this.latencyGlobal, this.enactmentSpecification, this.latencyMappings);
         copy.available = new ArrayList<>(this.available);
         return copy;
     }

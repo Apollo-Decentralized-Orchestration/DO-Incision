@@ -1,0 +1,379 @@
+/usr/lib/jvm/java-14-oracle/bin/java -Didea.launcher.port=35631 -Didea.launcher.bin.path=/home/stefan/Documents/idea-IC-183.5912.21/bin -Dfile.encoding=UTF-8 -classpath /home/stefan/git/orgs/apollo-core/EE-Core/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Guice/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Model/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-IO/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Enactables/out/production/classes:/home/stefan/git/orgs/apollo-core/SC-Core/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Control/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Visualization/out/production/classes:/home/stefan/git/orgs/apollo-core/EE-Docker/out/production/classes:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89/opt4j/-SNAPSHOT/58d2117a1ec66c5cdf7989b1715c4ce4df09eb32/opt4j--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89/opendse/-SNAPSHOT/52208f780933a5aa3b74add918dc2e6a1a71bff9/opendse--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/Library/-SNAPSHOT/5b482333dd9b6cdb574da1ff2339c0fc7762df16/Library--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/EE-Control/master-SNAPSHOT/3da2b86f492caa6cb9b50a0f010b2f0e34df6370/EE-Control-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/SC-Core/main-SNAPSHOT/58cb7ceaccdfed3b8e62156ecd0eea72a11dd35b/SC-Core-main-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-benchmarks/-SNAPSHOT/ccdcc3413d50957d6ee775cba0c7aede110f985c/opt4j-benchmarks--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/EE-Enactables/master-SNAPSHOT/debe2aec195e6697434fb1250025417bab60e22c/EE-Enactables-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-core/-SNAPSHOT/fb55104a0b32b26352d2b9fc482b79c86245cd6b/opt4j-core--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/EE-Guice/main-SNAPSHOT/bda6e751f1325a4d34ef5114be2a007449f4450f/EE-Guice-main-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-operators/-SNAPSHOT/ac5c9c8d0394b27c6046a2050492b9a463db136e/opt4j-operators--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/EE-Model/main-SNAPSHOT/d84062aeba595583d7a6895eb7508c89639269fd/EE-Model-main-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-optimizers/-SNAPSHOT/43cedb4ccf5f4aa6fe392d6f9dc574948d755cc7/opt4j-optimizers--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-satdecoding/-SNAPSHOT/a1c0ce23e0199528d59e591f6eb8dd3bdea57c8/opt4j-satdecoding--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89/opendse/master-SNAPSHOT/ec15acefe1c19916f714159465dabe22a20d82ed/opendse-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/build/master-SNAPSHOT/70dabf620699c4ef6b8c41d01bfecb3f339b2827/build-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-tutorial/-SNAPSHOT/b5d1adc5e0de67ac8d96e004cc529294569dc4c8/opt4j-tutorial--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-encoding/master-SNAPSHOT/ba90cc013c9737daf1c22ba2c16ddcb96ec04c76/opendse-encoding-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-viewer/-SNAPSHOT/cd840236cc6d946f62bc6468f57d0385628e1ab9/opt4j-viewer--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-tutorial/master-SNAPSHOT/78dc7d804a6836cb9f5fe1d97bfa6d1a9332425a/opendse-tutorial-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/build/-SNAPSHOT/3b8fe0fe04534c5bae0219124674b4ebb338c306/build--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-encoding/-SNAPSHOT/224afb727958ac492ceb41b0fccd23709a33e8e1/opendse-encoding--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-optimization/master-SNAPSHOT/21a8525e04a82ed863c0bf49f9d4b7523fb65f34/opendse-optimization-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-generator/-SNAPSHOT/9d9a3f8f438d84c4e6fd075f81b9708781601206/opendse-generator--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-realtime/master-SNAPSHOT/e9bf88244f07986c13febd40b00baa1c04d8d3f/opendse-realtime-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-tutorial/-SNAPSHOT/c3f9208b5a827ff2c8c837543ecbabf13a0eb98d/opendse-tutorial--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-visualization/master-SNAPSHOT/667cef0e1b4e8e0e732fbd65c959665e143bce1b/opendse-visualization-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89/opt4j/master-SNAPSHOT/68da8faf9d6076089b4556ea8e59f36fd6f13b96/opt4j-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-optimization/-SNAPSHOT/37d667faa762ca4c5c422c530cd7a0d9ccb5b4a0/opendse-optimization--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-realtime/-SNAPSHOT/512c12046d52ed56fa4e789c4b3cbd88052991e2/opendse-realtime--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-Core/EE-Core/master-SNAPSHOT/5640d499e28b0c994f3ec1234f0c2a81c5670fd4/EE-Core-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.8.6/9180733b7df8542621dc12e21e87557e8c99b8cb/gson-2.8.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-visualization/-SNAPSHOT/8054e80c01328901f42725a4b0795e6d845ebca1/opendse-visualization--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-io/-SNAPSHOT/3dafce43292155f5ccb97b211d55f9278ffc3488/opendse-io--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-web/4.1.1/ae6249173d0a55cad1ccc7b3520a7d41c02eca30/vertx-web-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-model/-SNAPSHOT/439452549b53ac1490ab480c5487e2d8ad231cf0/opendse-model--SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-web-client/4.1.1/e2d96390397ca7428dcf15674427d469e18a7787/vertx-web-client-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.inject/guice/5.0.1/dae7556b441cada2b4f0a2314eb68e1ff423429/guice-5.0.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-web-common/4.1.1/92e665643ca2905e7044975ed1104b0e85ccecb4/vertx-web-common-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jung/jung-graph-impl/2.1.1/8293acb2ab4c00a3939cb99a8751e5d38a4299dc/jung-graph-impl-2.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-auth-common/4.1.1/d1be7b6b40293cfb3e3841c624d27223834fab5d/vertx-auth-common-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jung/jung-visualization/2.1.1/40488654daea1f57e0790e40153be19a307943dd/jung-visualization-2.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-bridge-common/4.1.1/1f6ea767cf5f9956eb352bf33aae7fd25e4db29d/vertx-bridge-common-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jung/jung-algorithms/2.1.1/632bd89a61a6c1ca7ed3505aca0765cff987096e/jung-algorithms-2.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.vertx/vertx-core/4.1.1/2015dbd9849c0cc7be99a6049011b876a6edd775/vertx-core-4.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.Apollo-AFCL/AFCLCore-AFCLv1.1/master-SNAPSHOT/5ba039bf1abff98601c61ae4b1138b97c67556f3/AFCLCore-AFCLv1.1-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jung/jung-api/2.1.1/e47ee4efdfacce12f0af620747d9d0e44bf2eaa4/jung-api-2.1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.2.3/7c4f3c474fb2c041d8028740440937705ebb473a/logback-classic-1.2.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jmpi/jmpi-solver-gurobi/0.6/4f45c636daa60dceb96d269c92731ac3ff1ec724/jmpi-solver-gurobi-0.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-benchmarks/master-SNAPSHOT/472e8d63c6350f41453452f8575bb2797e26032/opt4j-benchmarks-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jmpi/jmpi-main/0.6/96c22fe07cd4555fd6cf8af427f2378d881e70d8/jmpi-main-0.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-tutorial/master-SNAPSHOT/e71e26800b3cd9f4142317c7144b208999e04765/opt4j-tutorial-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.java.dev.glazedlists/glazedlists_java15/1.9.1/3ec96aff6b7addc9a2f0f82eca7147613142e45/glazedlists_java15-1.9.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-optimizers/master-SNAPSHOT/8cf4410d8f88ff8a3a09b67c7e41d693fd0a12c3/opt4j-optimizers-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/javax.inject/javax.inject/1/6975da39a7040257bd51d21a231b76c915872d38/javax.inject-1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-operators/master-SNAPSHOT/8944c9035ddb736ed987af17862c29e860242606/opt4j-operators-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/aopalliance/aopalliance/1.0/235ba8b489512805ac13a8f9ea77a1ca5ebe3e8/aopalliance-1.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-satdecoding/master-SNAPSHOT/440d81710d3afdcbb7b82df7c75160b09ffdb5c5/opt4j-satdecoding-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/30.1-jre/d0c3ce2311c9e36e73228da25a6e99b2ab826f/guava-30.1-jre.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-viewer/master-SNAPSHOT/95144f33abeb31ac2de2df37ddeb1f4cc254edc7/opt4j-viewer-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.1/1dcf1de382a0bf95a3d8b0849546c88bac1292c9/failureaccess-1.0.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/opt4j-core/master-SNAPSHOT/9e5a6f4b79bfd2565d4cdc7612fd976ed32f671d/opt4j-core-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/b421526c5f297295adef1c886e5246c39d4ac629/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.5.0/2f50520c8abea66fbd8d26e481d3aef5c673b510/checker-qual-3.5.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.docker-java/docker-java-transport-httpclient5/3.2.11/88acd3561148dcd13c2222decee4110e9f1021dc/docker-java-transport-httpclient5-3.2.11.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.docker-java/docker-java-core/3.2.13/5a3af141f152d36aad519c7b3915251111592b60/docker-java-core-3.2.13.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.3.4/dac170e4594de319655ffb62f41cbd6dbb5e601e/error_prone_annotations-2.3.4.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/1.3/ba035118bc8bac37d7eff77700720999acd9986d/j2objc-annotations-1.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler-proxy/4.1.65.Final/494094032106f27cb19f67a2ce88570d974438de/netty-handler-proxy-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec-http2/4.1.65.Final/b98d8554d43bbf379883005d043484bafd47cf3/netty-codec-http2-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec-http/4.1.65.Final/fdf0886e1a615ab4ccea96830d7e663a4349180/netty-codec-http-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver-dns/4.1.65.Final/e8bd69d605d08b2257c2ee17cb959cc54302484e/netty-resolver-dns-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.65.Final/28313a14ddd2fc312f75e8f21a5a12ffac4ef0b6/netty-handler-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec-socks/4.1.65.Final/6a9107f2be2b2566adf491dc53fd34b0faf9d13d/netty-codec-socks-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec-dns/4.1.65.Final/6aa72620a8cdd7c9414f45a0c9439fdcab060350/netty-codec-dns-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.65.Final/4a171d689d44df38d1b5b09cedee8584f858e702/netty-codec-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.65.Final/14c0c0356af101fb7f6e2ba77b3e68d7b21dc37b/netty-transport-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.65.Final/9654d248812add4aa36a6201fab88ac5f13028c3/netty-buffer-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.65.Final/561ff144d7ab425d74a2c54e8fb78865a6986063/netty-resolver-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.65.Final/3e5ad41e33add0fad197942e38a509f868aa2c5a/netty-common-4.1.65.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.9.8/a1c807329eb0c75976aeb5961a506b3516ffeae3/jackson-dataformat-yaml-2.9.8.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.module/jackson-module-jsonSchema/2.9.8/156ebce94303720a08cd954b88456000b409909e/jackson-module-jsonSchema-2.9.8.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/json-schema-validator/2.2.6/d6cc3cb8a6a8311f51f2ff21c7bede63d71e9129/json-schema-validator-2.2.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/json-schema-core/1.2.5/7e19e29936a37a41f05999467c8b4a6f6308f238/json-schema-core-1.2.5.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/jackson-coreutils/1.8/491a6e1130a180c153df9f2b7aabd7a700282c67/jackson-coreutils-1.8.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.10.3/aae92628b5447fa25af79871ca98668da6edd439/jackson-databind-2.10.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.11.4/593f7b18bab07a76767f181e2a2336135ce82cc4/jackson-core-2.11.4.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opt4j/Library/master-SNAPSHOT/8822f58906d247fa435c62cd5cc08411c2dd882b/Library-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-generator/master-SNAPSHOT/bfb705c5c25c75aa7236e89cab0dc8a476ea3cfe/opendse-generator-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-io/master-SNAPSHOT/4a2539d139eb0716b9700a13ad1275ba421fbcc4/opendse-io-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.FedorSmirnov89.opendse/opendse-model/master-SNAPSHOT/3f9efbdc78770f15e50c291ffbf1a358b4832795/opendse-model-master-SNAPSHOT.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.yaml/snakeyaml/1.23/ec62d74fe50689c28c0ff5b35d3aebcaa8b5be68/snakeyaml-1.23.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.docker-java/docker-java-api/3.2.13/5817ef8f770cb7e740d590090bf352df9491f3c1/docker-java-api-3.2.13.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.10.3/f63b3b1da563767d04d2e4d3fc1ae0cdeffebe7/jackson-annotations-2.10.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.6/815893df5f31da2ece4040fe0a12fd44b577afaf/commons-io-2.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.2.3/864344400c3d4d92dfeb0a305dc87d953677c03c/logback-core-1.2.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents.client5/httpclient5/5.0.3/c4bc772689d4bb2d4128c5e4966f765a8a76e904/httpclient5-5.0.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.30/b5a4b6d16ab13e34a88fae84c35cd5d68cac922c/slf4j-api-1.7.30.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/uri-template/0.9/ab1ad5804d3c7d640f21059085df5be340e97929/uri-template-0.9.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.docker-java/docker-java-transport/3.2.13/e9d308d1822181a9d48c99739f5eca014ec89199/docker-java-transport-3.2.13.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.8.0/3551d8d827e54858214107541d3aff9c615cb615/jna-5.8.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.21/4ec95b60d4e86b5c95a0e919cb172a0af98011ef/commons-compress-1.21.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.12.0/c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e/commons-lang3-3.12.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcpkix-jdk15on/1.64/3dac163e20110817d850d17e0444852a6d7d0bd7/bcpkix-jdk15on-1.64.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.ow2.sat4j/org.ow2.sat4j.pb/2.3.5/ae46e580753b9d33c21dc2292ea987c34b9b79d7/org.ow2.sat4j.pb-2.3.5.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.ow2.sat4j/org.ow2.sat4j.core/2.3.5/5c446af569276907e35f122df9dedbb281e0a846/org.ow2.sat4j.core-2.3.5.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.ow2.sat4j/org.ow2.sat4j.core/2.3.5/6d229b3927ee278546b15a2350095b46aeb17da9/org.ow2.sat4j.core-2.3.5-tests.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.io7m.xom/xom/1.2.10/4165e25bef19aad134f6498cc277110b9bc5e52b/xom-1.2.10.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-collections4/4.4/62ebe7544cb7164d87e0637a2a6a2bdc981395e8/commons-collections4-4.4.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/javax.validation/validation-api/1.1.0.Final/8613ae82954779d518631e05daa73a6a954817d5/validation-api-1.1.0.Final.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/msg-simple/1.1/f261263e13dd4cfa93cc6b83f1f58f619097a2c4/msg-simple-1.1.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.github.fge/btf/1.2/9e66651022eb86301b348d57e6f59459effc343b/btf-1.2.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.3/56498efd17752898cfcc3868c1b6211a07b12b8f/joda-time-2.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/com.googlecode.libphonenumber/libphonenumber/6.2/3ddc8255a39cc0505a6a34c56c9ec256833d2239/libphonenumber-6.2.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/javax.mail/mailapi/1.4.3/124600e35d9031da50e5f67661ffa741541f8f6a/mailapi-1.4.3.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/net.sf.jopt-simple/jopt-simple/4.6/306816fb57cf94f108a43c95731b08934dcae15c/jopt-simple-4.6.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents.core5/httpcore5/5.0.2/ea298cd1ce1d860747149fbb5f6236300219f378/httpcore5-5.0.2.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.13/3f18e1aa31031d89db6f01ba05d501258ce69d2c/commons-codec-1.13.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk15on/1.64/1467dac1b787b5ad2a18201c0c281df69882259e/bcprov-jdk15on-1.64.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/xerces/xercesImpl/2.8.0/cfd3ebe2f8034e660344f9108c3e2daf78c29cc3/xercesImpl-2.8.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/xalan/xalan/2.7.0/a33c0097f1c70b20fa7ded220ea317eb3500515e/xalan-2.7.0.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/org.mozilla/rhino/1.7R4/e982f2136574b9a423186fbaeaaa98dc3e5a5288/rhino-1.7R4.jar:/home/stefan/.gradle/caches/modules-2/files-2.1/javax.activation/activation/1.1/e6cb541461c2834bdea3eb920f1884d1eb508b50/activation-1.1.jar:/home/stefan/Documents/idea-IC-183.5912.21/lib/idea_rt.jar com.intellij.rt.execution.application.AppMainV2 at.uibk.dps.ee.guice.starter.EeConfiguration soykb/config.xml
+Searching Modules ... Done
+Loaded configuration from soykb/config.xml
+Using io.vertx.core.logging.SLF4JLogDelegateFactory
+Deployed 40 verticles.
+Pausing enactment.
+-- processing {"bucket":"soykbuibk","reference":"NC_000913.3-hipA7.fasta","r1":"hipa7_reads_R1_2.fastq","r2":"hipa7_reads_R2_2.fastq","chr1":"NC_000913.3:4316169","chr2":"NC_000913.3:4636685","chr3":"NC_000913.3:4935","chr4":"NC_000913.3:10309"}
+Availability of the input data modeled by node soykb/chr4 advertized.
+Availability of the input data modeled by node soykb/chr2 advertized.
+Availability of the input data modeled by node soykb/chr3 advertized.
+Availability of the input data modeled by node soykb/r1 advertized.
+Availability of the input data modeled by node soykb/reference advertized.
+Availability of the input data modeled by node soykb/r2 advertized.
+Availability of the input data modeled by node soykb/chr1 advertized.
+Availability of the input data modeled by node soykb/bucket advertized.
+Resuming enactment.
+Thread 35; Task soykb_alignment_to_reference1 is schedulable.
+Thread 35; Task soykb_alignment_to_reference2 is schedulable.
+Thread 35; Task soykb_alignment_to_reference3 is schedulable.
+Enacting Task soykb_alignment_to_reference1
+Thread 44; Task soykb_alignment_to_reference2 scheduled
+Thread 43; Task soykb_alignment_to_reference1 scheduled
+Enacting Task soykb_alignment_to_reference2
+Thread 45; Task soykb_alignment_to_reference3 scheduled
+Enacting Task soykb_alignment_to_reference3
+Input for Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","r1":"hipa7_reads_R1_2.fastq","r2":"hipa7_reads_R2_2.fastq","reference":"NC_000913.3-hipA7.fasta"}
+Input for Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"r1":"hipa7_reads_R1_2.fastq","r2":"hipa7_reads_R2_2.fastq","reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk"}
+Input for Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"r1":"hipa7_reads_R1_2.fastq","r2":"hipa7_reads_R2_2.fastq","reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk"}
+Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"aligned_reads": "1659431094242_aligned_reads.sam", "elapsed_time": 3.1256048679351807}
+Enactment finished for task soykb_alignment_to_reference1.
+Serverless function {} finished.
+Output of Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"aligned_reads": "1659431094249_aligned_reads.sam", "elapsed_time": 3.1490259170532227}
+Enactment finished for task soykb_alignment_to_reference2.
+Thread 44; Data on node soykb_alignment_to_reference2/aligned_reads available.
+Thread 43; Data on node soykb_alignment_to_reference1/aligned_reads available.
+Thread 35; Task soykb_sort_sam1 is schedulable.
+Thread 46; Task soykb_sort_sam1 scheduled
+Enacting Task soykb_sort_sam1
+Thread 36; Task soykb_sort_sam2 is schedulable.
+Input for Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"aligned_reads":"1659431094242_aligned_reads.sam","bucket":"soykbuibk"}
+Thread 47; Task soykb_sort_sam2 scheduled
+Enacting Task soykb_sort_sam2
+Input for Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"aligned_reads":"1659431094249_aligned_reads.sam","bucket":"soykbuibk"}
+Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://nvpl2u7eejdrscdll55nvomp3a0qumpv.lambda-url.us-east-1.on.aws/ is {"aligned_reads": "1659431094221_aligned_reads.sam", "elapsed_time": 3.252875804901123}
+Enactment finished for task soykb_alignment_to_reference3.
+Thread 45; Data on node soykb_alignment_to_reference3/aligned_reads available.
+Thread 38; Task soykb_sort_sam3 is schedulable.
+Thread 48; Task soykb_sort_sam3 scheduled
+Enacting Task soykb_sort_sam3
+Input for Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"aligned_reads":"1659431094221_aligned_reads.sam","bucket":"soykbuibk"}
+Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"sorted_reads": "1659431098295_sorted_reads.bam", "elapsed_time": 0.9801485538482666}
+Enactment finished for task soykb_sort_sam3.
+Thread 46; Data on node soykb_sort_sam3/sorted_reads available.
+Thread 37; Task soykb_dedup3 is schedulable.
+Thread 49; Task soykb_dedup3 scheduled
+Enacting Task soykb_dedup3
+Input for Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","sorted_reads":"1659431098295_sorted_reads.bam"}
+Serverless function {} finished.
+Output of Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"sorted_reads": "1659431098270_sorted_reads.bam", "elapsed_time": 1.0701591968536377}
+Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ triggerred.
+Enactment finished for task soykb_sort_sam1.
+Thread 47; Data on node soykb_sort_sam1/sorted_reads available.
+Thread 39; Task soykb_dedup1 is schedulable.
+Enacting Task soykb_dedup1
+Thread 33; Task soykb_dedup1 scheduled
+Input for Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","sorted_reads":"1659431098270_sorted_reads.bam"}
+Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://abzuwbac2m7wzlgpm6zfrnj5c40hexln.lambda-url.us-east-1.on.aws/ is {"sorted_reads": "1659431098381_sorted_reads.bam", "elapsed_time": 1.16343355178833}
+Enactment finished for task soykb_sort_sam2.
+Thread 48; Data on node soykb_sort_sam2/sorted_reads available.
+Thread 40; Task soykb_dedup2 is schedulable.
+Thread 43; Task soykb_dedup2 scheduled
+Enacting Task soykb_dedup2
+Input for Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","sorted_reads":"1659431098381_sorted_reads.bam"}
+Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"deduped_reads": "1659431099787_deduped_reads.bam", "elapsed_time": 3.638418674468994}
+Enactment finished for task soykb_dedup1.
+Thread 49; Data on node soykb_dedup1/deduped_reads available.
+Thread 41; Task soykb_add_replace1 is schedulable.
+Thread 44; Task soykb_add_replace1 scheduled
+Enacting Task soykb_add_replace1
+Input for Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","deduped_reads":"1659431099787_deduped_reads.bam"}
+Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"deduped_reads": "1659431099901_deduped_reads.bam", "elapsed_time": 3.8759875297546387}
+Enactment finished for task soykb_dedup2.
+Thread 33; Data on node soykb_dedup2/deduped_reads available.
+Thread 42; Task soykb_add_replace2 is schedulable.
+Thread 45; Task soykb_add_replace2 scheduled
+Enacting Task soykb_add_replace2
+Input for Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","deduped_reads":"1659431099901_deduped_reads.bam"}
+Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://xektuf6xq7mlscz3ddcxlmhf2y0szkes.lambda-url.us-east-1.on.aws/ is {"deduped_reads": "1659431099805_deduped_reads.bam", "elapsed_time": 3.9655439853668213}
+Enactment finished for task soykb_dedup3.
+Thread 43; Data on node soykb_dedup3/deduped_reads available.
+Thread 36; Task soykb_add_replace3 is schedulable.
+Thread 46; Task soykb_add_replace3 scheduled
+Enacting Task soykb_add_replace3
+Input for Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"deduped_reads":"1659431099805_deduped_reads.bam","bucket":"soykbuibk"}
+Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"addrepl": "1659431104294_addrepl.bam", "elapsed_time": 1.4006001949310303}
+Enactment finished for task soykb_add_replace1.
+Thread 44; Data on node soykb_add_replace1/addrepl available.
+Thread 35; Task soykb_realign_target_creator1 is schedulable.
+Thread 47; Task soykb_realign_target_creator1 scheduled
+Enacting Task soykb_realign_target_creator1
+Input for Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"addrepl":"1659431104294_addrepl.bam","reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk"}
+Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"addrepl": "1659431104397_addrepl.bam", "elapsed_time": 1.192371129989624}
+Enactment finished for task soykb_add_replace3.
+Thread 45; Data on node soykb_add_replace3/addrepl available.
+Thread 38; Task soykb_realign_target_creator3 is schedulable.
+Thread 48; Task soykb_realign_target_creator3 scheduled
+Enacting Task soykb_realign_target_creator3
+Input for Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","addrepl":"1659431104397_addrepl.bam","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://kbqlngc543plsvzrvjtjuqt3aq0mirwu.lambda-url.us-east-1.on.aws/ is {"addrepl": "1659431104423_addrepl.bam", "elapsed_time": 1.3961377143859863}
+Enactment finished for task soykb_add_replace2.
+Thread 46; Data on node soykb_add_replace2/addrepl available.
+Thread 37; Task soykb_realign_target_creator2 is schedulable.
+Thread 49; Task soykb_realign_target_creator2 scheduled
+Enacting Task soykb_realign_target_creator2
+Input for Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk","addrepl":"1659431104423_addrepl.bam"}
+Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"intervals": "1659431106830_intervals.list", "elapsed_time": 5.372530221939087}
+Enactment finished for task soykb_realign_target_creator1.
+Thread 47; Data on node soykb_realign_target_creator1/intervals available.
+Thread 39; Task soykb_indel_realign1 is schedulable.
+Thread 33; Task soykb_indel_realign1 scheduled
+Enacting Task soykb_indel_realign1
+Input for Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","intervals":"1659431106830_intervals.list","addrepl":"1659431104294_addrepl.bam","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"intervals": "1659431107130_intervals.list", "elapsed_time": 6.224851846694946}
+Enactment finished for task soykb_realign_target_creator3.
+Thread 48; Data on node soykb_realign_target_creator3/intervals available.
+Thread 40; Task soykb_indel_realign3 is schedulable.
+Thread 43; Task soykb_indel_realign3 scheduled
+Enacting Task soykb_indel_realign3
+Input for Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","addrepl":"1659431104397_addrepl.bam","intervals":"1659431107130_intervals.list","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://ezbibug3jxjej53rtc4v7hybca0wfqui.lambda-url.us-east-1.on.aws/ is {"intervals": "1659431107991_intervals.list", "elapsed_time": 7.721526861190796}
+Enactment finished for task soykb_realign_target_creator2.
+Thread 49; Data on node soykb_realign_target_creator2/intervals available.
+Thread 41; Task soykb_indel_realign2 is schedulable.
+Thread 44; Task soykb_indel_realign2 scheduled
+Enacting Task soykb_indel_realign2
+Input for Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","addrepl":"1659431104423_addrepl.bam","reference":"NC_000913.3-hipA7.fasta","intervals":"1659431107991_intervals.list"}
+Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"indel_realigned": "1659431111616indel_realigned.bam", "elapsed_time": 3.6043150424957275}
+Enactment finished for task soykb_indel_realign1.
+Thread 33; Data on node soykb_indel_realign1/indel_realigned available.
+Thread 42; Task soykb_haplotype_caller1_1 is schedulable.
+Thread 42; Task soykb_haplotype_caller1_2 is schedulable.
+Thread 45; Task soykb_haplotype_caller1_1 scheduled
+Enacting Task soykb_haplotype_caller1_1
+Thread 42; Task soykb_haplotype_caller1_3 is schedulable.
+Thread 46; Task soykb_haplotype_caller1_2 scheduled
+Enacting Task soykb_haplotype_caller1_2
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"indel_realigned":"1659431111616indel_realigned.bam","bucket":"soykbuibk","reference":"NC_000913.3-hipA7.fasta","chromosome":"NC_000913.3:4316169"}
+Thread 42; Task soykb_haplotype_caller1_4 is schedulable.
+Thread 47; Task soykb_haplotype_caller1_3 scheduled
+Enacting Task soykb_haplotype_caller1_3
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"indel_realigned":"1659431111616indel_realigned.bam","bucket":"soykbuibk","chromosome":"NC_000913.3:4636685","reference":"NC_000913.3-hipA7.fasta"}
+Thread 48; Task soykb_haplotype_caller1_4 scheduled
+Enacting Task soykb_haplotype_caller1_4
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk","chromosome":"NC_000913.3:4935","indel_realigned":"1659431111616indel_realigned.bam"}
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","chromosome":"NC_000913.3:10309","bucket":"soykbuibk","indel_realigned":"1659431111616indel_realigned.bam"}
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"indel_realigned": "1659431112427indel_realigned.bam", "elapsed_time": 2.813365936279297}
+Enactment finished for task soykb_indel_realign3.
+Thread 43; Data on node soykb_indel_realign3/indel_realigned available.
+Thread 36; Task soykb_haplotype_caller3_4 is schedulable.
+Thread 36; Task soykb_haplotype_caller3_3 is schedulable.
+Thread 49; Task soykb_haplotype_caller3_4 scheduled
+Enacting Task soykb_haplotype_caller3_4
+Thread 36; Task soykb_haplotype_caller3_2 is schedulable.
+Thread 33; Task soykb_haplotype_caller3_3 scheduled
+Enacting Task soykb_haplotype_caller3_3
+Thread 36; Task soykb_haplotype_caller3_1 is schedulable.
+Thread 43; Task soykb_haplotype_caller3_2 scheduled
+Enacting Task soykb_haplotype_caller3_2
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431112427indel_realigned.bam","chromosome":"NC_000913.3:10309","bucket":"soykbuibk"}
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431112427indel_realigned.bam","bucket":"soykbuibk","chromosome":"NC_000913.3:4935"}
+Thread 44; Task soykb_haplotype_caller3_1 scheduled
+Enacting Task soykb_haplotype_caller3_1
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"chromosome":"NC_000913.3:4636685","reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431112427indel_realigned.bam","bucket":"soykbuibk"}
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk","chromosome":"NC_000913.3:4316169","indel_realigned":"1659431112427indel_realigned.bam"}
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://p5fc3q4iczkxolkwl6zkwloy3q0ncrbs.lambda-url.us-east-1.on.aws/ is {"indel_realigned": "1659431114203indel_realigned.bam", "elapsed_time": 2.794905185699463}
+Enactment finished for task soykb_indel_realign2.
+Thread 44; Data on node soykb_indel_realign2/indel_realigned available.
+Thread 35; Task soykb_haplotype_caller2_2 is schedulable.
+Thread 35; Task soykb_haplotype_caller2_1 is schedulable.
+Thread 45; Task soykb_haplotype_caller2_2 scheduled
+Enacting Task soykb_haplotype_caller2_2
+Thread 35; Task soykb_haplotype_caller2_4 is schedulable.
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk","chromosome":"NC_000913.3:4636685","indel_realigned":"1659431114203indel_realigned.bam"}
+Thread 35; Task soykb_haplotype_caller2_3 is schedulable.
+Thread 47; Task soykb_haplotype_caller2_4 scheduled
+Enacting Task soykb_haplotype_caller2_4
+Thread 46; Task soykb_haplotype_caller2_1 scheduled
+Enacting Task soykb_haplotype_caller2_1
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431114203indel_realigned.bam","bucket":"soykbuibk","chromosome":"NC_000913.3:10309"}
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","chromosome":"NC_000913.3:4316169","reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431114203indel_realigned.bam"}
+Thread 48; Task soykb_haplotype_caller2_3 scheduled
+Enacting Task soykb_haplotype_caller2_3
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Input for Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","indel_realigned":"1659431114203indel_realigned.bam","bucket":"soykbuibk","chromosome":"NC_000913.3:4935"}
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115610_NC_000913.3:4935.vcf", "elapsed_time": 2.683886766433716}
+Enactment finished for task soykb_haplotype_caller1_3.
+Thread 45; Data on node soykb_haplotype_caller1_3/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115601_NC_000913.3:4316169.vcf", "elapsed_time": 2.737489700317383}
+Enactment finished for task soykb_haplotype_caller1_1.
+Thread 46; Data on node soykb_haplotype_caller1_1/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115705_NC_000913.3:4636685.vcf", "elapsed_time": 2.686397075653076}
+Enactment finished for task soykb_haplotype_caller3_2.
+Thread 47; Data on node soykb_haplotype_caller3_2/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115721_NC_000913.3:4316169.vcf", "elapsed_time": 2.6907904148101807}
+Enactment finished for task soykb_haplotype_caller3_1.
+Thread 48; Data on node soykb_haplotype_caller3_1/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115699_NC_000913.3:10309.vcf", "elapsed_time": 2.68861985206604}
+Enactment finished for task soykb_haplotype_caller3_4.
+Thread 49; Data on node soykb_haplotype_caller3_4/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115667_NC_000913.3:4935.vcf", "elapsed_time": 2.7161874771118164}
+Enactment finished for task soykb_haplotype_caller3_3.
+Thread 33; Data on node soykb_haplotype_caller3_3/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115620_NC_000913.3:10309.vcf", "elapsed_time": 2.8641135692596436}
+Enactment finished for task soykb_haplotype_caller1_4.
+Thread 43; Data on node soykb_haplotype_caller1_4/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431115680_NC_000913.3:4636685.vcf", "elapsed_time": 2.9157063961029053}
+Enactment finished for task soykb_haplotype_caller1_2.
+Thread 44; Data on node soykb_haplotype_caller1_2/haplo available.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431117424_NC_000913.3:4636685.vcf", "elapsed_time": 2.6638545989990234}
+Enactment finished for task soykb_haplotype_caller2_2.
+Thread 45; Data on node soykb_haplotype_caller2_2/haplo available.
+Thread 38; Task soykb_genotype_gvcfs2 is schedulable.
+Thread 49; Task soykb_genotype_gvcfs2 scheduled
+Enacting Task soykb_genotype_gvcfs2
+Input for Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"to_check_2":"1659431117424_NC_000913.3:4636685.vcf","to_check_3":"1659431115705_NC_000913.3:4636685.vcf","to_check_1":"1659431115680_NC_000913.3:4636685.vcf","chromosome":"NC_000913.3:4636685","bucket":"soykbuibk","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431117372_NC_000913.3:10309.vcf", "elapsed_time": 2.7811484336853027}
+Enactment finished for task soykb_haplotype_caller2_4.
+Thread 46; Data on node soykb_haplotype_caller2_4/haplo available.
+Thread 37; Task soykb_genotype_gvcfs4 is schedulable.
+Thread 33; Task soykb_genotype_gvcfs4 scheduled
+Enacting Task soykb_genotype_gvcfs4
+Input for Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","to_check_3":"1659431115699_NC_000913.3:10309.vcf","to_check_1":"1659431115620_NC_000913.3:10309.vcf","to_check_2":"1659431117372_NC_000913.3:10309.vcf","chromosome":"NC_000913.3:10309","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431117457_NC_000913.3:4935.vcf", "elapsed_time": 2.8209211826324463}
+Enactment finished for task soykb_haplotype_caller2_3.
+Thread 47; Data on node soykb_haplotype_caller2_3/haplo available.
+Thread 39; Task soykb_genotype_gvcfs3 is schedulable.
+Thread 43; Task soykb_genotype_gvcfs3 scheduled
+Enacting Task soykb_genotype_gvcfs3
+Input for Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","to_check_2":"1659431117457_NC_000913.3:4935.vcf","to_check_3":"1659431115667_NC_000913.3:4935.vcf","reference":"NC_000913.3-hipA7.fasta","chromosome":"NC_000913.3:4935","to_check_1":"1659431115610_NC_000913.3:4935.vcf"}
+Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://io3e6ekvvhy4cum7t2qiaip2eu0mnxxy.lambda-url.us-east-1.on.aws/ is {"haplo": "1659431117527_NC_000913.3:4316169.vcf", "elapsed_time": 2.898056745529175}
+Enactment finished for task soykb_haplotype_caller2_1.
+Thread 48; Data on node soykb_haplotype_caller2_1/haplo available.
+Thread 40; Task soykb_merge_gvcfs is schedulable.
+Thread 40; Task soykb_genotype_gvcfs1 is schedulable.
+Thread 44; Task soykb_merge_gvcfs scheduled
+Enacting Task soykb_merge_gvcfs
+Thread 45; Task soykb_genotype_gvcfs1 scheduled
+Enacting Task soykb_genotype_gvcfs1
+Input for Serverless function https://uz2ukwa2hcko3xxvisfxcs7lke0vgtci.lambda-url.us-east-1.on.aws/ is {"to_merge_1_4":"1659431115620_NC_000913.3:10309.vcf","to_merge_2_1":"1659431117527_NC_000913.3:4316169.vcf","to_merge_1_3":"1659431115610_NC_000913.3:4935.vcf","to_merge_2_3":"1659431117457_NC_000913.3:4935.vcf","to_merge_1_2":"1659431115680_NC_000913.3:4636685.vcf","to_merge_1_1":"1659431115601_NC_000913.3:4316169.vcf","to_merge_2_4":"1659431117372_NC_000913.3:10309.vcf","bucket":"soykbuibk","to_merge_3_2":"1659431115705_NC_000913.3:4636685.vcf","to_merge_3_1":"1659431115721_NC_000913.3:4316169.vcf","to_merge_3_3":"1659431115667_NC_000913.3:4935.vcf","to_merge_2_2":"1659431117424_NC_000913.3:4636685.vcf","reference":"NC_000913.3-hipA7.fasta","to_merge_3_4":"1659431115699_NC_000913.3:10309.vcf"}
+Input for Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"to_check_3":"1659431115721_NC_000913.3:4316169.vcf","to_check_2":"1659431117527_NC_000913.3:4316169.vcf","reference":"NC_000913.3-hipA7.fasta","to_check_1":"1659431115601_NC_000913.3:4316169.vcf","chromosome":"NC_000913.3:4316169","bucket":"soykbuibk"}
+Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://uz2ukwa2hcko3xxvisfxcs7lke0vgtci.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"genotype_gvcfs": "GVCF_NC_000913.3:4636685.vcf", "elapsed_time": 2.878246545791626}
+Enactment finished for task soykb_genotype_gvcfs2.
+Thread 49; Data on node soykb_genotype_gvcfs2/genotype_gvcfs available.
+Serverless function {} finished.
+Output of Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"genotype_gvcfs": "GVCF_NC_000913.3:4316169.vcf", "elapsed_time": 2.833019256591797}
+Enactment finished for task soykb_genotype_gvcfs1.
+Thread 33; Data on node soykb_genotype_gvcfs1/genotype_gvcfs available.
+Serverless function {} finished.
+Output of Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"genotype_gvcfs": "GVCF_NC_000913.3:4935.vcf", "elapsed_time": 2.9828007221221924}
+Enactment finished for task soykb_genotype_gvcfs3.
+Thread 43; Data on node soykb_genotype_gvcfs3/genotype_gvcfs available.
+Serverless function {} finished.
+Output of Serverless function https://iytgcfvg6yomsrzvn7jhud57j40adryk.lambda-url.us-east-1.on.aws/ is {"genotype_gvcfs": "GVCF_NC_000913.3:10309.vcf", "elapsed_time": 3.063591957092285}
+Enactment finished for task soykb_genotype_gvcfs4.
+Thread 44; Data on node soykb_genotype_gvcfs4/genotype_gvcfs available.
+Thread 35; Task soykb_combine_variants is schedulable.
+Thread 46; Task soykb_combine_variants scheduled
+Enacting Task soykb_combine_variants
+Input for Serverless function https://pqzui26yyjprgn3fmbego4d7wy0vrciw.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","to_combine_1":"GVCF_NC_000913.3:4316169.vcf","to_combine_2":"GVCF_NC_000913.3:4636685.vcf","to_combine_3":"GVCF_NC_000913.3:4935.vcf","to_combine_4":"GVCF_NC_000913.3:10309.vcf","reference":"NC_000913.3-hipA7.fasta"}
+Serverless function https://pqzui26yyjprgn3fmbego4d7wy0vrciw.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://uz2ukwa2hcko3xxvisfxcs7lke0vgtci.lambda-url.us-east-1.on.aws/ is {"mergeGVCF": "mergeGVCF.vcf", "elapsed_time": 4.338059902191162}
+Enactment finished for task soykb_merge_gvcfs.
+Thread 45; Data on node soykb_merge_gvcfs/mergeGVCF available.
+Serverless function {} finished.
+Output of Serverless function https://pqzui26yyjprgn3fmbego4d7wy0vrciw.lambda-url.us-east-1.on.aws/ is {"combine_variants": "combined.vcf", "elapsed_time": 3.0461630821228027}
+Enactment finished for task soykb_combine_variants.
+Thread 46; Data on node soykb_combine_variants/combine_variants available.
+Thread 37; Task soykb_select_variants_indel is schedulable.
+Thread 37; Task soykb_select_variants_snp is schedulable.
+Thread 47; Task soykb_select_variants_indel scheduled
+Enacting Task soykb_select_variants_indel
+Thread 48; Task soykb_select_variants_snp scheduled
+Enacting Task soykb_select_variants_snp
+Input for Serverless function https://kg4jhyqz2ta6r5lmrwuumyatfi0mvenc.lambda-url.us-east-1.on.aws/ is {"combine_variants":"combined.vcf","bucket":"soykbuibk","reference":"NC_000913.3-hipA7.fasta"}
+Input for Serverless function https://l7o363noduuirrq4dbv5elfh4q0mdbrq.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","bucket":"soykbuibk","combine_variants":"combined.vcf"}
+Serverless function https://l7o363noduuirrq4dbv5elfh4q0mdbrq.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function https://kg4jhyqz2ta6r5lmrwuumyatfi0mvenc.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://kg4jhyqz2ta6r5lmrwuumyatfi0mvenc.lambda-url.us-east-1.on.aws/ is {"indel_only": "indel_only.vcf", "elapsed_time": 2.551543712615967}
+Enactment finished for task soykb_select_variants_indel.
+Thread 47; Data on node soykb_select_variants_indel/indel_only available.
+Thread 39; Task soykb_filter_variants_indel is schedulable.
+Thread 49; Task soykb_filter_variants_indel scheduled
+Enacting Task soykb_filter_variants_indel
+Input for Serverless function https://hmx2mia3vamexdlv5bshhjtqha0lmpcj.lambda-url.us-east-1.on.aws/ is {"bucket":"soykbuibk","reference":"NC_000913.3-hipA7.fasta","indel_only":"indel_only.vcf"}
+Serverless function https://hmx2mia3vamexdlv5bshhjtqha0lmpcj.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://l7o363noduuirrq4dbv5elfh4q0mdbrq.lambda-url.us-east-1.on.aws/ is {"snp_only": "snp_only.vcf", "elapsed_time": 3.350391149520874}
+Enactment finished for task soykb_select_variants_snp.
+Thread 48; Data on node soykb_select_variants_snp/snp_only available.
+Thread 40; Task soykb_filter_variants_snp is schedulable.
+Thread 33; Task soykb_filter_variants_snp scheduled
+Enacting Task soykb_filter_variants_snp
+Input for Serverless function https://34wj2qkwxkmuxjmn3j6hm5fil40giysj.lambda-url.us-east-1.on.aws/ is {"reference":"NC_000913.3-hipA7.fasta","snp_only":"snp_only.vcf","bucket":"soykbuibk"}
+Serverless function https://34wj2qkwxkmuxjmn3j6hm5fil40giysj.lambda-url.us-east-1.on.aws/ triggerred.
+Serverless function {} finished.
+Output of Serverless function https://hmx2mia3vamexdlv5bshhjtqha0lmpcj.lambda-url.us-east-1.on.aws/ is {"all_filtered_indel": "all_filtered_indel.vcf", "elapsed_time": 2.741431713104248}
+Enactment finished for task soykb_filter_variants_indel.
+Thread 49; Data on node soykb_filter_variants_indel/all_filtered_indel available.
+Serverless function {} finished.
+Output of Serverless function https://34wj2qkwxkmuxjmn3j6hm5fil40giysj.lambda-url.us-east-1.on.aws/ is {"all_filtered_snp": "all_filtered_snp.vcf", "elapsed_time": 3.2826972007751465}
+Enactment finished for task soykb_filter_variants_snp.
+Thread 33; Data on node soykb_filter_variants_snp/all_filtered_snp available.
+-----------for {"all_filtered_snp":"all_filtered_snp.vcf","all_filtered_indel":"all_filtered_indel.vcf","mergeGVCF":"mergeGVCF.vcf"}
+Workflow executed correctly.
+Enactment result: {"all_filtered_snp":"all_filtered_snp.vcf","all_filtered_indel":"all_filtered_indel.vcf","mergeGVCF":"mergeGVCF.vcf"}
