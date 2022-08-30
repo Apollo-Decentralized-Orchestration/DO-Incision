@@ -129,7 +129,7 @@ public class SchedulerTest {
         /*
         final EnactmentSpecification specification = setupSpecification(eGraph);
 
-        List<Cut> cuts = new Scheduler().schedule(specification);
+        List<Cut> cuts = new JIT().schedule(specification);
 
         MappingsConcurrent ms = specification.getMappings();
         for(Mapping<Task, Resource> m: ms) {

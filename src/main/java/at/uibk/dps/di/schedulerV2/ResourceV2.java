@@ -39,8 +39,8 @@ public class ResourceV2 {
         this.latencyMappings = latencyMappings;
     }
 
-    ResourceV2(String id, int instances,
-        EnactmentSpecification enactmentSpecification, List<LatencyMapping> latencyMappings) {
+    public ResourceV2(String id, int instances, EnactmentSpecification enactmentSpecification,
+        List<LatencyMapping> latencyMappings) {
         this.id = id;
         this.instances = instances;
         this.enactmentSpecification = enactmentSpecification;
