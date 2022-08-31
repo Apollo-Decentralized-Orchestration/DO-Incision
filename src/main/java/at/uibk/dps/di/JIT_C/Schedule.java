@@ -17,6 +17,14 @@ public class Schedule {
         this.instance = instance;
     }
 
+    public Schedule(Task task, Resource vm, String instance, double xst, double xft) {
+        this.task = task;
+        this.vm = vm;
+        this.xst = xst;
+        this.xft = xft;
+        this.instance = instance;
+    }
+
     public Schedule(Task task, Resource vm, double xst, double xft) {
         this.task = task;
         this.vm = vm;

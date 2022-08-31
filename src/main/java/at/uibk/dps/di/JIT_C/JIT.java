@@ -8,7 +8,6 @@ import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
 import at.uibk.dps.ee.model.properties.PropertyServiceFunctionUser;
 import com.google.gson.JsonPrimitive;
-import jdk.internal.net.http.common.Pair;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Resource;
@@ -33,9 +32,6 @@ public class JIT {
             };
         return TT;
     }
-
-    private int id = 1;
-
     private static final double acquisitiondelay = 1.0;
     private static final double interval = 10.0;
 
@@ -50,6 +46,9 @@ public class JIT {
         return null;
     }
 
+
+    private int id = 1;
+    private int iteration = 1;
     Map<Task, Resource> scheduledMapping = new HashMap<>();
     Map<Task, Double> AST = new HashMap<>();
     Map<Task, Double> XFT = new HashMap<>();
@@ -64,15 +63,19 @@ public class JIT {
 
     private void printVMPoolStatus() {
         for(VMPoolEntry entry: VMPoolStatus) {
-            System.out.println("VMPOOLSTATUS -- id: " + entry.getId() + ", type: " + entry.getType().getId() + ", startTime: " + entry.getStartTime() +
-                ", ExpectedIdleStartTime: " + entry.getExpecteddIdleStartTime() + ", endTime: " + entry.getEndTime());
+            /*System.out.println("VMPOOLSTATUS -- id: " + entry.getId() + ", type: " + entry.getType().getId() + ", startTime: " + entry.getStartTime() +
+                ", ExpectedIdleStartTime: " + entry.getExpecteddIdleStartTime() + ", endTime: " + entry.getEndTime());*/
+            System.out.println("VMPOOLSTATUS:\t " + entry.getId() + " | " + entry.getType().getId() + " | " + entry.getStartTime() +
+                " | " + entry.getExpecteddIdleStartTime() + " | " + entry.getEndTime());
         }
     }
 
     private void printSchedule() {
         for(Schedule entry: scheduled) {
-            System.out.println("SCHEDULE -- id: " + entry.getTask() + ", VM: " + entry.getVm() + " (" + entry.getInstance() + "), XST: " + entry.getXst() +
-                ", XFT: " + entry.getXft());
+            /*System.out.println("SCHEDULE -- id: " + entry.getTask() + ", VM: " + entry.getVm() + " (" + entry.getInstance() + "), XST: " + entry.getXst() +
+                ", XFT: " + entry.getXft());*/
+            System.out.println("SCHEDULE:\t\t" + entry.getTask() + " | " + entry.getVm() + " (" + entry.getInstance() + ") | " + entry.getXst() +
+                " | " + entry.getXft());
         }
     }
 
@@ -439,7 +442,7 @@ public class JIT {
                 vmstarttimes.put(instance, (double) System.currentTimeMillis());
 
                 // 10. Schedule t_e on v_e at XST(t_e)
-                scheduled.add(new Schedule(t_e, to_provision.get(t_e), instance));
+                // LATER
 
                 // 11. Update VM Pool Status
                 Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(t_e);
@@ -449,8 +452,15 @@ public class JIT {
                         ET = PropertyServiceScheduler.getDuration(map);
                     }
                 }
-                VMPoolStatus.add(new VMPoolEntry(instance, to_provision.get(t_e), 0.0, XST.get(t_e) + ET, null));
-                printVMPoolStatus();
+                VMPoolEntry e = new VMPoolEntry(instance, to_provision.get(t_e), 0.0, XST.get(t_e) + ET, null);
+                VMPoolStatus.add(e);
+                //printVMPoolStatus();
+
+                // 10. Schedule t_e on v_e at XST(t_e)
+                calcXFT(t_e, specification, adaptedGraph, to_provision.get(t_e), e);
+                XFT.replace(t_e, XFT.get(t_e) + XST.get(t_e));
+                scheduled.add(new Schedule(t_e, to_provision.get(t_e), instance, XST.get(t_e), XFT.get(t_e)));
+                //printSchedule();
 
             } // 12. End for
 
@@ -459,44 +469,62 @@ public class JIT {
             // 13. While all tasks in T are not completed do
             Map<Task, Boolean> completed = new HashMap<>();
             for(Task t: adaptedGraph.getVertices()) {
-                completed.put(t, false);
+                if(!(t instanceof Communication)) {
+                    completed.put(t, false);
+                }
             }
+
+            //System.out.println("------->");
+            printVMPoolStatus();
+            printSchedule();
+            //System.out.println("<------");
+
             while(!completed.isEmpty()){
 
                 // 14. Send the scheduled tasks for execution to the execution manager
                 while (!scheduled.isEmpty()) {
-                    Schedule s = scheduled.get(0);
-                    System.out.println("Send scheduled task " + s.getTask().getId() + " to execution manager.");
-                    scheduledMapping.put(s.getTask(), s.getVm());
+
+                    System.out.println("---------------- iteration " + (iteration++) + " ----------------");
+
+                    Schedule scheuledTask = scheduled.get(0);
+                    System.out.println("\tSend scheduled task " + scheuledTask.getTask().getId() + " to execution manager.");
+                    scheduledMapping.put(scheuledTask.getTask(), scheuledTask.getVm());
 
                     // 15. Update AST (Actual start time), XFT of scheduled tasks
-                    AST.put(s.getTask(), XST.get(s.getTask()));
-                    Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(s.getTask());
+                    AST.put(scheuledTask.getTask(), XST.get(scheuledTask.getTask()));
+                    Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(scheuledTask.getTask());
                     double ET = 0.0;
                     for(Mapping<Task, Resource> map: mappings) {
-                        if(map.getTarget().getId().equals(s.getVm().getId())) {
+                        if(map.getTarget().getId().equals(scheuledTask.getVm().getId())) {
                             ET = PropertyServiceScheduler.getDuration(map);
                         }
                     }
-                    XFT.put(s.getTask(), AST.get(s.getTask()) + ET);
-                    s.setXst(XST.get(s.getTask()));
-                    s.setXft(XFT.get(s.getTask()));
-                    printSchedule();
+                    XFT.put(scheuledTask.getTask(), AST.get(scheuledTask.getTask()) + ET);
+                    scheuledTask.setXst(XST.get(scheuledTask.getTask()));
+                    scheuledTask.setXft(XFT.get(scheuledTask.getTask()));
 
                     // 16. to_be_scheduled
-                    List<Task> to_be_scheduled = new ArrayList<>();
+                    List<Task> to_be_scheduled_tmp = new ArrayList<>();
                     for(Task t: adaptedGraph.getVertices()) {
-                        Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(adaptedGraph, t);
-                        for(Task parent: parents) {
-                            for(Schedule sched: scheduled) {
-                                if(sched.getTask().getId().equals(parent.getId())) {
-                                    if(!(t instanceof Communication)) {
-                                        to_be_scheduled.add(t);
+                        Collection<Task> parents =
+                            GraphUtility.getPredecessorTaskNodes(adaptedGraph, t);
+                        for (Task parent : parents) {
+                            for (Schedule sched : scheduled) {
+                                if (sched.getTask().getId().equals(parent.getId())) {
+                                    if (!(t instanceof Communication)) {
+                                        to_be_scheduled_tmp.add(t);
                                     }
                                 }
                             }
                         }
                     }
+                    List<Task> to_be_scheduled = new ArrayList<>();
+                    for(Task t: to_be_scheduled_tmp) {
+                        to_be_scheduled.add(0, t);
+                    }
+
+                    boolean exit = false;
+
 
                     // 17. Planandschedule(to_be_scheduled)
 
@@ -538,14 +566,14 @@ public class JIT {
                                 double temp = Math.max(XFT.get(lastParent), max);
 
                                 // 17.3.7 If temp >= XIST ...
-                                mappings = specification.getMappings().getMappings(s.getTask());
+                                mappings = specification.getMappings().getMappings(scheuledTask.getTask());
                                 ET = 0.0;
                                 for(Mapping<Task, Resource> map: mappings) {
                                     if(map.getTarget().getId().equals(vp.getId())) {
                                         ET = PropertyServiceScheduler.getDuration(map);
                                     }
                                 }
-                                if(temp >= (XST.get(s.getTask()) + ET) && (temp + XET.get(vp).get(ti)) <= D) {
+                                if(temp >= (XST.get(scheuledTask.getTask()) + ET) && (temp + XET.get(vp).get(ti)) <= D) {
 
                                     // 17.3.8  XST(t) =  temp
                                     XST.replace(ti, temp);
@@ -554,6 +582,7 @@ public class JIT {
                                     taskvmmap.put(ti, vp);
 
                                     // 17.3.10 return taskvmmap
+                                    exit = true;
                                 }
                                 // 17.3.11 Else
                                 else {
@@ -574,36 +603,43 @@ public class JIT {
                                 // 15. XST = acquisitiondelay
                                 XST.put(ti, acquisitiondelay);
                             }
-                            // 17.3.16. End if
-                            // 17.3.17. Find {VM_k} e VM_set for which XST(t) + XET(t, VM_k) <= D
-                            List<Resource> resources = new ArrayList<>();
-                            for(Resource res : XET.keySet()) {
-                                if(XST.get(s.getTask()) + XET.get(res).get(ti) <= D) {
-                                    resources.add(res);
+
+                            if(!exit) {
+                                // 17.3.16. End if
+                                // 17.3.17. Find {VM_k} e VM_set for which XST(t) + XET(t, VM_k) <= D
+                                List<Resource> resources = new ArrayList<>();
+                                for(Resource res : XET.keySet()) {
+                                    calcXST(ti, adaptedGraph, null);
+                                    if(XST.get(ti) + XET.get(res).get(ti) <= D) {
+                                        resources.add(res);
+                                    }
                                 }
-                            }
-                            // 17.3.18. VM_j = arg(min_VM_k(XET(t,VM_k)/interval * Cost(VM_K)
-                            Resource VM_j = null;
-                            double min = Double.MAX_VALUE;
-                            for(Resource r: resources) {
-                                // TODO check paper there is arg(...)
-                                double tmp = XET.get(r).get(ti)/interval * Cost(r);
-                                if(min > tmp){
-                                    min = tmp;
-                                    VM_j = r;
+                                // 17.3.18. VM_j = arg(min_VM_k(XET(t,VM_k)/interval * Cost(VM_K)
+                                Resource VM_j = null;
+                                double min = Double.MAX_VALUE;
+                                for(Resource r: resources) {
+                                    // TODO check paper there is arg(...)
+                                    double tmp = XET.get(r).get(ti)/interval * Cost(r);
+                                    if(min > tmp){
+                                        min = tmp;
+                                        VM_j = r;
+                                    }
                                 }
+                                // 17.3.19. taskvmmap = VMj
+                                taskvmmap.put(ti, VM_j);
                             }
-                            // 17.3.19. taskvmmap = VMj
-                            taskvmmap.put(ti, VM_j);
 
                             // 17.4 Find vk e active VMs
                             List<VMPoolEntry> vk = new ArrayList<>();
                             for(VMPoolEntry entry: active_VMs) {
                                 Resource r = entry.getType();
-                                calcXFT(ti, specification, adaptedGraph, r);
-                                calcXST(ti, adaptedGraph);
+                                calcXFT(ti, specification, adaptedGraph, r, entry);
+                                calcXST(ti, adaptedGraph, entry);
                                 calcLFT(ti, adaptedGraph);
-                                double CLI = (System.currentTimeMillis() - vmstarttimes.get(entry.getId()))/interval * interval + interval;
+                                double CLI = ((int)((entry.getExpecteddIdleStartTime() - entry.getStartTime()) / interval) * interval);
+                                if((entry.getExpecteddIdleStartTime() - entry.getStartTime()) % interval != 0) {
+                                    CLI += interval;
+                                }
                                 if(r.getId().equals(taskvmmap.get(ti).getId())
                                     && XST.get(ti) <= CLI
                                     && XFT.get(ti) <= LFT.get(ti)) {
@@ -611,8 +647,8 @@ public class JIT {
                                     boolean safe = true;
                                     for(Task child: children) {
                                         double LST = LFT.get(child) - MET.get(child);
-                                        calcXFT(child, specification, adaptedGraph, r);
-                                        calcXST(child, adaptedGraph);
+                                        calcXFT(child, specification, adaptedGraph, r, entry);
+                                        calcXST(child, adaptedGraph, entry);
                                         if(XST.get(child) > LST) {
                                             safe = false;
                                         }
@@ -628,7 +664,7 @@ public class JIT {
 
                                 // 17.6 Find the VM vk, such that the difference between XIST(vk) and XST(ti) is minimum
                                 VMPoolEntry minDiff = null;
-                                min = Double.MAX_VALUE;
+                                double min = Double.MAX_VALUE;
                                 for(VMPoolEntry v: vk) {
                                     ET = 0.0;
                                     mappings = specification.getMappings().getMappings(ti);
@@ -645,9 +681,11 @@ public class JIT {
                                 }
 
                                 // 17.7 Schedule ti on vk and update XST(ti)
-                                calcXST(ti, adaptedGraph);
+                                calcXST(ti, adaptedGraph, minDiff);
                                 scheduledMapping.put(ti, minDiff.getType());
-                                System.out.println("Schedule " + ti.getId() + " on " + minDiff.getId());
+                                //System.out.println("Schedule " + ti.getId() + " on " + minDiff.getId());
+                                scheduled.add(new Schedule(ti, minDiff.getType(), minDiff.getId(), XST.get(ti), XFT.get(ti)));
+                                //printSchedule();
 
                                 // 17.8 Update VM Pool Status
                                 for(VMPoolEntry entry : VMPoolStatus) {
@@ -659,10 +697,11 @@ public class JIT {
                                                 ET = PropertyServiceScheduler.getDuration(map);
                                             }
                                         }
+                                        calcXST(ti, adaptedGraph, entry);
                                         entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                     }
                                 }
-                                printVMPoolStatus();
+                                //printVMPoolStatus();
                             }
                             // 17.9 Else
                             else {
@@ -671,10 +710,13 @@ public class JIT {
                                 List<VMPoolEntry> vj = new ArrayList<>();
                                 for(VMPoolEntry entry: active_VMs) {
                                     Resource r = entry.getType();
-                                    calcXFT(ti, specification, adaptedGraph, r);
-                                    calcXST(ti, adaptedGraph);
+                                    calcXFT(ti, specification, adaptedGraph, r, entry);
+                                    calcXST(ti, adaptedGraph, entry);
                                     calcLFT(ti, adaptedGraph);
-                                    double CLI = (System.currentTimeMillis() - vmstarttimes.get(entry.getId()))/interval * interval + interval;
+                                    double CLI = ((int)((entry.getExpecteddIdleStartTime() - entry.getStartTime()) / interval) * interval);
+                                    if((entry.getExpecteddIdleStartTime() - entry.getStartTime()) % interval != 0) {
+                                        CLI += interval;
+                                    }
                                     if(r.getId().equals(taskvmmap.get(ti).getId())
                                         && XFT.get(ti) <= CLI
                                         && XFT.get(ti) <= LFT.get(ti)) {
@@ -682,8 +724,8 @@ public class JIT {
                                         boolean safe = true;
                                         for(Task child: children) {
                                             double LST = LFT.get(child) - MET.get(child);
-                                            calcXFT(child, specification, adaptedGraph, r);
-                                            calcXST(child, adaptedGraph);
+                                            calcXFT(child, specification, adaptedGraph, r, entry);
+                                            calcXST(child, adaptedGraph, entry);
                                             if(XST.get(child) > LST) {
                                                 safe = false;
                                             }
@@ -699,7 +741,7 @@ public class JIT {
 
                                     // 17.12 Find the VM ...
                                     VMPoolEntry minDiff = null;
-                                    min = Double.MAX_VALUE;
+                                    double min = Double.MAX_VALUE;
                                     for(VMPoolEntry v: vj) {
                                         ET = 0.0;
                                         mappings = specification.getMappings().getMappings(ti);
@@ -716,9 +758,11 @@ public class JIT {
                                     }
 
                                     // 17.13 Schedule ti on vj; update XST(ti)
-                                    calcXST(ti, adaptedGraph);
+                                    calcXST(ti, adaptedGraph, minDiff);
                                     scheduledMapping.put(ti, minDiff.getType());
-                                    System.out.println("Schedule " + ti.getId() + " on " + minDiff.getId());
+                                    //System.out.println("Schedule " + ti.getId() + " on " + minDiff.getId());
+                                    scheduled.add(new Schedule(ti, minDiff.getType(), minDiff.getId(), XST.get(ti), XFT.get(ti)));
+                                    //printSchedule();
 
                                     // 17.14 Update VM Pool Status
                                     for(VMPoolEntry entry : VMPoolStatus) {
@@ -733,7 +777,7 @@ public class JIT {
                                             entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                         }
                                     }
-                                    printVMPoolStatus();
+                                    //printVMPoolStatus();
                                 }
                                 // 17.15 Else
                                 else {
@@ -746,13 +790,19 @@ public class JIT {
                                         }
                                     }
                                     String instance = "v" + (id++);
-                                    VMPoolStatus.add(new VMPoolEntry(instance, taskvmmap.get(ti), XST.get(ti) - acquisitiondelay, XST.get(ti) + ET, null));
-                                    printVMPoolStatus();
+                                    VMPoolEntry entry_tmp = new VMPoolEntry(instance, taskvmmap.get(ti), null, null, null);
+                                    VMPoolStatus.add(entry_tmp);
+                                    //printVMPoolStatus();
 
                                     // 17.17 Schedule ti on v at XST(ti)
-                                    calcXST(ti, adaptedGraph);
+                                    calcXFT(ti, specification, adaptedGraph, entry_tmp.getType(), entry_tmp);
+                                    calcXST(ti, adaptedGraph, entry_tmp);
+                                    entry_tmp.setStartTime(XST.get(ti) - acquisitiondelay);
+                                    entry_tmp.setExpecteddIdleStartTime(XST.get(ti) + getET(specification, ti, entry_tmp.getType()));
                                     scheduledMapping.put(ti, taskvmmap.get(ti));
-                                    System.out.println("Schedule " + ti.getId() + " on " + instance);
+                                    //System.out.println("Schedule " + ti.getId() + " on " + instance);
+                                    scheduled.add(new Schedule(ti, taskvmmap.get(ti), instance, XST.get(ti), XFT.get(ti)));
+                                    //printSchedule();
 
                                     // 17.18 Update VM Pool Status
                                     for(VMPoolEntry entry : VMPoolStatus) {
@@ -767,7 +817,7 @@ public class JIT {
                                             entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                         }
                                     }
-                                    printVMPoolStatus();
+                                    //printVMPoolStatus();
                                 } // 17.19 End if
                             } // 17.20 End if
                         } // 17.21 End for
@@ -775,9 +825,14 @@ public class JIT {
                     // 17.22 Deprovision the idle VMs
                     System.out.println("Deprovision idle VM");
 
-                    System.out.println("----SIMULATED: " + s.getTask().getId() + " finished");
-                    completed.remove(s.getTask());
-                    scheduled.remove(s);
+                    System.out.println("[[[ SIMULATED: " + scheuledTask.getTask().getId() + " finished ]]]");
+                    completed.remove(scheuledTask.getTask());
+                    scheduled.remove(scheuledTask);
+
+                    //System.out.println("------->");
+                    printVMPoolStatus();
+                    printSchedule();
+                    //System.out.println("<------");
                 }
 
             // 18. End while
@@ -793,44 +848,87 @@ public class JIT {
         // 22. End
     }
 
-    private void calcXST(Task t, EnactmentGraph eGraph) {
+    private void calcXST(Task t, EnactmentGraph eGraph, VMPoolEntry entry) {
         double max = 0.0;
         Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(eGraph, t);
         for(Task parent: parents) {
-            if(max < XFT.get(parent) + getTT(parent, t)) {
-                max = XFT.get(parent) + getTT(parent, t);
+            double delay = getTT(t, parent);
+            if(entry != null) {
+                for (Schedule s : scheduled) {
+                    if (s.getTask().getId().equals(parent.getId()) && s.getInstance().equals(entry.getId())) {
+                        if(entry.getExpecteddIdleStartTime() > XFT.get(parent)) {
+                            delay = entry.getExpecteddIdleStartTime();
+                            XST.put(t, delay);
+                            return;
+                        } else {
+                            delay = 0.0;
+                        }
+                    }
+                }
+            }
+            if(max < XFT.get(parent) + delay) {
+                max = XFT.get(parent) + delay;
             }
         }
         XST.put(t, max);
     }
 
-    private void calcXFT(Task t, EnactmentSpecification specification, EnactmentGraph eGraph, Resource r) {
+    private void calcXFT(Task t, EnactmentSpecification specification, EnactmentGraph eGraph, Resource r, VMPoolEntry entry) {
         Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(eGraph, t);
         double max = 0.0;
         for(Task parent: parents) {
             if(!XFT.containsKey(parent)) {
-                calcXFT(parent, specification, eGraph, r);
+                calcXFT(parent, specification, eGraph, r, entry);
             }
-            if(max < XFT.get(parent) + getTT(parent, t)) {
-                max = XFT.get(parent) + getTT(parent, t);
+            double delay = getTT(t, parent);
+            for (Schedule s : scheduled) {
+                if (s.getTask().getId().equals(parent.getId()) && s.getInstance().equals(entry.getId())) {
+                    if(entry.getExpecteddIdleStartTime() <= XFT.get(parent)) {
+                        delay = 0.0;
+                    } else {
+                        delay = entry.getExpecteddIdleStartTime() - XFT.get(parent);
+                    }
+                }
+            }
+            if (max < XFT.get(parent) + delay) {
+                max = XFT.get(parent) + delay;
             }
         }
-        double ET = 0.0;
-        Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(t);
-        for(Mapping<Task, Resource> map: mappings) {
-            if(map.getTarget().getId().equals(r.getId())) {
-                ET = PropertyServiceScheduler.getDuration(map);
-            }
-        }
+        double ET = getET(specification, t, entry.getType());
         XFT.put(t, max + ET);
+    }
+
+    double getET(EnactmentSpecification specification, Task t, Resource r){
+        double ET = 0.0;
+
+        if(t.getId().contains("+")) {
+            String[] tasks = t.getId().split("\\+");
+            for(String task: tasks) {
+                Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(specification.getEnactmentGraph().getVertex("taskNode" + task.replaceAll("[^0-9]", "")));
+                for(Mapping<Task, Resource> map: mappings) {
+                    if(map.getTarget().getId().equals(r.getId())) {
+                        ET += PropertyServiceScheduler.getDuration(map);
+                    }
+                }
+            }
+        } else {
+            Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(t);
+            for(Mapping<Task, Resource> map: mappings) {
+                if(map.getTarget().getId().equals(r.getId())) {
+                    ET += PropertyServiceScheduler.getDuration(map);
+                }
+            }
+        }
+
+        return ET;
     }
 
     private void calcLFT(Task t, EnactmentGraph eGraph) {
         double min = Double.MAX_VALUE;
         Collection<Task> children =  GraphUtility.getSuccessorTaskNodes(eGraph, t);
         for(Task child: children) {
-            if(min > LFT.get(child) - MET.get(child) - getTT(t, child)) {
-                min = LFT.get(child) - MET.get(child) - getTT(t, child);
+            if(min > LFT.get(child) - MET.get(child) - getTT(child, t)) {
+                min = LFT.get(child) - MET.get(child) - getTT(child, t);
             }
         }
         LFT.put(t, min);
