@@ -129,11 +129,24 @@ public class JIT {
         }
     }
 
-    private double getTT(Task t1, Task t2){
+
+
+    private double getTTIgnoreDirection(int i, int j){
+        double[][] TT = getTransferTime();
+        if(TT[i][j] != 0.0) {
+            return TT[i][j];
+        }
+        return TT[j][i];
+    }
+
+    private double getTT(Task t1, Task t2, boolean onSameInstance){
         if(t1.getId().equals(t2.getId())) {
             return 0.0;
         }
-        double[][] TT = getTransferTime();
+        if(onSameInstance){
+            return 0.0;
+        }
+
         double tt = 0.0;
         if(t1.getId().contains("+")) {
             String[] tasks = t1.getId().split("\\+");
@@ -141,14 +154,14 @@ public class JIT {
                 if(t2.getId().contains("+")) {
                     String[] tsks = t2.getId().split("\\+");
                     for(String ta: tsks) {
-                        tt += TT[Integer.valueOf(
-                            ta.replaceAll("[^0-9]", "")) - 1][
-                            Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
+                        tt += getTTIgnoreDirection(Integer.valueOf(
+                            ta.replaceAll("[^0-9]", "")) - 1,
+                            Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1);
                     }
                 }else {
-                    tt += TT[Integer.valueOf(
-                        task.replaceAll("[^0-9]", "")) - 1][
-                        Integer.valueOf(t2.getId().replaceAll("[^0-9]", "")) - 1];
+                    tt += getTTIgnoreDirection(Integer.valueOf(
+                        t2.getId().replaceAll("[^0-9]", "")) - 1,
+                        Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1);
                 }
             }
         }else if(t2.getId().contains("+")) {
@@ -157,22 +170,31 @@ public class JIT {
                 if(t1.getId().contains("+")) {
                     String[] tsks = t1.getId().split("\\+");
                     for(String ta: tsks) {
-                        tt += TT[Integer.valueOf(
-                            ta.replaceAll("[^0-9]", "")) - 1][
-                            Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
+                        tt += getTTIgnoreDirection(Integer.valueOf(
+                            ta.replaceAll("[^0-9]", "")) - 1,
+                            Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1);
                     }
                 }else {
-                    tt += TT[Integer.valueOf(
-                        t1.getId().replaceAll("[^0-9]", "")) - 1][
-                        Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
+                    tt += getTTIgnoreDirection(Integer.valueOf(
+                        t1.getId().replaceAll("[^0-9]", "")) - 1,
+                        Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1);
                 }
             }
         } else {
-            tt = TT[Integer.valueOf(t2.getId().replaceAll("[^0-9]", "")) - 1]
-                    [Integer.valueOf(t1.getId().replaceAll("[^0-9]", "")) - 1];
+            tt = getTTIgnoreDirection(Integer.valueOf(t2.getId().replaceAll("[^0-9]", "")) - 1,
+                Integer.valueOf(t1.getId().replaceAll("[^0-9]", "")) - 1);
         }
 
         return tt;
+    }
+
+    private Schedule findScheduleByTask(Task t) {
+        for(Schedule s: scheduled) {
+            if(s.getTask().getId().equals(t.getId())) {
+                return s;
+            }
+        }
+        return null;
     }
 
     public void schedule(EnactmentSpecification specification, double D){
@@ -217,7 +239,7 @@ public class JIT {
                         if(!EST.containsKey(predecessor)) {
                             nodeStack.add(0, node);
                         } else {
-                            double tmp = EST.get(predecessor) + MET_tmp.get(predecessor) + getTT(successor, predecessor);
+                            double tmp = EST.get(predecessor) + MET_tmp.get(predecessor) + getTT(successor, predecessor, false);
                             if (tmp > max) {
                                 max = tmp;
                             }
@@ -311,7 +333,7 @@ public class JIT {
                             if(!LFT.containsKey(successor)) {
                                 stack.add(0, node);
                             } else {
-                                double tt = getTT(successor, predecessor);
+                                double tt = getTT(successor, predecessor, false);
                                 double tmp = LFT.get(successor) - MET.get(successor) - tt;
                                 if (tmp < min) {
                                     min = tmp;
@@ -541,6 +563,8 @@ public class JIT {
                     for(Task ti : to_be_scheduled) {
 
                         boolean exit = false;
+                        Resource vp = null;
+                        Task lastParent = null;
 
                         // 17.3 vmmap = CheapesttaskVM(t_i)
                         // 17.3.1. Begin
@@ -550,7 +574,7 @@ public class JIT {
                         if(!entryTasks.contains(ti)) {
                             // 17.3.4. lastParent arg(max tp ts parent XFT(tp)
                             Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(adaptedGraph, ti);
-                            Task lastParent = null;
+
                             max = 0.0;
                             for(Task parent : parents) {
                                 if(XFT.get(parent) > max) {
@@ -559,13 +583,13 @@ public class JIT {
                                 }
                             }
                             // 17.3.5. vp VM on which lastParent is running
-                            Resource vp = scheduledMapping.get(lastParent);
+                            vp = scheduledMapping.get(lastParent);
 
                             // 17.3.6 temp ...
                             max = 0.0;
                             for(Task parent : parents) {
-                                if(parent != lastParent && XFT.get(parent) + getTT(parent, ti) > max) {
-                                    max = XFT.get(parent) + getTT(parent, ti);
+                                if(parent != lastParent && XFT.get(parent) + getTT(parent, ti, false) > max) {
+                                    max = XFT.get(parent) + getTT(parent, ti, false);
                                 }
                             }
                             double temp = Math.max(XFT.get(lastParent), max);
@@ -581,7 +605,7 @@ public class JIT {
                             //TODO here!
                             ET = getET(specification, ti, vp);
 
-                            if(ti.getId().contains("4+7")) {
+                            if(ti.getId().contains("2")) {
                                 System.out.println(1);
                             }
 
@@ -602,8 +626,8 @@ public class JIT {
                                 // 17.3.12 XST(t) = ...
                                 max = 0.0;
                                 for(Task parent : parents) {
-                                    if(XFT.get(parent) + getTT(parent, ti) > max) {
-                                        max = XFT.get(parent) + getTT(parent, ti);
+                                    if(XFT.get(parent) + getTT(ti, parent, false) > max) {
+                                        max = XFT.get(parent) + getTT(ti, parent, false);
                                     }
                                 }
                                 if(XST.containsKey(ti)) {
@@ -625,8 +649,11 @@ public class JIT {
                             // 17.3.17. Find {VM_k} e VM_set for which XST(t) + XET(t, VM_k) <= D
                             List<Resource> resources = new ArrayList<>();
                             for (Resource res : XET.keySet()) {
-                                calcXST(ti, adaptedGraph, null);
-                                if (XST.get(ti) + XET.get(res).get(ti) <= D) {
+                                double subtract = 0.0;
+                                if(vp != null && lastParent != null && vp.getId().equals(res.getId())) {
+                                    subtract = getTT(ti, lastParent, false);
+                                }
+                                if (XST.get(ti) - subtract + XET.get(res).get(ti) <= D) {
                                     resources.add(res);
                                 }
                             }
@@ -845,7 +872,7 @@ public class JIT {
                                 for(VMPoolEntry entry : VMPoolStatus) {
                                     Task lastTask = getLastTaskByInstance(entry.getId());
                                     entry.setEndTime(entry.getExpecteddIdleStartTime() +
-                                        getTT(lastTask, ti)
+                                        getTT(lastTask, ti, false)
                                     );
                                 }
                             }
@@ -904,7 +931,7 @@ public class JIT {
         double max = 0.0;
         Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(eGraph, t);
         for(Task parent: parents) {
-            double delay = getTT(t, parent);
+            double delay = getTT(parent, t, false);
             if(entry != null) {
                 for (Schedule s : scheduled) {
                     if (s.getTask().getId().equals(parent.getId()) && s.getInstance().equals(entry.getId())) {
@@ -932,7 +959,7 @@ public class JIT {
             if(!XFT.containsKey(parent)) {
                 calcXFT(parent, specification, eGraph, r, entry);
             }
-            double delay = getTT(t, parent);
+            double delay = getTT(t, parent, false);
             for (Schedule s : scheduled) {
                 if (s.getTask().getId().equals(parent.getId()) && s.getInstance().equals(entry.getId())) {
                     if(entry.getExpecteddIdleStartTime() <= XFT.get(parent)) {
@@ -979,8 +1006,8 @@ public class JIT {
         double min = Double.MAX_VALUE;
         Collection<Task> children =  GraphUtility.getSuccessorTaskNodes(eGraph, t);
         for(Task child: children) {
-            if(min > LFT.get(child) - MET.get(child) - getTT(child, t)) {
-                min = LFT.get(child) - MET.get(child) - getTT(child, t);
+            if(min > LFT.get(child) - MET.get(child) - getTT(child, t, false)) {
+                min = LFT.get(child) - MET.get(child) - getTT(child, t, false);
             }
         }
         LFT.put(t, min);
