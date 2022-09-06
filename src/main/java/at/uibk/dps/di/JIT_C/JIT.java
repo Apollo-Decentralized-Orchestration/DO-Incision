@@ -596,14 +596,7 @@ public class JIT {
 
                             // 17.3.7 If temp >= XIST ...
                             Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(ti);
-                            double ET = 0.0;
-                            for(Mapping<Task, Resource> map: mappings) {
-                                if(map.getTarget().getId().equals(vp.getId())) {
-                                    ET = PropertyServiceScheduler.getDuration(map);
-                                }
-                            }
-                            //TODO here!
-                            ET = getET(specification, ti, vp);
+                            double ET = getET(specification, ti, vp);
 
                             if(ti.getId().contains("2")) {
                                 System.out.println(1);
@@ -711,13 +704,7 @@ public class JIT {
                             VMPoolEntry minDiff = null;
                             double min = Double.MAX_VALUE;
                             for(VMPoolEntry v: vk) {
-                                double ET = 0.0;
-                                Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(ti);
-                                for(Mapping<Task, Resource> map: mappings) {
-                                    if(map.getTarget().getId().equals(v.getId())) {
-                                        ET = PropertyServiceScheduler.getDuration(map);
-                                    }
-                                }
+                                double ET = getET(specification, ti, v.getType());
                                 double XIST = XST.get(ti) + ET;
                                 if(Math.abs(XST.get(ti) - XIST) < min) {
                                     min = Math.abs(XST.get(ti) - XIST);
@@ -784,13 +771,7 @@ public class JIT {
                                 VMPoolEntry minDiff = null;
                                 double min = Double.MAX_VALUE;
                                 for(VMPoolEntry v: vj) {
-                                    double ET = 0.0;
-                                    Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(ti);
-                                    for(Mapping<Task, Resource> map: mappings) {
-                                        if(map.getTarget().getId().equals(v.getId())) {
-                                            ET = PropertyServiceScheduler.getDuration(map);
-                                        }
-                                    }
+                                    double ET = getET(specification, ti, v.getType());
                                     double XIST = XST.get(ti) + ET;
                                     if(Math.abs(XST.get(ti) - XIST) < min) {
                                         min = Math.abs(XST.get(ti) - XIST);
@@ -810,14 +791,7 @@ public class JIT {
                                 // 17.14 Update VM Pool Status
                                 for(VMPoolEntry entry : VMPoolStatus) {
                                     if(entry.getId().equals(minDiff.getId())) {
-                                        double ET = 0.0;
-                                        Set<Mapping<Task, Resource>>
-                                            mappings = specification.getMappings().getMappings(ti);
-                                        for(Mapping<Task, Resource> map: mappings) {
-                                            if(map.getTarget().getId().equals(entry.getType().getId())) {
-                                                ET = PropertyServiceScheduler.getDuration(map);
-                                            }
-                                        }
+                                        double ET = getET(specification, ti, entry.getType());
                                         entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                     }
                                 }
@@ -827,13 +801,6 @@ public class JIT {
                             else {
 
                                 // 17.16 Procure a new VMv of type vmmap from the cloud at XST(ti) - acquistiondelay
-                                double ET = 0.0;
-                                Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(ti);
-                                for(Mapping<Task, Resource> map: mappings) {
-                                    if(map.getTarget().getId().equals(taskvmmap.get(ti).getId())) {
-                                        ET = PropertyServiceScheduler.getDuration(map);
-                                    }
-                                }
                                 String instance = "v" + (id++);
                                 VMPoolEntry entry_tmp = new VMPoolEntry(instance, taskvmmap.get(ti), null, null, null);
                                 VMPoolStatus.add(entry_tmp);
@@ -853,13 +820,7 @@ public class JIT {
                                 // 17.18 Update VM Pool Status
                                 for(VMPoolEntry entry : VMPoolStatus) {
                                     if(entry.getId().equals(taskvmmap.get(ti).getId())) {
-                                        ET = 0.0;
-                                        mappings = specification.getMappings().getMappings(ti);
-                                        for(Mapping<Task, Resource> map: mappings) {
-                                            if(map.getTarget().getId().equals(entry.getType().getId())) {
-                                                ET = PropertyServiceScheduler.getDuration(map);
-                                            }
-                                        }
+                                        double ET = getET(specification, ti, entry.getType());
                                         entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                     }
                                 }
