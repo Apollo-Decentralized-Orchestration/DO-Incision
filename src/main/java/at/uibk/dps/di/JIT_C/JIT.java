@@ -17,6 +17,9 @@ import java.util.*;
 
 public class JIT {
 
+    /**
+     * --> Configuration
+     */
     private double[][] getTransferTime(){
         double[][] TT =
             {
@@ -46,26 +49,25 @@ public class JIT {
         return null;
     }
 
+    /**
+     * <-- Configuration
+     */
 
     private int id = 1;
     private int iteration = 1;
-    Map<Task, Resource> scheduledMapping = new HashMap<>();
-    Map<Task, Double> AST = new HashMap<>();
-    Map<Task, Double> XFT = new HashMap<>();
-    Map<Task, Double> XST = new HashMap<>();
-    Map<Task, Double> LFT = new HashMap<>();
-    Map<Task, Double> MET = new HashMap<>();
-
+    private Map<Task, Resource> scheduledMapping = new HashMap<>();
+    private Map<Task, Double> AST = new HashMap<>();
+    private Map<Task, Double> XFT = new HashMap<>();
+    private Map<Task, Double> XST = new HashMap<>();
+    private Map<Task, Double> LFT = new HashMap<>();
+    private Map<Task, Double> MET = new HashMap<>();
     private List<Schedule> scheduled = new ArrayList<>();
     private List<Schedule> scheduledPrint = new ArrayList<>();
     private List<VMPoolEntry> VMPoolStatus = new ArrayList<>();
-
     private Map<String, Double> vmstarttimes = new HashMap<>();
 
     private void printVMPoolStatus() {
         for(VMPoolEntry entry: VMPoolStatus) {
-            /*System.out.println("VMPOOLSTATUS -- id: " + entry.getId() + ", type: " + entry.getType().getId() + ", startTime: " + entry.getStartTime() +
-                ", ExpectedIdleStartTime: " + entry.getExpecteddIdleStartTime() + ", endTime: " + entry.getEndTime());*/
             System.out.println("VMPOOLSTATUS:\t " + entry.getId() + " | " + entry.getType().getId() + " | " + entry.getStartTime() +
                 " | " + entry.getExpecteddIdleStartTime() + " | " + entry.getEndTime());
         }
@@ -73,8 +75,6 @@ public class JIT {
 
     private void printSchedule() {
         for(Schedule entry: scheduledPrint) {
-            /*System.out.println("SCHEDULE -- id: " + entry.getTask() + ", VM: " + entry.getVm() + " (" + entry.getInstance() + "), XST: " + entry.getXst() +
-                ", XFT: " + entry.getXft());*/
             System.out.println("SCHEDULE:\t\t" + entry.getTask() + " | " + entry.getVm() + " (" + entry.getInstance() + ") | " + entry.getXst() +
                 " | " + entry.getXft());
         }
@@ -140,9 +140,9 @@ public class JIT {
                     Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(t);
                     double min = Double.MAX_VALUE;
                     for(Mapping<Task, Resource> map: mappings) {
-                        double dur = PropertyServiceScheduler.getDuration(map);
-                        if(dur < min) {
-                            min = dur;
+                        double duration = PropertyServiceScheduler.getDuration(map);
+                        if(duration < min) {
+                            min = duration;
                         }
                     }
                     MET_tmp.put(t, min);
@@ -704,10 +704,6 @@ public class JIT {
                             scheduledPrint.add(new Schedule(ti, minDiff.getType(), minDiff.getId(), XST.get(ti), XFT.get(ti)));
                             //printSchedule();
 
-                            if(ti.getId().contains("8+9")) {
-                                System.out.println(1);
-                            }
-
                             // 17.8 Update VM Pool Status
                             for(VMPoolEntry entry : VMPoolStatus) {
                                 if(entry.getId().equals(minDiff.getId())) {
@@ -837,9 +833,22 @@ public class JIT {
                                         entry.setExpecteddIdleStartTime(XST.get(ti) + ET);
                                     }
                                 }
-                                //printVMPoolStatus();
                             } // 17.19 End if
                         } // 17.20 End if
+
+                        // Update end time of VM Pool Status
+                        for(Task texit: exitTasks) {
+                            if(ti.getId().equals(texit.getId())) {
+                                for(VMPoolEntry entry : VMPoolStatus) {
+                                    Task lastTask = getLastTaskByInstance(entry.getId());
+                                    entry.setEndTime(entry.getExpecteddIdleStartTime() +
+                                        getTT(lastTask, ti)
+                                    );
+                                    System.out.println(1);
+                                }
+                            }
+                        }
+
                     } // 17.21 End for
 
                 if(!to_be_scheduled.isEmpty()) {
@@ -851,6 +860,7 @@ public class JIT {
                     printSchedule();
                     //System.out.println("<------");
                 }
+
             }
 
             // 18. End while
@@ -863,6 +873,20 @@ public class JIT {
         }
         // 21. End If
         // 22. End
+    }
+
+    private Task getLastTaskByInstance(String instance) {
+        double max = 0.0;
+        Task t = null;
+        for(Schedule sched: scheduled) {
+            if(sched.getInstance().equals(instance)) {
+                if(max < sched.getXft()) {
+                    max = sched.getXft();
+                    t = sched.getTask();
+                }
+            }
+        }
+        return t;
     }
 
     private VMPoolEntry getEntryByInstance(String instance) {
