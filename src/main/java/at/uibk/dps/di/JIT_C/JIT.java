@@ -863,6 +863,25 @@ public class JIT {
         }
         // 21. End If
         // 22. End
+
+        double totalExecution = 0.0;
+        double totalCost = 0.0;
+
+        for(VMPoolEntry entry: VMPoolStatus) {
+            double diff = (entry.getEndTime() - entry.getStartTime());
+            if(diff % interval != 0) {
+                diff = ((int) (diff/interval)) * interval + interval;
+            }
+            totalCost += diff/interval * Cost(entry.getType());
+            if(totalExecution < entry.getEndTime()) {
+                totalExecution = entry.getEndTime();
+            }
+        }
+
+        System.out.println("------------------------------------");
+        System.out.println("Total Execution = " + totalExecution);
+        System.out.println("Total Cost = $" + totalCost);
+        System.out.println("------------------------------------");
     }
 
     private Task getLastTaskByInstance(String instance) {
