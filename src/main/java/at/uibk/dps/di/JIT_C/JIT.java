@@ -4,14 +4,12 @@ import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.di.schedulerV2.GraphUtility;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.graph.EnactmentSpecification;
+import at.uibk.dps.ee.model.graph.MappingsConcurrent;
 import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
 import at.uibk.dps.ee.model.properties.PropertyServiceFunctionUser;
 import com.google.gson.JsonPrimitive;
-import net.sf.opendse.model.Communication;
-import net.sf.opendse.model.Mapping;
-import net.sf.opendse.model.Resource;
-import net.sf.opendse.model.Task;
+import net.sf.opendse.model.*;
 
 import java.util.*;
 
@@ -49,6 +47,57 @@ public class JIT {
         return null;
     }
 
+    private EnactmentGraph preprocessing() {
+        // TODO I think we do not need to implement this
+        final Task comm1 = new Communication("commNode1");
+        final Task comm2 = new Communication("commNode2");
+        final Task comm3 = new Communication("commNode3");
+        final Task comm4 = new Communication("commNode4");
+        final Task comm5 = new Communication("commNode5");
+        final Task comm6 = new Communication("commNode6");
+        final Task comm7 = new Communication("commNode7");
+        final Task comm8 = new Communication("commNode8");
+        final Task comm10 = new Communication("commNode10");
+        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
+        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
+        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
+        final Task task4u7 = PropertyServiceFunctionUser.createUserTask("taskNode4+7", "noop");
+        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
+        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
+        final Task task8u9 = PropertyServiceFunctionUser.createUserTask("taskNode8+9", "noop");
+        EnactmentGraph graph = new EnactmentGraph();
+        PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
+        PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
+
+        PropertyServiceDependency.addDataDependency(task1, comm2, "key1", graph);
+
+        PropertyServiceDependency.addDataDependency(comm2, task2, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm2, task3, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm2, task4u7, "key2", graph);
+
+        PropertyServiceDependency.addDataDependency(task2, comm3, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task2, comm4, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task4u7, comm6, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task3, comm5, "key2", graph);
+
+        PropertyServiceDependency.addDataDependency(comm3, task5, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm4, task6, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm5, task6, "key2", graph);
+
+        PropertyServiceDependency.addDataDependency(task5, comm7, "key2", graph);
+        PropertyServiceDependency.addDataDependency(task6, comm8, "key2", graph);
+
+        PropertyServiceDependency.addDataDependency(comm7, task8u9, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm8, task8u9, "key2", graph);
+        PropertyServiceDependency.addDataDependency(comm6, task8u9, "key2", graph);
+
+        PropertyServiceDependency.addDataDependency(task8u9, comm10, "key2", graph);
+
+        PropertyServiceData.makeRoot(comm1);
+        PropertyServiceData.makeLeaf(comm10);
+        return graph;
+    }
+
     /**
      * <-- Configuration
      */
@@ -61,10 +110,10 @@ public class JIT {
     private Map<Task, Double> XST = new HashMap<>();
     private Map<Task, Double> LFT = new HashMap<>();
     private Map<Task, Double> MET = new HashMap<>();
+    private Map<Task, Double> EST = new HashMap<>();
     private List<Schedule> scheduled = new ArrayList<>();
     private List<Schedule> scheduledPrint = new ArrayList<>();
     private List<VMPoolEntry> VMPoolStatus = new ArrayList<>();
-    private Map<String, Double> vmstarttimes = new HashMap<>();
 
     private void printVMPoolStatus() {
         for(VMPoolEntry entry: VMPoolStatus) {
@@ -81,6 +130,9 @@ public class JIT {
     }
 
     private double getTT(Task t1, Task t2){
+        if(t1.getId().equals(t2.getId())) {
+            return 0.0;
+        }
         double[][] TT = getTransferTime();
         double tt = 0.0;
         if(t1.getId().contains("+")) {
@@ -95,8 +147,8 @@ public class JIT {
                     }
                 }else {
                     tt += TT[Integer.valueOf(
-                        t2.getId().replaceAll("[^0-9]", "")) - 1][
-                        Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
+                        task.replaceAll("[^0-9]", "")) - 1][
+                        Integer.valueOf(t2.getId().replaceAll("[^0-9]", "")) - 1];
                 }
             }
         }else if(t2.getId().contains("+")) {
@@ -150,8 +202,6 @@ public class JIT {
             }
 
             // Eq. 3: Earliest start time of task t_i
-            Map<Task, Double> EST = new HashMap<>();
-            double[][] TT = getTransferTime();
             Stack<Task> nodeStack = new Stack<>();
             for(Task entryTask : entryTasksTmp) {
                 EST.put(entryTask, 0.0);
@@ -167,9 +217,7 @@ public class JIT {
                         if(!EST.containsKey(predecessor)) {
                             nodeStack.add(0, node);
                         } else {
-                            double tmp = EST.get(predecessor) + MET_tmp.get(predecessor) + TT[
-                                Integer.valueOf(predecessor.getId().replaceAll("[^0-9]", "")) - 1][
-                                Integer.valueOf(successor.getId().replaceAll("[^0-9]", "")) - 1];
+                            double tmp = EST.get(predecessor) + MET_tmp.get(predecessor) + getTT(successor, predecessor);
                             if (tmp > max) {
                                 max = tmp;
                             }
@@ -179,6 +227,7 @@ public class JIT {
                     nodeStack.push(successor);
                 }
             }
+
 
             // Eq. 4: Earliest finish time of task t_i
             Map<Task, Double> EFT = new HashMap<>();
@@ -199,6 +248,9 @@ public class JIT {
                 }
             }
             double MET_W = max;
+
+
+        double[][] TT = getTransferTime();
 
         // 3. If D >= MET W
         if(D >= MET_W) {
@@ -259,55 +311,10 @@ public class JIT {
                             if(!LFT.containsKey(successor)) {
                                 stack.add(0, node);
                             } else {
-                                if(successor.getId().contains("+")) {
-                                    String[] tasks = successor.getId().split("\\+");
-                                    double tt = 0.0;
-                                    for(String task: tasks) {
-                                        if(predecessor.getId().contains("+")) {
-                                            String[] tsks = predecessor.getId().split("\\+");
-                                            for(String ta: tsks) {
-                                                tt += TT[Integer.valueOf(
-                                                    ta.replaceAll("[^0-9]", "")) - 1][
-                                                    Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
-                                            }
-                                        }else {
-                                            tt += TT[Integer.valueOf(
-                                                predecessor.getId().replaceAll("[^0-9]", "")) - 1][
-                                                Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
-                                        }
-                                    }
-                                    double tmp = LFT.get(successor) - MET.get(successor) - tt;
-                                    if (tmp < min) {
-                                        min = tmp;
-                                    }
-                                }else if(predecessor.getId().contains("+")) {
-                                    String[] tasks = predecessor.getId().split("\\+");
-                                    double tt = 0.0;
-                                    for(String task: tasks) {
-                                        if(successor.getId().contains("+")) {
-                                            String[] tsks = successor.getId().split("\\+");
-                                            for(String ta: tsks) {
-                                                tt += TT[Integer.valueOf(
-                                                    ta.replaceAll("[^0-9]", "")) - 1][
-                                                    Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
-                                            }
-                                        }else {
-                                            tt += TT[Integer.valueOf(
-                                                successor.getId().replaceAll("[^0-9]", "")) - 1][
-                                                Integer.valueOf(task.replaceAll("[^0-9]", "")) - 1];
-                                        }
-                                    }
-                                    double tmp = LFT.get(successor) - MET.get(successor) - tt;
-                                    if (tmp < min) {
-                                        min = tmp;
-                                    }
-                                } else {
-                                    double tmp = LFT.get(successor) - MET.get(successor) -
-                                        TT[Integer.valueOf(predecessor.getId().replaceAll("[^0-9]", "")) - 1]
-                                            [Integer.valueOf(successor.getId().replaceAll("[^0-9]", "")) - 1];
-                                    if (tmp < min) {
-                                        min = tmp;
-                                    }
+                                double tt = getTT(successor, predecessor);
+                                double tmp = LFT.get(successor) - MET.get(successor) - tt;
+                                if (tmp < min) {
+                                    min = tmp;
                                 }
                             }
                         }
@@ -386,7 +393,6 @@ public class JIT {
                                 stackXET.push(predecessor);
                             }
                         }
-
                         XET.put(r, tmp);
                     }
                 }
@@ -407,7 +413,7 @@ public class JIT {
                     taskvmmap = new HashMap<>();
                     // 8.3. If t is not an entry task then
                     if(!entryTasks.contains(t_e)) {
-                        // TODO
+                        // This will never happen
                     }
                     // 8.14. Else
                     else {
@@ -440,19 +446,12 @@ public class JIT {
                 // 9. Procure a VM instance ve of type To_Provision from the cloud
                 // TODO we assume it is already provisioned
                 String instance = "v" + (id++);
-                vmstarttimes.put(instance, (double) System.currentTimeMillis());
 
                 // 10. Schedule t_e on v_e at XST(t_e)
                 // LATER
 
                 // 11. Update VM Pool Status
-                Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(t_e);
-                double ET = 0.0;
-                for(Mapping<Task, Resource> map: mappings) {
-                    if(map.getTarget().getId().equals(to_provision.get(t_e).getId())) {
-                        ET = PropertyServiceScheduler.getDuration(map);
-                    }
-                }
+                double ET = getET(specification, t_e, to_provision.get(t_e));
                 VMPoolEntry e = new VMPoolEntry(instance, to_provision.get(t_e), 0.0, XST.get(t_e) + ET, null);
                 VMPoolStatus.add(e);
                 //printVMPoolStatus();
@@ -469,10 +468,10 @@ public class JIT {
 
 
             // 13. While all tasks in T are not completed do
-            Map<Task, Boolean> completed = new HashMap<>();
+            Map<Task, Boolean> T = new HashMap<>();
             for(Task t: adaptedGraph.getVertices()) {
                 if(!(t instanceof Communication)) {
-                    completed.put(t, false);
+                    T.put(t, false);
                 }
             }
 
@@ -481,7 +480,7 @@ public class JIT {
             printSchedule();
             //System.out.println("<------");
 
-            while(!completed.isEmpty()){
+            while(!T.isEmpty()){
 
                 System.out.println("---------------- iteration " + (iteration++) + " ----------------");
 
@@ -494,15 +493,8 @@ public class JIT {
 
                     // 15. Update AST (Actual start time), XFT of scheduled tasks
                     AST.put(scheuledTask.getTask(), XST.get(scheuledTask.getTask()));
-                    Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(scheuledTask.getTask());
-                    double ET = 0.0;
-                    for (Mapping<Task, Resource> map : mappings) {
-                        if (map.getTarget().getId().equals(scheuledTask.getVm().getId())) {
-                            ET = PropertyServiceScheduler.getDuration(map);
-                        }
-                    }
-
-                    VMPoolEntry entry = getEntryByInstance(scheuledTask.getInstance());
+                    double ET = getET(specification, scheuledTask.getTask(), scheuledTask.getVm());
+                    VMPoolEntry entry = getEntryByInstance(scheuledTask.getInstance ());
                     if(entry == null) {
                         XFT.put(scheuledTask.getTask(), AST.get(scheuledTask.getTask()) + ET);
                     }
@@ -511,7 +503,7 @@ public class JIT {
 
 
                     System.out.println("[[[ SIMULATED: " + scheuledTask.getTask().getId() + " finished ]]]");
-                    completed.remove(scheuledTask.getTask());
+                    T.remove(scheuledTask.getTask());
                     scheduledPrint.remove(scheuledTask);
                 }
 
@@ -522,7 +514,7 @@ public class JIT {
                         Collection<Task> parents = GraphUtility.getPredecessorTaskNodes(adaptedGraph, t);
                         boolean allParentsSafe = !parents.isEmpty();
                         for (Task parent : parents) {
-                            if(!(!completed.containsKey(parent) && completed.containsKey(t))) {
+                            if(!(!T.containsKey(parent) && T.containsKey(t))) {
                                 allParentsSafe = false;
                             }
                         }
@@ -586,6 +578,13 @@ public class JIT {
                                     ET = PropertyServiceScheduler.getDuration(map);
                                 }
                             }
+                            //TODO here!
+                            ET = getET(specification, ti, vp);
+
+                            if(ti.getId().contains("4+7")) {
+                                System.out.println(1);
+                            }
+
                             if(temp >= (XST.get(lastParent) + ET) && (temp + XET.get(vp).get(ti)) <= D) {
 
                                 // 17.3.8  XST(t) =  temp
@@ -607,7 +606,11 @@ public class JIT {
                                         max = XFT.get(parent) + getTT(parent, ti);
                                     }
                                 }
-                                XST.replace(ti, max);
+                                if(XST.containsKey(ti)) {
+                                    XST.replace(ti, max);
+                                }else {
+                                    XST.put(ti, max);
+                                }
 
                             } // 17.3.13 End if
                         }
@@ -844,7 +847,6 @@ public class JIT {
                                     entry.setEndTime(entry.getExpecteddIdleStartTime() +
                                         getTT(lastTask, ti)
                                     );
-                                    System.out.println(1);
                                 }
                             }
                         }
@@ -982,57 +984,5 @@ public class JIT {
             }
         }
         LFT.put(t, min);
-    }
-
-
-    private EnactmentGraph preprocessing() {
-        // TODO I think we do not need to implement this
-        final Task comm1 = new Communication("commNode1");
-        final Task comm2 = new Communication("commNode2");
-        final Task comm3 = new Communication("commNode3");
-        final Task comm4 = new Communication("commNode4");
-        final Task comm5 = new Communication("commNode5");
-        final Task comm6 = new Communication("commNode6");
-        final Task comm7 = new Communication("commNode7");
-        final Task comm8 = new Communication("commNode8");
-        final Task comm10 = new Communication("commNode10");
-        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
-        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
-        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
-        final Task task4u7 = PropertyServiceFunctionUser.createUserTask("taskNode4+7", "noop");
-        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
-        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
-        final Task task8u9 = PropertyServiceFunctionUser.createUserTask("taskNode8+9", "noop");
-        EnactmentGraph graph = new EnactmentGraph();
-        PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
-        PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
-
-        PropertyServiceDependency.addDataDependency(task1, comm2, "key1", graph);
-
-        PropertyServiceDependency.addDataDependency(comm2, task2, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm2, task3, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm2, task4u7, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task2, comm3, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task2, comm4, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task4u7, comm6, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task3, comm5, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(comm3, task5, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm4, task6, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm5, task6, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task5, comm7, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task6, comm8, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(comm7, task8u9, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm8, task8u9, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm6, task8u9, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task8u9, comm10, "key2", graph);
-
-        PropertyServiceData.makeRoot(comm1);
-        PropertyServiceData.makeLeaf(comm10);
-        return graph;
     }
 }
