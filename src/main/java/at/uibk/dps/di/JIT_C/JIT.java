@@ -4,11 +4,9 @@ import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.di.schedulerV2.GraphUtility;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.graph.EnactmentSpecification;
-import at.uibk.dps.ee.model.graph.MappingsConcurrent;
-import at.uibk.dps.ee.model.properties.PropertyServiceData;
 import at.uibk.dps.ee.model.properties.PropertyServiceDependency;
 import at.uibk.dps.ee.model.properties.PropertyServiceFunctionUser;
-import com.google.gson.JsonPrimitive;
+import at.uibk.dps.ee.model.utils.UtilsCopy;
 import net.sf.opendse.model.*;
 
 import java.util.*;
@@ -18,6 +16,10 @@ public class JIT {
     /**
      * --> Configuration
      */
+
+    private static final double acquisitionDelay = 1.0;
+    private static final double interval = 10.0;
+
     private double[][] getTransferTime(){
         double[][] TT =
             {
@@ -33,8 +35,6 @@ public class JIT {
             };
         return TT;
     }
-    private static final double acquisitiondelay = 1.0;
-    private static final double interval = 10.0;
 
     private Double Cost(Resource resource){
         if(resource.getId().equals("Vl")) {
@@ -45,57 +45,6 @@ public class JIT {
             return 0.01;
         }
         return null;
-    }
-
-    private EnactmentGraph preprocessing() {
-        // TODO I think we do not need to implement this
-        final Task comm1 = new Communication("commNode1");
-        final Task comm2 = new Communication("commNode2");
-        final Task comm3 = new Communication("commNode3");
-        final Task comm4 = new Communication("commNode4");
-        final Task comm5 = new Communication("commNode5");
-        final Task comm6 = new Communication("commNode6");
-        final Task comm7 = new Communication("commNode7");
-        final Task comm8 = new Communication("commNode8");
-        final Task comm10 = new Communication("commNode10");
-        final Task task1 = PropertyServiceFunctionUser.createUserTask("taskNode1", "noop");
-        final Task task2 = PropertyServiceFunctionUser.createUserTask("taskNode2", "noop");
-        final Task task3 = PropertyServiceFunctionUser.createUserTask("taskNode3", "noop");
-        final Task task4u7 = PropertyServiceFunctionUser.createUserTask("taskNode4+7", "noop");
-        final Task task5 = PropertyServiceFunctionUser.createUserTask("taskNode5", "noop");
-        final Task task6 = PropertyServiceFunctionUser.createUserTask("taskNode6", "noop");
-        final Task task8u9 = PropertyServiceFunctionUser.createUserTask("taskNode8+9", "noop");
-        EnactmentGraph graph = new EnactmentGraph();
-        PropertyServiceData.setContent(comm1, new JsonPrimitive(true));
-        PropertyServiceDependency.addDataDependency(comm1, task1, "key1", graph);
-
-        PropertyServiceDependency.addDataDependency(task1, comm2, "key1", graph);
-
-        PropertyServiceDependency.addDataDependency(comm2, task2, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm2, task3, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm2, task4u7, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task2, comm3, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task2, comm4, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task4u7, comm6, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task3, comm5, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(comm3, task5, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm4, task6, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm5, task6, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task5, comm7, "key2", graph);
-        PropertyServiceDependency.addDataDependency(task6, comm8, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(comm7, task8u9, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm8, task8u9, "key2", graph);
-        PropertyServiceDependency.addDataDependency(comm6, task8u9, "key2", graph);
-
-        PropertyServiceDependency.addDataDependency(task8u9, comm10, "key2", graph);
-
-        PropertyServiceData.makeRoot(comm1);
-        PropertyServiceData.makeLeaf(comm10);
-        return graph;
     }
 
     /**
@@ -114,6 +63,62 @@ public class JIT {
     private List<Schedule> scheduled = new ArrayList<>();
     private List<Schedule> scheduledPrint = new ArrayList<>();
     private List<VMPoolEntry> VMPoolStatus = new ArrayList<>();
+
+    private EnactmentGraph preprocessing(EnactmentSpecification specification) {
+
+        // 4.1 Begin
+        EnactmentGraph eGraph = UtilsCopy.deepCopyEGraph(specification.getEnactmentGraph());
+
+        // 4.2 tksstack = tentry
+        Stack<Task> tksstack = new Stack<>();
+        Collection<Task> entryTasks = new ArrayList<>();
+        for(Task t : GraphUtility.getRootNodes(eGraph)) {
+            entryTasks.addAll(GraphUtility.getSuccessorTaskNodes(eGraph, t));
+        }
+        entryTasks.forEach((t) -> tksstack.push(t));
+
+        // 4.3 while tksstack is not empty
+        while (!tksstack.isEmpty()) {
+
+            // 4.4 tp = tksstack(front)
+            Task tp = tksstack.pop();
+
+            // 4.5 Sc = {tc | tc is the child of tp}
+            Collection<Task> Sc = GraphUtility.getSuccessorTaskNodes(eGraph, tp);
+
+            // 4.6 If Cardinality Sc=1 and tc has only one parent tp
+            if (Sc.size() == 1 && GraphUtility.getPredecessorTaskNodes(eGraph, Sc.iterator().next()).size() == 1) {
+
+                // 4.7 Replace tp and tc with tp+c
+                Task tc = Sc.iterator().next();
+                Task merged = PropertyServiceFunctionUser.createUserTask(tp.getId() + "+" + tc.getId(), tc.getType());
+
+                // 4.8 Set tp+c as the parent of t
+                for (Task t : eGraph.getPredecessors(tp)) {
+                    PropertyServiceDependency.addDataDependency(t, merged, "key", eGraph);
+                }
+                for (Task t : eGraph.getSuccessors(tc)) {
+                    PropertyServiceDependency.addDataDependency(merged, t, "key", eGraph);
+                }
+                for (Task t : eGraph.getPredecessors(tc)) {
+                    eGraph.removeVertex(t);
+                }
+                eGraph.removeVertex(tc);
+                eGraph.removeVertex(tp);
+
+                // 4.10 Add tp+c to the front of tksstack
+                tksstack.push(merged);
+            }
+            // 4.11 Else
+            else {
+                // 4.12. Add tps children to the rear of tksstack
+                Sc.forEach((t) -> tksstack.add(0, t));
+            } // 4.13 End if
+        } // 4.14 End While
+
+        // 4.15 End
+        return eGraph;
+    }
 
     private void printVMPoolStatus() {
         for(VMPoolEntry entry: VMPoolStatus) {
@@ -278,7 +283,8 @@ public class JIT {
         if(D >= MET_W) {
 
             // 4. Call Pre-processing(W)
-            EnactmentGraph adaptedGraph = preprocessing();
+            EnactmentGraph adaptedGraph = preprocessing(specification);
+            //EnactmentGraphViewer.view(adaptedGraph);
 
             // 5. Compute MET, LFT and XET matrices using Equations (2), (8) and (10) respectively
                 // Eq. 2: Minimum execution time of task t_i
@@ -439,8 +445,8 @@ public class JIT {
                     }
                     // 8.14. Else
                     else {
-                        // 15. XST = acquisitiondelay
-                        XST.put(t_e, acquisitiondelay);
+                        // 15. XST = acquisitionDelay
+                        XST.put(t_e, acquisitionDelay);
                     }
                     // 8.16. End if
                     // 8.17. Find {VM_k} e VM_set for which XST(t) + XET(t, VM_k) <= D
@@ -633,8 +639,8 @@ public class JIT {
                         }
                         // 17.3.14. Else
                         else {
-                            // 15. XST = acquisitiondelay
-                            XST.put(ti, acquisitiondelay);
+                            // 15. XST = acquisitionDelay
+                            XST.put(ti, acquisitionDelay);
                         }
 
                         if(!exit) {
@@ -809,7 +815,7 @@ public class JIT {
                                 // 17.17 Schedule ti on v at XST(ti)
                                 calcXFT(ti, specification, adaptedGraph, entry_tmp.getType(), entry_tmp);
                                 calcXST(ti, adaptedGraph, entry_tmp);
-                                entry_tmp.setStartTime(XST.get(ti) - acquisitiondelay);
+                                entry_tmp.setStartTime(XST.get(ti) - acquisitionDelay);
                                 entry_tmp.setExpecteddIdleStartTime(XST.get(ti) + getET(specification, ti, entry_tmp.getType()));
                                 scheduledMapping.put(ti, taskvmmap.get(ti));
                                 //System.out.println("Schedule " + ti.getId() + " on " + instance);
