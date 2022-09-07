@@ -3,13 +3,14 @@ package at.uibk.dps.di.schedulerV2;
 import at.uibk.dps.di.properties.PropertyServiceScheduler;
 import at.uibk.dps.ee.model.graph.EnactmentGraph;
 import at.uibk.dps.ee.model.graph.EnactmentSpecification;
+import at.uibk.dps.ee.model.graph.MappingsConcurrent;
 import at.uibk.dps.ee.model.graph.ResourceGraph;
+import jdk.javadoc.internal.doclets.toolkit.PropertyUtils;
+import jdk.nashorn.internal.runtime.Property;
 import net.sf.opendse.model.Communication;
 import net.sf.opendse.model.Mapping;
 import net.sf.opendse.model.Resource;
 import net.sf.opendse.model.Task;
-import nu.xom.jaxen.util.SingletonList;
-import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -340,12 +341,68 @@ public class Scheduler {
         return maxFT;
     }
 
+    private Double budgetLevelGlobal = 0.0;
+    private Map<Task, Double> budgetLevel = new HashMap<>();
+    private Map<Task, Double> taskCost = new HashMap<>();
+    private Map<Task, Double> taskMinCost = new HashMap<>();
+    private Map<Task, Double> taskMaxCost = new HashMap<>();
+
+    private double calcTotal(Map<Task, Double> map){
+        double total = 0.0;
+        for(Task t: map.keySet()) {
+            total += map.get(t);
+        }
+        return total;
+    }
+
+    private void setupCost(EnactmentSpecification specification, double budget) {
+        EnactmentGraph eGraph = specification.getEnactmentGraph();
+        for(Task t: eGraph.getVertices()) {
+            if(!(t instanceof Communication)) {
+                double min = Double.MAX_VALUE;
+                double max = 0.0;
+                for(Mapping<Task, Resource> map: specification.getMappings().getMappings(t)) {
+                    double cost = map.getAttribute("Cost");
+                    if(cost < min) {
+                        min = cost;
+                    }
+                    if (cost > max) {
+                        max = cost;
+                    }
+                }
+                taskMinCost.put(t, min);
+                taskMaxCost.put(t, max);
+            }
+        }
+        budgetLevelGlobal = (budget - calcTotal(taskMinCost)) / (calcTotal(taskMaxCost) - calcTotal(taskMinCost));
+
+        for(Task t: eGraph.getVertices()) {
+            if(!(t instanceof Communication)) {
+                budgetLevel.put(t, taskMinCost.get(t) + (taskMaxCost.get(t) - taskMinCost.get(t)) * budgetLevelGlobal);
+            }
+        }
+        System.out.println(1);
+    }
+
+    private Double getCost(Task task, ResourceV2 resource, EnactmentSpecification specification){
+        for(Mapping<Task, Resource> map: specification.getMappings().getMappings(task)) {
+            if(map.getTarget().getId().equals(resource.getId())) {
+                return map.getAttribute("Cost");
+            }
+        }
+        //throw new Exception("Could not find cost for resource " + resource.getId());
+        System.err.println("Could not find cost for resource " + resource.getId());
+        return null;
+    }
+
     /**
      * Actual scheduler.
      *
      * @param specification of the workflow to schedule.
      */
-    public void schedule(EnactmentSpecification specification) {
+    public void schedule(EnactmentSpecification specification, double budget) {
+
+        setupCost(specification, budget);
 
         // Get the resource and enactment graph and the vertices from the specification
         ResourceGraph rGraph = specification.getResourceGraph();
@@ -381,6 +438,10 @@ public class Scheduler {
             ResourceV2 bestResource = resources.get(0);
             double bestFT = Double.MAX_VALUE;
 
+            if(specification.getMappings().getMappings(rankedTask).isEmpty()) {
+                System.err.println("Could not find suitable mapping for task " + rankedTask.getId());
+            }
+
             // Iterate over all possible resources of selected task
             for(Mapping<Task, Resource> taskResourceMapping :specification.getMappings().getMappings(rankedTask)) {
                 for(ResourceV2 resource: resources) {
@@ -405,16 +466,37 @@ public class Scheduler {
             }
             GraphUtility.counter++;
 
-            double ft = bestResource.ftTask(rankedTask, possStart, true, mapResource, false);
-            mapResource.put(rankedTask, bestResource);
-            mapFT.put(rankedTask, ft);
-            System.out.println("Fixed task " + rankedTask + " on " + bestResource.getId() + " with FT=" + ft);
-            rankedTask.setAttribute("FINAL_FT", ft + "_" + (bestResource.getId().contains("Local") ? "L" : "CLOUD"));
+            double cost = getCost(rankedTask, bestResource, specification);
+            double currentCost = taskCost.values().stream().mapToDouble(Double::doubleValue).sum();
+            if(cost > budgetLevel.get(rankedTask) && currentCost + cost + calcTotal(taskMinCost) - taskMinCost.get(rankedTask) > budget) {
+                    // cannot take this one
+                System.err.println("Cannot take vorgesehenen one");
+                Mapping<Task, Resource> mapToDelete = null;
+                Set<Mapping<Task, Resource>> mappings = specification.getMappings().getMappings(rankedTask);
+                for(Mapping<Task, Resource> map: mappings) {
+                    if(map.getTarget().getId().equals(bestResource.getId())) {
+                        mapToDelete = map;
+                    }
+                }
+                specification.getMappings().removeMapping(mapToDelete);
+                rankedTaskStack.push(rankedTask);
+            } else {
+                double ft = bestResource.ftTask(rankedTask, possStart, true, mapResource, false);
+                mapResource.put(rankedTask, bestResource);
+                mapFT.put(rankedTask, ft);
+                System.out.println("Fixed task " + rankedTask + " on " + bestResource.getId() + " with FT=" + ft);
+                rankedTask.setAttribute("FINAL_FT", ft + "_" + (bestResource.getId().contains("Local") ? "L" : "CLOUD"));
 
-            updateRank(mapRank, mapResource, specification, rankedTask, mapRank.get(rankedTask));
-            mapRank.remove(rankedTask);
-            rankedTaskStack = sort(mapRank, new ArrayList<>(mapRank.keySet()), specification, mapResource);
-            //mapRank.forEach((t,r) -> t.setAttribute(GraphUtility.counter + "_rank:", r));
+                updateRank(mapRank, mapResource, specification, rankedTask, mapRank.get(rankedTask));
+                mapRank.remove(rankedTask);
+                rankedTaskStack = sort(mapRank, new ArrayList<>(mapRank.keySet()), specification, mapResource);
+                //mapRank.forEach((t,r) -> t.setAttribute(GraphUtility.counter + "_rank:", r));
+
+                taskMinCost.remove(rankedTask);
+                taskCost.put(rankedTask, cost);
+            }
         }
     }
+
+
 }
